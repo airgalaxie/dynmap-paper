@@ -16,8 +16,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.destroystokyo.paper.MaterialTags;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
@@ -202,8 +202,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
 
     private static class BlockToCheck {
         Location loc;
-        int typeid;
-        byte data;
+        Material type;
         String trigger;
     };
     private LinkedList<BlockToCheck> blocks_to_check = null;
@@ -232,7 +231,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         public int getBlockIDAt(String wname, int x, int y, int z) {
             World w = getServer().getWorld(wname);
             if((w != null) && w.isChunkLoaded(x >> 4, z >> 4)) {
-                return getBlockIdFromBlock(w.getBlockAt(x, y, z));
+                return w.getBlockAt(x,  y,  z).getType().getId();
             }
             return -1;
         }
@@ -1275,11 +1274,11 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
                 World w = loc.getWorld();
                 if(!w.isChunkLoaded(loc.getBlockX()>>4, loc.getBlockZ()>>4))
                     continue;
-                int bt = getBlockIdFromBlock(w.getBlockAt(loc));
+                Material bt = w.getBlockAt(loc).getType();
                 /* Avoid stationary and moving water churn */
-                if(bt == 9) bt = 8;
-                if(btt.typeid == 9) btt.typeid = 8;
-                if((bt != btt.typeid) || (btt.data != w.getBlockAt(loc).getData())) {
+                //if(bt == 9) bt = 8;
+                //if(btt.typeid == 9) btt.typeid = 8;
+                if(bt != btt.type) {
                     String wn = getWorld(w).getName();
                     invalidateSnapshot(wn, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());                    	
                     mapManager.touch(wn, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), btt.trigger);
@@ -1302,8 +1301,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     private void checkBlock(Block b, String trigger) {
         BlockToCheck btt = new BlockToCheck();
         btt.loc = b.getLocation();
-        btt.typeid = getBlockIdFromBlock(b);
-        btt.data = b.getData();
+        btt.type = b.getType();
         btt.trigger = trigger;
         blocks_to_check_accum.add(btt); /* Add to accumulator */
         btth.startIfNeeded();
@@ -1425,9 +1423,9 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
                     Material m = b.getType();
                     if(m == null) return;
                     switch(m) {
-                        case STATIONARY_WATER:
+                        //case STATIONARY_WATER:
                         case WATER:
-                        case STATIONARY_LAVA:
+                        //case STATIONARY_LAVA:
                         case LAVA:
                         case GRAVEL:
                         case SAND:
@@ -1447,13 +1445,11 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
                 public void onBlockFromTo(BlockFromToEvent event) {
                     Block b = event.getBlock();
                     Material m = b.getType();
-                    String m_id = (m != null) ? m.toString() : "";
-                    boolean not_pressure_plate = (m_id != "WOOD_PLATE") && (m_id != "STONE_PLATE") && (!m_id.contains("PRESSURE_PLATE")) && (m_id != "");
-                    if (not_pressure_plate)
+                    if(!MaterialTags.PRESSURE_PLATES.isTagged(m))
                         checkBlock(b, "blockfromto");
                     b = event.getToBlock();
                     m = b.getType();
-                    if (not_pressure_plate)
+                    if(!MaterialTags.PRESSURE_PLATES.isTagged(m))
                         checkBlock(b, "blockfromto");
                 }
             };
