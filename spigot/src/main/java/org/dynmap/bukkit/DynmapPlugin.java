@@ -290,15 +290,8 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             else
                 return null;
         }
-        private boolean noservername = false;
         @Override
         public String getServerName() {
-        	try {
-        		if (!noservername)
-        			return getServer().getServerName();
-        	} catch (NoSuchMethodError x) {	// Missing in 1.14 spigot - no idea why removed...
-        		noservername = true;
-        	}
     		return getServer().getMotd();
         }
         private boolean isBanned(OfflinePlayer p) {
@@ -725,7 +718,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         @Override
         public int getArmorPoints() {
             if(player != null)
-                return (int) player.getAttribute(Attribute.GENERIC_ARMOR).getValue();
+                return (int) player.getAttribute(Attribute.ARMOR).getValue();
             else
                 return 0;
         }
@@ -1473,12 +1466,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
                 public void onBlockPistonRetract(BlockPistonRetractEvent event) {
                     Block b = event.getBlock();
                     Location loc = b.getLocation();
-                    BlockFace dir;
-                    try {   /* Workaround Bukkit bug = http://leaky.bukkit.org/issues/1227 */
-                        dir = event.getDirection();
-                    } catch (ClassCastException ccx) {
-                        dir = BlockFace.NORTH;
-                    }
+                    BlockFace dir = event.getDirection();
                     String wn = getWorld(loc.getWorld()).getName();
                     int x = loc.getBlockX(), y = loc.getBlockY(), z = loc.getBlockZ();
                     invalidateSnapshot(wn, x, y, z);
@@ -1497,12 +1485,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
                 public void onBlockPistonExtend(BlockPistonExtendEvent event) {
                     Block b = event.getBlock();
                     Location loc = b.getLocation();
-                    BlockFace dir;
-                    try {   /* Workaround Bukkit bug = http://leaky.bukkit.org/issues/1227 */
-                        dir = event.getDirection();
-                    } catch (ClassCastException ccx) {
-                        dir = BlockFace.NORTH;
-                    }
+                    BlockFace dir = event.getDirection();
                     String wn = getWorld(loc.getWorld()).getName();
                     int x = loc.getBlockX(), y = loc.getBlockY(), z = loc.getBlockZ();
                     invalidateSnapshot(wn, x, y, z);

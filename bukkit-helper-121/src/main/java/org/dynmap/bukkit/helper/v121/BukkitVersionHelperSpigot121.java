@@ -1,6 +1,11 @@
 package org.dynmap.bukkit.helper.v121;
 
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.ChunkSnapshot;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.WorldBorder;
 import org.bukkit.craftbukkit.v1_21_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_21_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
@@ -50,6 +55,7 @@ import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -423,6 +429,8 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
      */
 	@Override
     public String getSkinURL(Player player) {
+		URL compare = player.getPlayerProfile().getTextures().getSkin();
+
     	String url = null;
     	CraftPlayer cp = (CraftPlayer)player;
     	GameProfile profile = cp.getProfile();
@@ -448,7 +456,11 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
     				}
     			}
     		}
-    	}    	
+    	}
+
+		Log.info("New: " + compare);
+		Log.info("Old: " + url);
+
     	return url;
     }
 	// Get minY for world
