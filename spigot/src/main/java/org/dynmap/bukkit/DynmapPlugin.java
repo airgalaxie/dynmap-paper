@@ -72,15 +72,9 @@ import org.dynmap.bukkit.helper.BukkitVersionHelper;
 import org.dynmap.bukkit.helper.BukkitWorld;
 import org.dynmap.bukkit.helper.SnapshotCache;
 import org.dynmap.bukkit.permissions.BukkitPermissions;
-import org.dynmap.bukkit.permissions.NijikokunPermissions;
-import org.dynmap.bukkit.permissions.OpPermissions;
-import org.dynmap.bukkit.permissions.PEXPermissions;
-import org.dynmap.bukkit.permissions.PermBukkitPermissions;
 import org.dynmap.bukkit.permissions.GroupManagerPermissions;
 import org.dynmap.bukkit.permissions.PermissionProvider;
 import org.dynmap.bukkit.permissions.VaultPermissions;
-import org.dynmap.bukkit.permissions.bPermPermissions;
-import org.dynmap.bukkit.permissions.LuckPermsPermissions;
 import org.dynmap.bukkit.permissions.LuckPerms5Permissions;
 import org.dynmap.common.BiomeMap;
 import org.dynmap.common.DynmapCommandSender;
@@ -765,25 +759,13 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         }
         
 
-        permissions = PEXPermissions.create(getServer(), "dynmap");
-        if (permissions == null)
-            permissions = bPermPermissions.create(getServer(), "dynmap", perdefs);
-        if (permissions == null)
-            permissions = PermBukkitPermissions.create(getServer(), "dynmap", perdefs);
-        if (permissions == null)
-            permissions = NijikokunPermissions.create(getServer(), "dynmap");
+        permissions = LuckPerms5Permissions.create(getServer(), "dynmap");
         if (permissions == null)
             permissions = GroupManagerPermissions.create(getServer(), "dynmap");
-        if (permissions == null)
-            permissions = LuckPermsPermissions.create(getServer(), "dynmap");
-        if (permissions == null)
-            permissions = LuckPerms5Permissions.create(getServer(), "dynmap");
         if (permissions == null)
             permissions = VaultPermissions.create(this, "dynmap");
         if (permissions == null)
             permissions = BukkitPermissions.create("dynmap", perdefs);
-        if (permissions == null)
-            permissions = new OpPermissions(new String[] { "fullrender", "cancelrender", "radiusrender", "resetstats", "reload", "purgequeue", "pause", "ips-for-id", "ids-for-ip", "add-id-for-ip", "del-id-for-ip" });
         /* Get and initialize data folder */
         File dataDirectory = this.getDataFolder();
         if(dataDirectory.exists() == false)
