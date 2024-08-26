@@ -157,15 +157,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
      */
     public class BukkitServer extends DynmapServerInterface {
         @Override
-        public int getBlockIDAt(String wname, int x, int y, int z) {
-            World w = getServer().getWorld(wname);
-            if((w != null) && w.isChunkLoaded(x >> 4, z >> 4)) {
-                return w.getBlockAt(x,  y,  z).getType().getId();
-            }
-            return -1;
-        }
-
-        @Override
         public int isSignAt(String wname, int x, int y, int z) {
             World w = getServer().getWorld(wname);
             if((w != null) && w.isChunkLoaded(x >> 4, z >> 4)) {
@@ -229,11 +220,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
                 return true;
             return false;
         }
-        @Override
-        public boolean isServerThread() {
-            return Bukkit.getServer().isPrimaryThread();
-        }
-
         @Override
         public String stripChatColor(String s) {
             return ChatColor.stripColor(s);
@@ -336,14 +322,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             getServer().broadcastMessage(msg);
         }
         @Override
-        public String[] getBiomeIDs() {
-            BiomeMap[] b = BiomeMap.values();
-            String[] bname = new String[b.length];
-            for(int i = 0; i < bname.length; i++)
-                bname[i] = b[i].toString();
-            return bname;
-        }
-        @Override
         public double getCacheHitRate() {
         	return helper.useGenericCache() ? BukkitVersionHelper.gencache.getHitRate() : SnapshotCache.sscache.getHitRate();
         }
@@ -367,20 +345,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
                 return new BukkitPlayer(op);
             }
             return null;
-        }
-        @Override
-        public Set<String> checkPlayerPermissions(String player, Set<String> perms) {
-            OfflinePlayer p = getServer().getOfflinePlayer(player);
-            if (isBanned(p))
-                return new HashSet<String>();
-            Set<String> rslt = permissions.hasOfflinePermissions(player, perms);
-            if (rslt == null) {
-                rslt = new HashSet<String>();
-                if(p.isOp()) {
-                    rslt.addAll(perms);
-                }
-            }
-            return rslt;
         }
         @Override
         public boolean checkPlayerPermission(String player, String perm) {
@@ -440,30 +404,9 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         public int getCurrentPlayers() {
             return helper.getOnlinePlayers().length;
         }
-
-        @Override
-        public double getServerTPS() {
-            return getServer().getTPS()[0];
-        }
-
         @Override
         public String getServerIP() {
             return Bukkit.getServer().getIp();
-        }
-
-        @Override
-        public Map<Integer, String> getBlockIDMap() {
-            String[] bsn = helper.getBlockNames();
-            HashMap<Integer, String> map = new HashMap<Integer, String>();
-            for (int i = 0; i < bsn.length; i++) {
-                if (bsn[i] != null) {
-                	if (bsn[i].indexOf(':') < 0)
-                		map.put(i, "minecraft:" + bsn[i]);
-                	else
-                		map.put(i, bsn[i]);
-                }
-            }
-            return map;
         }
     }
     /**

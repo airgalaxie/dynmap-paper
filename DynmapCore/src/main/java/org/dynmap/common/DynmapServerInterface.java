@@ -96,11 +96,6 @@ public abstract class DynmapServerInterface {
      */
     public abstract void broadcastMessage(String msg);
     /**
-     * Get Biome ID lis
-     * @return list of biome IDs
-     */
-    public abstract String[] getBiomeIDs();
-    /**
      * Get snapshot cache hit rate
      * @return hit rate
      */
@@ -115,13 +110,6 @@ public abstract class DynmapServerInterface {
      * @return world object, or null if not found
      */
     public abstract DynmapWorld getWorldByName(String wname);
-    /**
-     * Test which of given set of permisssions a possibly offline user has
-     * @param player - player
-     * @param perms - set of permission IDs
-     * @return set of permission IDs allowed to player
-     */
-    public abstract Set<String> checkPlayerPermissions(String player, Set<String> perms);
     /**
      * Test single permission attribute
      * @param player - player
@@ -152,14 +140,6 @@ public abstract class DynmapServerInterface {
      */
     public abstract int getCurrentPlayers();
     /**
-     * Test if given mod is loaded (Forge)
-     * @param name - mod name
-     * @return true if mod loaded
-     */
-    public boolean isModLoaded(String name) {
-        return false;
-    }
-    /**
      * Get version of mod with given name
      * 
      * @param name - name of mod
@@ -168,16 +148,6 @@ public abstract class DynmapServerInterface {
     public String getModVersion(String name) {
         return null;
     }
-
-    /**
-     * Get block ID at given coordinate in given world (if chunk is loaded)
-     * @param wname - world name
-     * @param x - X coordinate
-     * @param y - Y coordinate
-     * @param z - Z coordinate
-     * @return block ID, or -1 if chunk at given coordinate isn't loaded
-     */
-    public abstract int getBlockIDAt(String wname, int x, int y, int z);
     /**
      * Checks if a sign is at a given coordinate in a given world (if chunk is loaded)
      * @param wname - world name
@@ -187,11 +157,6 @@ public abstract class DynmapServerInterface {
      * @return 1 if a sign is at the location, 0 if it's not, -1 if the chunk isn't loaded
      */
     public abstract int isSignAt(String wname, int x, int y, int z);
-    /**
-     * Get current TPS for server (20.0 is nominal)
-     * @return ticks per second
-     */
-    public abstract double getServerTPS();
     /**
      * Get address configured for server
      * 
@@ -212,13 +177,6 @@ public abstract class DynmapServerInterface {
      */
     public List<String> getModList() {
         return Collections.emptyList();
-    }
-    /**
-     * Get block ID map (modID:blockname, keyed by block ID)
-     * @return block ID map
-     */
-    public Map<Integer, String> getBlockIDMap() {
-        return Collections.emptyMap();
     }
     /**
      * Open resource (check all mods)
@@ -242,12 +200,5 @@ public abstract class DynmapServerInterface {
      */
     public Map<String, Integer> getItemUniqueIDMap() {
         return Collections.emptyMap();
-    }
-    /**
-     * Test if current thread is server thread
-     * @return true if server thread
-     */
-    public boolean isServerThread() {
-        return false;
     }
 }
