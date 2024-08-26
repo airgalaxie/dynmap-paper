@@ -448,7 +448,6 @@ public class TexturePack {
         OPAQUE, /* Block is opaque - blocks light - lit by light from adjacent blocks */
         TRANSPARENT,    /* Block is transparent - passes light - lit by light level in own block */ 
         SEMITRANSPARENT, /* Opaque block that doesn't block all rays (steps, slabs) - use light above for face lighting on opaque blocks */
-        LEAVES /* Special case of transparent, to work around lighting errors in SpoutPlugin */
     }
     
     public static class ColorizingData {
@@ -2099,13 +2098,6 @@ public class TexturePack {
                                     trans = BlockTransparency.OPAQUE;
                                     Log.severe("Texture mapping has invalid transparency setting - " + av[1] + " - line " + lineNum + " of " + txtname);
                                 }
-                                /* For leaves, base on leaf transparency setting */
-                                if(trans == BlockTransparency.LEAVES) {
-                                    if(core.getLeafTransparency())
-                                        trans = BlockTransparency.TRANSPARENT;
-                                    else
-                                        trans = BlockTransparency.OPAQUE;
-                                }
                             }
                             else if(av[0].equals("colorMult")) {
                                 colorMult = (int)Long.parseLong(av[1], 16);
@@ -2176,13 +2168,6 @@ public class TexturePack {
                             if(trans == null) {
                                 trans = BlockTransparency.OPAQUE;
                                 Log.severe("Texture mapping has invalid transparency setting - " + av[1] + " - line " + lineNum + " of " + txtname);
-                            }
-                            /* For leaves, base on leaf transparency setting */
-                            if(trans == BlockTransparency.LEAVES) {
-                                if(core.getLeafTransparency())
-                                    trans = BlockTransparency.TRANSPARENT;
-                                else
-                                    trans = BlockTransparency.OPAQUE;
                             }
                         }
                     }
@@ -2264,13 +2249,6 @@ public class TexturePack {
                             if(trans == null) {
                                 trans = BlockTransparency.OPAQUE;
                                 Log.severe("Texture mapping has invalid transparency setting - " + av[1] + " - line " + lineNum + " of " + txtname);
-                            }
-                            /* For leaves, base on leaf transparency setting */
-                            if(trans == BlockTransparency.LEAVES) {
-                                if(core.getLeafTransparency())
-                                    trans = BlockTransparency.TRANSPARENT;
-                                else
-                                    trans = BlockTransparency.OPAQUE;
                             }
                         }
                         else if(av[0].equals("colorMult")) {

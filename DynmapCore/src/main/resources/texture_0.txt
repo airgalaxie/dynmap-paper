@@ -426,13 +426,13 @@ block:id=log,data=7,north=0:log_jungle_top,south=0:log_jungle_top,east=4000:log_
 block:id=log,data=11,north=4000:log_jungle,south=4000:log_jungle,east=0:log_jungle_top,west=0:log_jungle_top,top=4000:log_jungle,bottom=4000:log_jungle
 block:id=log,data=15,allfaces=0:log_jungle,stdrot=true
 # Leaves (oak)
-block:id=leaves,data=0,data=4,data=8,data=12,allfaces=2000:leaves_oak,stdrot=true,transparency=LEAVES
+block:id=leaves,data=0,data=4,data=8,data=12,allfaces=2000:leaves_oak,stdrot=true,transparency=TRANSPARENT
 # Leaves (spruce/pine)
-block:id=leaves,data=1,data=5,data=9,data=13,allfaces=13000:leaves_spruce,stdrot=true,transparency=LEAVES
+block:id=leaves,data=1,data=5,data=9,data=13,allfaces=13000:leaves_spruce,stdrot=true,transparency=TRANSPARENT
 # Leaves (birch)
-block:id=leaves,data=2,data=6,data=10,data=14,allfaces=14000:leaves_birch,stdrot=true,transparency=LEAVES
+block:id=leaves,data=2,data=6,data=10,data=14,allfaces=14000:leaves_birch,stdrot=true,transparency=TRANSPARENT
 # Leaves (jungle)
-block:id=leaves,data=3,data=7,data=11,data=15,allfaces=2000:leaves_jungle,stdrot=true,transparency=LEAVES
+block:id=leaves,data=3,data=7,data=11,data=15,allfaces=2000:leaves_jungle,stdrot=true,transparency=TRANSPARENT
 # Sponge
 block:id=sponge,allfaces=0:sponge,stdrot=true
 # Glass
@@ -1172,9 +1172,9 @@ block:id=stained_hardened_clay,data=0,stdrot=true,allfaces=0:hardened_clay_stain
 [1.7.0-]block:id=stained_glass_pane,data=15,patch0=12000:glass_black,patch1=12000:glass_pane_top_black,transparency=TRANSPARENT
 
 # Leaves (acacia) (161)
-[1.7.0-]block:id=leaves2,data=0,data=4,data=8,data=12,allfaces=2000:leaves_acacia,stdrot=true,transparency=LEAVES
+[1.7.0-]block:id=leaves2,data=0,data=4,data=8,data=12,allfaces=2000:leaves_acacia,stdrot=true,transparency=TRANSPARENT
 # Leaves (big oak) (161)
-[1.7.0-]block:id=leaves2,data=1,data=5,data=9,data=13,allfaces=2000:leaves_big_oak,stdrot=true,transparency=LEAVES
+[1.7.0-]block:id=leaves2,data=1,data=5,data=9,data=13,allfaces=2000:leaves_big_oak,stdrot=true,transparency=TRANSPARENT
 
 # Wood (acacia) (162)
 [1.7.0-]block:id=log2,data=0,allsides=0:log_acacia,topbottom=0:log_acacia_top,stdrot=true

@@ -124,7 +124,6 @@ public class DynmapCore implements DynmapCommonAPI {
     public boolean disable_chat_to_web = false;
     private WebAuthManager authmgr;
     public boolean player_info_protected;
-    private boolean transparentLeaves = true;
     private List<String> sortPermissionNodes;
     private int perTickLimit = 50;   // 50 ms
     private boolean dumpMissing = false;
@@ -277,13 +276,6 @@ public class DynmapCore implements DynmapCommonAPI {
     
     public final void setTriggerDefault(String[] triggers) {
         deftriggers = triggers;
-    }
-    
-    public final void setLeafTransparency(boolean trans) {
-        transparentLeaves = trans;
-    }
-    public final boolean getLeafTransparency() {
-        return transparentLeaves;
     }
 
     /* Add/Replace branches in configuration tree with contribution from a separate file */
@@ -511,8 +503,6 @@ public class DynmapCore implements DynmapCommonAPI {
         if (defaultStorage.needsStaticWebFiles()) {
         	updateStaticWebToStorage();
         }
-        /* Load control for leaf transparency (spout lighting bug workaround) */
-        transparentLeaves = configuration.getBoolean("transparent-leaves", true);
         
         // Inject core instance
         ImageIOManager.core = this;

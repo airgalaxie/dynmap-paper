@@ -46,7 +46,6 @@ import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.world.ChunkPopulateEvent;
 import org.bukkit.event.world.SpawnChangeEvent;
 import org.bukkit.event.world.StructureGrowEvent;
@@ -104,7 +103,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     private MapManager mapManager;
     public static DynmapPlugin plugin;
     public PluginManager pm;
-    private BukkitEnableCoreCallback enabCoreCB = new BukkitEnableCoreCallback();
     private HashMap<String, BukkitWorld> world_by_name = new HashMap<String, BukkitWorld>();
 
     private long cur_tick;
@@ -145,42 +143,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         if(w == last_world) {
             last_world = null;
             last_bworld = null;
-        }
-    }
-
-    // Nonblocking thread safety
-    private static final AtomicBoolean tryNativeId = new AtomicBoolean(true);
-    @SuppressWarnings("deprecation")
-    private static final int getBlockIdFromMaterial(Material material) {
-        if (tryNativeId.get()) {
-            try {
-                return material.getId();
-            } catch (NoSuchMethodError e) {
-                // We failed once, no need to retry
-                tryNativeId.set(false);
-            } catch (java.lang.IllegalArgumentException e) {
-                // Ignore this entirely, as modern materials throw
-                // java.lang.IllegalArgumentException: Cannot get ID of Modern Material
-            }
-        }
-
-        // We're living in a world where numerical IDs have been phased out completely.
-        // Let's return *some* number, because we need one.
-        // Also in that case we are adding a constant to ensure we're not conflicting with the
-        // actual IDs
-        return material.ordinal() + (1 << 20);
-    }
-    private static final int getBlockIdFromBlock(Block block) {
-        return getBlockIdFromMaterial(block.getType());
-    }
-
-    private class BukkitEnableCoreCallback extends DynmapCore.EnableCoreCallbacks {
-        @Override
-        public void configurationLoaded() {
-            File st = new File(core.getDataFolder(), "renderdata/spout-texture.txt");
-            if(st.exists()) {
-                st.delete();
-            }
         }
     }
 
@@ -839,7 +801,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         core.setBiomeNames(helper.getBiomeNames());
         
         /* Load configuration */
-        if(!core.initConfiguration(enabCoreCB)) {
+        if(!core.initConfiguration(null)) {
             this.setEnabled(false);
             return;
         }
@@ -871,23 +833,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
 
         core.setSkinUrlProvider(skinUrlProvider);
 
-        /* See if we need to wait before enabling core */
-        if(!readyToEnable()) {
-            Listener pl = new Listener() {
-                @EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
-                public void onPluginEnabled(PluginEnableEvent evt) {
-                    if (!readyToEnable()) {
-                        if (readyToEnable()) { /* If we;re ready now, finish enable */
-                            doEnable();   /* Finish enable */
-                        }
-                    }
-                }
-            };
-            pm.registerEvents(pl, this);
-        }
-        else {
-            doEnable();
-        }
+        doEnable();
 
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             public void run() {
@@ -896,13 +842,9 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         }, 1, 1);
     }
 
-    private boolean readyToEnable() {
-        return true;
-    }
-
     private void doEnable() {
         /* Enable core */
-        if(!core.enableCore(enabCoreCB)) {
+        if(!core.enableCore(null)) {
             this.setEnabled(false);
             return;
         }

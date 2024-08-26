@@ -731,17 +731,17 @@ block:id=stripped_dark_oak_wood,data=1,allsides=0:stripped_dark_oak_log,topbotto
 block:id=stripped_dark_oak_wood,data=0,north=0:stripped_dark_oak_log,south=0:stripped_dark_oak_log,east=4000:stripped_dark_oak_log,west=4000:stripped_dark_oak_log,top=0:stripped_dark_oak_log,bottom=0:stripped_dark_oak_log
 block:id=stripped_dark_oak_wood,data=2,north=4000:stripped_dark_oak_log,south=4000:stripped_dark_oak_log,east=0:stripped_dark_oak_log,west=0:stripped_dark_oak_log,top=4000:stripped_dark_oak_log,bottom=4000:stripped_dark_oak_log
 # Leaves (oak)
-block:id=oak_leaves,allfaces=2000:oak_leaves,stdrot=true,transparency=LEAVES
+block:id=oak_leaves,allfaces=2000:oak_leaves,stdrot=true,transparency=TRANSPARENT
 # Leaves (spruce/pine)
-block:id=spruce_leaves,allfaces=13000:spruce_leaves,stdrot=true,transparency=LEAVES
+block:id=spruce_leaves,allfaces=13000:spruce_leaves,stdrot=true,transparency=TRANSPARENT
 # Leaves (birch)
-block:id=birch_leaves,allfaces=14000:birch_leaves,stdrot=true,transparency=LEAVES
+block:id=birch_leaves,allfaces=14000:birch_leaves,stdrot=true,transparency=TRANSPARENT
 # Leaves (jungle)
-block:id=jungle_leaves,allfaces=2000:jungle_leaves,stdrot=true,transparency=LEAVES
+block:id=jungle_leaves,allfaces=2000:jungle_leaves,stdrot=true,transparency=TRANSPARENT
 # Leaves (acacia)
-block:id=acacia_leaves,allfaces=2000:acacia_leaves,stdrot=true,transparency=LEAVES
+block:id=acacia_leaves,allfaces=2000:acacia_leaves,stdrot=true,transparency=TRANSPARENT
 # Leaves (dark oak)
-block:id=dark_oak_leaves,allfaces=2000:dark_oak_leaves,stdrot=true,transparency=LEAVES
+block:id=dark_oak_leaves,allfaces=2000:dark_oak_leaves,stdrot=true,transparency=TRANSPARENT
 # Sponge
 block:id=sponge,allfaces=0:sponge,stdrot=true
 # Glass
