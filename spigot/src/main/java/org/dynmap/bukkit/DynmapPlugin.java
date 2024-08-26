@@ -828,10 +828,9 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         }
     }
     
-    public void loadExtraBiomes(String mcver) {
+    public void loadExtraBiomes() {
         int cnt = 0;
 
-        BiomeMap.loadWellKnownByVersion(mcver);
         /* Find array of biomes in biomebase */
         Object[] biomelist = helper.getBiomeBaseList();
         //Log.info("biomelist length = " + biomelist.length);
@@ -918,7 +917,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         helper.initializeBlockStates();
         
         /* Load extra biomes, if any */
-        loadExtraBiomes(mcver);
+        loadExtraBiomes();
              
         /* Set up player login/quit event handler */
         registerPlayerLoginListener();
