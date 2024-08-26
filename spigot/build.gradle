@@ -23,7 +23,6 @@ dependencies {
     implementation('io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT')
     compileOnly('net.luckperms:api:5.0')  { transitive = false }
     compileOnly('com.github.MilkBowl:VaultAPI:1.7') { transitive = false }
-    compileOnly('net.skinsrestorer:skinsrestorer-api:14.2.+')  { transitive = false }
     implementation(project(":dynmap-api"))  { transitive = false }
     implementation(project(path: ":DynmapCore", configuration: "shadow"))  { transitive = false }
     compileOnly('org.anjocaido:EssentialsGroupManager:2.10.1')  { transitive = false }

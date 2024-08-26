@@ -788,33 +788,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             return;
         }
 
-        /* Skins support via SkinsRestorer */
-        SkinsRestorerSkinUrlProvider skinUrlProvider = null;
-
-        if (core.configuration.getBoolean("skinsrestorer-integration", false)) {
-
-            Plugin skinsRestorer = getServer().getPluginManager().getPlugin("SkinsRestorer");
-
-            if (skinsRestorer == null) {
-                Log.warning("SkinsRestorer integration can't be enabled because SkinsRestorer is not installed");
-            } else {
-                try {
-                    skinUrlProvider = new SkinsRestorerSkinUrlProvider();
-                    Log.info("SkinsRestorer API integration enabled");
-                } catch (NoClassDefFoundError e) {
-                    skinUrlProvider = null;
-                    Log.warning("You are using unsupported version of SkinsRestorer. Use v14.1 or newer.");
-                    Log.warning("Disabled SkinsRestorer integration for this session");
-                } catch (Throwable e) {
-                    // SkinsRestorer probably updated its API
-                    skinUrlProvider = null;
-                    Log.warning("Error while enabling SkinsRestorer integration", e);
-                }
-            }
-        }
-
-        core.setSkinUrlProvider(skinUrlProvider);
-
         doEnable();
 
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
