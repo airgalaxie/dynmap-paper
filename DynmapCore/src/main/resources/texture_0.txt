@@ -363,8 +363,7 @@ block:id=dirt,allfaces=0:dirt,stdrot=true
 # Cobblestone
 block:id=cobblestone,allfaces=0:cobblestone,stdrot=true
 # Wooden Plank (oak)
-[-1.6.4]block:id=planks,data=0,data=4,data=5,data=6,data=7,data=8,data=9,data=10,data=11,data=12,data=13,data=14,data=15,allfaces=0:planks_oak,stdrot=true
-[1.7.0-]block:id=planks,data=0,data=6,data=7,data=8,data=9,data=10,data=11,data=12,data=13,data=14,data=15,allfaces=0:planks_oak,stdrot=true
+block:id=planks,data=0,data=6,data=7,data=8,data=9,data=10,data=11,data=12,data=13,data=14,data=15,allfaces=0:planks_oak,stdrot=true
 # Wooden Plank (spruce)
 block:id=planks,data=1,allfaces=0:planks_spruce,stdrot=true
 # Wooden Plank (birch)
@@ -605,7 +604,6 @@ block:id=wool,data=15,allfaces=0:wool_colored_black,stdrot=true
 # Dandelion
 block:id=yellow_flower,patch0-1=0:flower_dandelion,transparency=TRANSPARENT
 # Rose
-[-1.6.4]block:id=red_flower,patch0-1=0:flower_rose,transparency=TRANSPARENT
 [1.7.0-]block:id=red_flower,data=0,data=9,data=10,data=11,data=12,data=13,data=14,data=15,patch0-1=0:flower_rose,transparency=TRANSPARENT
 [1.7.0-]block:id=red_flower,data=1,patch0-1=0:flower_blue_orchid,transparency=TRANSPARENT
 [1.7.0-]block:id=red_flower,data=2,patch0-1=0:flower_allium,transparency=TRANSPARENT
@@ -829,7 +827,6 @@ block:id=powered_repeater,data=2,data=6,data=10,data=14,top=4000:repeater_on,all
 # Repeater (on) facing west
 block:id=powered_repeater,data=3,data=7,data=11,data=15,top=0:repeater_on,allsides=0:stone,bottom=0:stone,transparency=TRANSPARENT
 # Locked Chest (95)
-[-1.6.4]block:id=stained_glass,data=*,top=6000,bottom=6005,south=2,north=1,east=4,west=3,txtid=chest
 # Stained Glass (95)
 [1.7.0-]block:id=stained_glass,data=0,allfaces=12000:glass_white,stdrot=true,transparency=TRANSPARENT
 [1.7.0-]block:id=stained_glass,data=1,allfaces=12000:glass_orange,stdrot=true,transparency=TRANSPARENT

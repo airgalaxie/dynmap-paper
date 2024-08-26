@@ -481,8 +481,6 @@ texture:id=beetroots_stage0
 texture:id=beetroots_stage1
 texture:id=beetroots_stage2
 texture:id=beetroots_stage3
-[-1.16.5]texture:id=grass_path_top
-[-1.16.5]texture:id=grass_path_side
 texture:id=command_block_back
 texture:id=command_block_front
 texture:id=command_block_side
@@ -814,7 +812,6 @@ block:id=detector_rail,state=powered:false,patch0=0:detector_rail,transparency=T
 # Web
 block:id=cobweb,patch0-1=0:cobweb,transparency=TRANSPARENT
 # Grass
-[-1.20.2]block:id=grass,patch0-1=1000:grass,transparency=TRANSPARENT
 [1.20.3-]block:id=short_grass,patch0-1=1000:grass,transparency=TRANSPARENT
 # Fern
 block:id=fern,patch0-1=1000:fern,transparency=TRANSPARENT
@@ -951,25 +948,20 @@ block:id=oak_door,data=*,patch0=0:oak_door_top,patch1=0:oak_door_bottom,transpar
 # Ladder
 block:id=ladder,patch0=0:ladder,transparency=TRANSPARENT
 # Rail - heading north-south
-[-1.16.5]block:id=rail,data=0,patch0=0:rail,transparency=TRANSPARENT
-[1.17-]block:id=rail,data=0,data=1,patch0=0:rail,transparency=TRANSPARENT
+block:id=rail,data=0,data=1,patch0=0:rail,transparency=TRANSPARENT
 # Rail - heading east-west
-[-1.16.5]block:id=rail,data=1,patch0=0:rail,transparency=TRANSPARENT
-[1.17-]block:id=rail,data=2,data=3,patch0=0:rail,transparency=TRANSPARENT
+block:id=rail,data=2,data=3,patch0=0:rail,transparency=TRANSPARENT
 # Rail - incline to east
 # Rail - incline to west
-[-1.16.5]block:id=rail,data=2,data=3,patch0=0:rail,transparency=TRANSPARENT
-[1.17-]block:id=rail,data=4,data=5,data=6,data=7,patch0=0:rail,transparency=TRANSPARENT
+block:id=rail,data=4,data=5,data=6,data=7,patch0=0:rail,transparency=TRANSPARENT
 # Rail - incline to north
 # Rail - incline to south
-[-1.16.5]block:id=rail,data=4,data=5,patch0=0:rail,transparency=TRANSPARENT
-[1.17-]block:id=rail,data=8,data=9,data=10,data=11,patch0=0:rail,transparency=TRANSPARENT
+block:id=rail,data=8,data=9,data=10,data=11,patch0=0:rail,transparency=TRANSPARENT
 # Rails - southeast corner
 # Rails - southwest corner
 # Rails - northwest corner
 # Rails - northeast corner
-[-1.16.5]block:id=rail,data=6,data=7,data=8,data=9,patch0=0:rail_corner,transparency=TRANSPARENT
-[1.17-]block:id=rail,data=12,data=13,data=14,data=15,data=16,data=17,data=18,data=19,patch0=0:rail_corner,transparency=TRANSPARENT
+block:id=rail,data=12,data=13,data=14,data=15,data=16,data=17,data=18,data=19,patch0=0:rail_corner,transparency=TRANSPARENT
 # Cobblestone Stairs
 block:id=cobblestone_stairs,patch0-2=0:cobblestone,transparency=SEMITRANSPARENT
 # Lever
@@ -1383,11 +1375,9 @@ block:id=quartz_pillar,data=2,top=0:quartz_pillar,bottom=0:quartz_pillar,north=6
 block:id=quartz_stairs,patch0=0:quartz_block_side,patch1=0:quartz_block_top,patch2=0:quartz_block_bottom,transparency=SEMITRANSPARENT
 
 # Activator rail - powered
-[-1.16.5]block:id=activator_rail,data=0-5,patch0=0:activator_rail_on,transparency=TRANSPARENT
-[1.17-]block:id=activator_rail,data=0-11,patch0=0:activator_rail_on,transparency=TRANSPARENT
+block:id=activator_rail,data=0-11,patch0=0:activator_rail_on,transparency=TRANSPARENT
 # Activator rail - unpowered
-[-1.16.5]block:id=activator_rail,data=6-11,patch0=0:activator_rail,transparency=TRANSPARENT
-[1.17-]block:id=activator_rail,data=12-23,patch0=0:activator_rail,transparency=TRANSPARENT
+block:id=activator_rail,data=12-23,patch0=0:activator_rail,transparency=TRANSPARENT
 
 # (158)	Dropper
 block:id=%dropper,state=facing:north,patch0=0:furnace_side,patch1=0:furnace_top,patch2=0:dropper_front,patch3=0:furnace_side,patch4=0:furnace_top,patch5=0:furnace_side,stdrot=true
@@ -1598,9 +1588,6 @@ block:id=beetroots,data=0,patch0-3=0:beetroots_stage0,transparency=TRANSPARENT
 block:id=beetroots,data=1,patch0-3=0:beetroots_stage1,transparency=TRANSPARENT
 block:id=beetroots,data=2,patch0-3=0:beetroots_stage2,transparency=TRANSPARENT
 block:id=beetroots,data=3,patch0-3=0:beetroots_stage3,transparency=TRANSPARENT
-
-# Grass Path (replaced with dirt path in 1.17
-[-1.16.5]block:id=grass_path,allsides=0:grass_path_side,top=0:grass_path_top,bottom=0:dirt,stdrot=true, transparency=SEMITRANSPARENT
 
 # End Gateway
 block:id=end_gateway,data=*,stdrot=true,allfaces=0:endportal
@@ -2103,13 +2090,6 @@ block:id=black_banner,id=black_wall_banner,data=*,patch0=0:oak_planks,patch1=0:b
 
 # Dead horn coral
 [1.13.1-]block:id=dead_horn_coral,patch0-1=0:dead_horn_coral,transparency=TRANSPARENT
-
-# Signpost
-[-1.13.2]block:id=sign,patch0=0,patch1=1,patch2=2,patch3=3,patch4=4,patch5=5,patch6=6,patch7=7,patch8=8,patch9=9,transparency=TRANSPARENT,txtid=sign
-# Wall sign
-[-1.13.2]block:id=wall_sign,patch0=0,patch1=1,patch2=2,patch3=3,patch4=4,patch5=5,transparency=TRANSPARENT,txtid=sign
-
-
 
 [1.14-]texture:id=cornflower
 [1.14-]texture:id=wither_rose
