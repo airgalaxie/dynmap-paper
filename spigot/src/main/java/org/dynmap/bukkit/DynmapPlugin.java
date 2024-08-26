@@ -1,8 +1,6 @@
 package org.dynmap.bukkit;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
@@ -107,12 +105,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     public static DynmapPlugin plugin;
     public PluginManager pm;
     private BukkitEnableCoreCallback enabCoreCB = new BukkitEnableCoreCallback();
-    private Method ismodloaded;
-    private Method instance;
-    private Method getindexedmodlist;
-    private Method getversion;
     private HashMap<String, BukkitWorld> world_by_name = new HashMap<String, BukkitWorld>();
-    private HashSet<String> modsused = new HashSet<String>();
 
     private long cur_tick;
     private long prev_tick;
@@ -201,16 +194,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     
     public DynmapPlugin() {
         plugin = this;
-        try {
-            Class<?> c = Class.forName("cpw.mods.fml.common.Loader");
-            ismodloaded = c.getMethod("isModLoaded", String.class);
-            instance = c.getMethod("instance");
-            getindexedmodlist = c.getMethod("getIndexedModList");
-            c = Class.forName("cpw.mods.fml.common.ModContainer");
-            getversion = c.getMethod("getVersion");
-        } catch (NoSuchMethodException nsmx) {
-        } catch (ClassNotFoundException e) {
-        }
     }
 
     /**
@@ -501,42 +484,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         public int getCurrentPlayers() {
             return helper.getOnlinePlayers().length;
         }
-        @Override
-        public boolean isModLoaded(String name) {
-            if(ismodloaded != null) {
-                try {
-                    Object rslt =ismodloaded.invoke(null,  name);
-                    if(rslt instanceof Boolean) {
-                        if(((Boolean)rslt).booleanValue()) {
-                            modsused.add(name);
-                            return true;
-                        }
-                    }
-                } catch (IllegalArgumentException iax) {
-                } catch (IllegalAccessException e) {
-                } catch (InvocationTargetException e) {
-                }
-            }
-            return false;
-        }
-        @Override
-        public String getModVersion(String name) {
-            if((instance != null) && (getindexedmodlist != null) && (getversion != null)) {
-                try {
-                    Object inst = instance.invoke(null);
-                    Map<?,?> modmap = (Map<?,?>) getindexedmodlist.invoke(inst);
-                    Object mod = modmap.get(name);
-                    if (mod != null) {
-                        return (String) getversion.invoke(mod);
-                    }
-                } catch (IllegalArgumentException iax) {
-                } catch (IllegalAccessException e) {
-                } catch (InvocationTargetException e) {
-                }
-            }
-            return null;
-        }
-
 
         @Override
         public double getServerTPS() {
