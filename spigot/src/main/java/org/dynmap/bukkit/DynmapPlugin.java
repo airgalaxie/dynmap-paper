@@ -113,10 +113,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     private Method getversion;
     private HashMap<String, BukkitWorld> world_by_name = new HashMap<String, BukkitWorld>();
     private HashSet<String> modsused = new HashSet<String>();
-    // TPS calculator
-    private double tps;
-    private long lasttick;
-    private long avgticklen = 50000000;
 
     private long cur_tick;
     private long prev_tick;
@@ -544,7 +540,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
 
         @Override
         public double getServerTPS() {
-            return tps;
+            return getServer().getTPS()[0];
         }
 
         @Override
@@ -945,9 +941,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         else {
             doEnable();
         }
-        // Start tps calculation
-        lasttick = System.nanoTime();
-        tps = 20.0;
 
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             public void run() {
@@ -1011,16 +1004,11 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     }
     
     private void processTick() {
-        long now = System.nanoTime();
-        long elapsed = now - lasttick;
-        lasttick = now;
-        avgticklen = ((avgticklen * 99) / 100) + (elapsed / 100);
-        tps = (double)1E9 / (double)avgticklen;
         cur_tick++;
         
         // Tick core
         if (core != null) {
-            core.serverTick(tps);
+            core.serverTick(getServer().getTPS()[0]);
         }
     }
 
