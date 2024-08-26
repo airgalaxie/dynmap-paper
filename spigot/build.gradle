@@ -31,7 +31,6 @@ dependencies {
     compileOnly('de.bananaco:bPermissions:2.9.1')  { transitive = false }
     compileOnly('com.platymuus.bukkit.permissions:PermissionsBukkit:1.6')  { transitive = false }
     compileOnly('org.anjocaido:EssentialsGroupManager:2.10.1')  { transitive = false }
-    implementation group: 'org.bstats', name: 'bstats-bukkit', version: '3.0.2'
     compileOnly('com.googlecode.json-simple:json-simple:1.1.1') { transitive = false }
     compileOnly('com.google.code.gson:gson:2.8.9') { transitive = false }
     implementation(project(':bukkit-helper')) {
@@ -116,7 +115,6 @@ jar {
 
 shadowJar {
     dependencies {
-        include(dependency('org.bstats::'))
         include(dependency(':dynmap-api'))
         include(dependency(":DynmapCore"))
         include(dependency(':bukkit-helper'))
@@ -141,7 +139,6 @@ shadowJar {
         include(dependency(':bukkit-helper-121-3'))
         include(dependency(':bukkit-helper-121-4'))
     }
-    relocate('org.bstats', 'org.dynmap.bstats')
     destinationDirectory = file '../target'
     archiveBaseName = "Dynmap"
     archiveClassifier = 'spigot'

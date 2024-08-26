@@ -18,10 +18,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.bstats.bukkit.Metrics;
-import org.bstats.charts.CustomChart;
-import org.bstats.json.JsonObjectBuilder;
-import org.bstats.json.JsonObjectBuilder.JsonObject;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
@@ -76,7 +72,6 @@ import org.dynmap.DynmapWebChatEvent;
 import org.dynmap.DynmapWorld;
 import org.dynmap.Log;
 import org.dynmap.MapManager;
-import org.dynmap.MapType;
 import org.dynmap.PlayerList;
 import org.dynmap.bukkit.helper.BukkitVersionHelper;
 import org.dynmap.bukkit.helper.BukkitWorld;
@@ -99,7 +94,6 @@ import org.dynmap.common.DynmapServerInterface;
 import org.dynmap.common.chunk.GenericChunkCache;
 import org.dynmap.common.DynmapListenerManager.EventType;
 import org.dynmap.common.chunk.GenericMapChunkCache;
-import org.dynmap.hdmap.HDMap;
 import org.dynmap.markers.MarkerAPI;
 import org.dynmap.modsupport.ModSupportImpl;
 import org.dynmap.utils.MapChunkCache;
@@ -114,7 +108,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     private MapManager mapManager;
     public static DynmapPlugin plugin;
     public PluginManager pm;
-    private Metrics metrics;
     private BukkitEnableCoreCallback enabCoreCB = new BukkitEnableCoreCallback();
     private Method ismodloaded;
     private Method instance;
@@ -128,7 +121,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     private long perTickLimit;
     private long cur_tick_starttime;
     private long avgticklen = 50000000;
-    
+
     private int chunks_in_cur_tick = 0;
     private long cur_tick;
     private long prev_tick;
@@ -170,7 +163,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             last_bworld = null;
         }
     }
-    
+
     // Nonblocking thread safety
     private static final AtomicBoolean tryNativeId = new AtomicBoolean(true);
     @SuppressWarnings("deprecation")
@@ -196,7 +189,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     private static final int getBlockIdFromBlock(Block block) {
         return getBlockIdFromMaterial(block.getType());
     }
-    
+
     private class BukkitEnableCoreCallback extends DynmapCore.EnableCoreCallbacks {
         @Override
         public void configurationLoaded() {
@@ -206,7 +199,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             }
         }
     }
-    
+
     private static class BlockToCheck {
         Location loc;
         int typeid;
@@ -229,7 +222,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         } catch (ClassNotFoundException e) {
         }
     }
-    
+
     private boolean banBrokenMsg = false;
     /**
      * Server access abstraction class
@@ -243,7 +236,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             }
             return -1;
         }
-		
+
         @Override
         public int isSignAt(String wname, int x, int y, int z) {
             World w = getServer().getWorld(wname);
@@ -631,7 +624,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         public double getServerTPS() {
             return tps;
         }
-        
+
         @Override
         public String getServerIP() {
             return Bukkit.getServer().getIp();
@@ -845,7 +838,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     
     public void loadExtraBiomes(String mcver) {
         int cnt = 0;
-        
+
         BiomeMap.loadWellKnownByVersion(mcver);
         /* Find array of biomes in biomebase */
         Object[] biomelist = helper.getBiomeBaseList();
@@ -1042,11 +1035,11 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             }
         }, 1, 1);
     }
-    
+
     private boolean readyToEnable() {
         return true;
     }
-    
+
     private void doEnable() {
         /* Enable core */
         if(!core.enableCore(enabCoreCB)) {
@@ -1072,9 +1065,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         /* Register our update trigger events */
         registerEvents();
 
-        /* Submit metrics to mcstats.org */
-        initMetrics();
-        
         /* Core is ready - notify API availability */
         DynmapCommonAPIListener.apiInitialized(this);
 
@@ -1086,10 +1076,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         /* Core is being disabled - notify API disable */
         DynmapCommonAPIListener.apiTerminated();
 
-        if (metrics != null) {
-            metrics = null;
-        }
-        
         /* Disable core */
         core.disableCore();
 
@@ -1120,7 +1106,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             core.serverTick(tps);
         }
     }
-    
+
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         DynmapCommandSender dsender;
@@ -1151,7 +1137,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         else
         	return Collections.emptyList();
     }
-    
+
     @Override
     public final MarkerAPI getMarkerAPI() {
         return core.getMarkerAPI();
@@ -1763,51 +1749,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         return core.testIfPlayerInfoProtected();
     }
 
-    private class FeatureChart extends CustomChart {
-    	public FeatureChart() { super("features_used"); }
-
-		@Override
-		protected JsonObject getChartData() throws Exception {
-			JsonObjectBuilder obj = new JsonObjectBuilder();
-            obj = obj.appendField("internal_web_server", core.configuration.getBoolean("disable-webserver", false) ? 0 : 1);
-            obj = obj.appendField("login_security", core.configuration.getBoolean("login-enabled", false) ? 1 : 0);
-            obj = obj.appendField("player_info_protected", core.player_info_protected ? 1 : 0);
-            for (String mod : modsused)
-            	obj = obj.appendField(mod + "_blocks", 1);
-            return obj.build();
-		}
-    }
-    private class MapChart extends CustomChart {
-    	public MapChart() { super("map_data"); }
-
-		@Override
-		protected JsonObject getChartData() throws Exception {
-			JsonObjectBuilder obj = new JsonObjectBuilder();
-			
-			obj = obj.appendField("worlds", core.mapManager != null ? core.mapManager.getWorlds().size() : 0);
-            int maps = 0, hdmaps = 0;
-            if (core.mapManager != null) {
-                for (DynmapWorld w : core.mapManager.getWorlds()) {
-                    for (MapType mt : w.maps)
-                        if (mt instanceof HDMap)
-                            ++hdmaps;
-                    maps += w.maps.size();
-                }
-                obj = obj.appendField("maps", maps);
-                obj = obj.appendField("hd_maps", hdmaps);
-            }
-            return obj.build();
-		}
-    }
-    
-    private void initMetrics() {
-        metrics = new Metrics(this, 619);
-
-        metrics.addCustomChart(new FeatureChart());
-
-        metrics.addCustomChart(new MapChart());
-    }
-    
     @Override
     public void processSignChange(String material, String world, int x, int y, int z,
             String[] lines, String playerid) {
@@ -1817,7 +1758,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     Polygon getWorldBorder(World w) {
         return helper.getWorldBorder(w);
     }
-    
+
     public static boolean migrateChunks() {
         if ((plugin != null) && (plugin.core != null)) {
             return plugin.core.migrateChunks();
