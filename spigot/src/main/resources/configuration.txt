@@ -42,26 +42,7 @@ storage:
   
 components:
   - class: org.dynmap.ClientConfigurationComponent
-  
-  # Remember to change the following class to org.dynmap.JsonFileClientUpdateComponent when using an external web server.
-  - class: org.dynmap.InternalClientUpdateComponent
-    sendhealth: true
-    sendposition: true
-    includehiddenplayers: false
-    # (optional) if true, color codes in player display names are used
-    use-name-colors: false
-  #  # Optional - make players hidden when they are inside/underground/in shadows (#=light level: 0=full shadow,15=sky)
-  #  hideifshadow: 4
-  #  # Optional - make player hidden when they are under cover (#=sky light level,0=underground,15=open to sky)
-  #  hideifundercover: 14
-  #  # (Optional) if true, players that are crouching/sneaking will be hidden 
-    hideifsneaking: false
-    # optional, if true, players that are in spectator mode will be hidden
-    hideifspectator: false
-    # If true, hide players with invisibility potion effects active
-    hide-if-invisiblity-potion: true
-    # If true, player names are not shown on map, chat, list
-    hidenames: false
+
   #- class: org.dynmap.JsonFileClientUpdateComponent
   #  writeinterval: 1
   #  sendhealth: true
@@ -292,22 +273,6 @@ exportpath: export
 # The path where files can be imported for /dmarker commands
 importpath: import
 
-# The network-interface the webserver will bind to (0.0.0.0 for all interfaces, 127.0.0.1 for only local access).
-# If not set, uses same setting as server in server.properties (or 0.0.0.0 if not specified)
-#webserver-bindaddress: 0.0.0.0
-
-# The TCP-port the webserver will listen on.
-webserver-port: 8123
-
-# Maximum concurrent session on internal web server - limits resources used in Bukkit server
-max-sessions: 30
-
-# Disables Webserver portion of Dynmap (Advanced users only)
-disable-webserver: false
-
-# Enable/disable having the web server allow symbolic links (true=compatible with existing code, false=more secure (default))
-allow-symlinks: true
-
 # Period between tile renders for fullrender, in seconds (non-zero to pace fullrenders, lessen CPU load)
 timesliceinterval: 0.0
 
@@ -351,11 +316,6 @@ player-sort-permission-nodes:
 # Set sidebaropened: 'true' to pin menu sidebar opened permanently, 'pinned' to default the sidebar to pinned, but allow it to unpin
 #sidebaropened: true
 
-# Customized HTTP response headers - add 'id: value' pairs to all HTTP response headers (internal web server only)
-#http-response-headers:
-#    Access-Control-Allow-Origin: "my-domain.com"
-#    X-Custom-Header-Of-Mine: "MyHeaderValue"
-
 # Trusted proxies for web server - which proxy addresses are trusted to supply valid X-Forwarded-For fields
 #   This now supports both IP address, and subnet ranges (e.g. 192.168.1.0/24 or 202.24.0.0/14 )
 trusted-proxies:
@@ -368,9 +328,6 @@ quitmessage: "%playername% quit"
 
 # Control whether layer control is presented on the UI (default is true)
 showlayercontrol: true
-
-# Enable checking for banned IPs via banned-ips.txt (internal web server only)
-check-banned-ips: true
 
 # Default selection when map page is loaded
 defaultzoom: 0

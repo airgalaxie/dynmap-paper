@@ -96,10 +96,6 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
     private static Charset cs_utf8 = Charset.forName("UTF-8");
     public JsonFileClientUpdateComponent(final DynmapCore core, final ConfigurationNode configuration) {
         super(core, configuration);
-        
-        if (!core.isInternalWebServerDisabled) {
-        	Log.severe("Using JsonFileClientUpdateComponent with disable-webserver=false is not supported: there will likely be problems");        	
-        }
 
         jsonInterval = (long)(configuration.getFloat("writeinterval", 1) * 1000);
         storage = core.getDefaultMapStorage();

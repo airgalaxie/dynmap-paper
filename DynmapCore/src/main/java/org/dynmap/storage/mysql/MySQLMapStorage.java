@@ -337,10 +337,7 @@ public class MySQLMapStorage extends MapStorage {
 
     private boolean writeConfigPHP(DynmapCore core) {
     	File cfgfile = new File(baseStandaloneDir, "MySQL_config.php");
-    	if (!core.isInternalWebServerDisabled) {	// If using internal server
-    		cfgfile.delete();	// Zap file (in case we left junk from last time)
-    		return true;
-    	}
+
     	// During initial startup, this can happen before baseStandaloneDir is setup
     	if (!baseStandaloneDir.exists()) {
     		baseStandaloneDir.mkdirs();

@@ -11,9 +11,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +24,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -49,7 +45,6 @@ import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.impl.MarkerAPIImpl;
 import org.dynmap.modsupport.ModSupportImpl;
 import org.dynmap.renderer.DynmapBlockState;
-import org.dynmap.servlet.*;
 import org.dynmap.storage.MapStorage;
 import org.dynmap.storage.filetree.FileTreeMapStorage;
 import org.dynmap.storage.mysql.MySQLMapStorage;
@@ -59,25 +54,7 @@ import org.dynmap.storage.sqllte.SQLiteMapStorage;
 import org.dynmap.utils.BlockStep;
 import org.dynmap.utils.BufferOutputStream;
 import org.dynmap.utils.ImageIOManager;
-import org.dynmap.web.BanIPFilter;
-import org.dynmap.web.CustomHeaderFilter;
-import org.dynmap.web.FileNameFilter;
-import org.dynmap.web.FilterHandler;
-import org.dynmap.web.HandlerRouter;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.NetworkTrafficServerConnector;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.session.DefaultSessionIdManager;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.yaml.snakeyaml.Yaml;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServlet;
 
 public class DynmapCore implements DynmapCommonAPI {
     /**
@@ -94,10 +71,6 @@ public class DynmapCore implements DynmapCommonAPI {
     private String version;
     private String platform = null;
     private String platformVersion = null;
-    private Server webServer = null;
-    private String webhostname = null;
-    private int webport = 0;
-    private HandlerRouter router = null;
     public MapManager mapManager = null;
     public PlayerList playerList;
     public ConfigurationNode configuration;
@@ -120,7 +93,6 @@ public class DynmapCore implements DynmapCommonAPI {
     private List<String> sortPermissionNodes;
     private int perTickLimit = 50;   // 50 ms
     private boolean dumpMissing = false;
-    public boolean isInternalWebServerDisabled = false;
         
     private int     config_hashcode;    /* Used to signal need to reload web configuration (world changes, config update, etc) */
     private int fullrenderplayerlimit;  /* Number of online players that will cause fullrender processing to pause */
@@ -163,7 +135,6 @@ public class DynmapCore implements DynmapCommonAPI {
 
     private String[] deftriggers = { };
 
-    private Boolean webserverCompConfigWarn = false;
     private final String CompConfigWiki = "https://github.com/webbukkit/dynmap/wiki/Component-Configuration";
 
     private final String[] defaultTemplates = {"vlowres", "lowres", "medres", "hires", "low_boost_hi",
@@ -393,9 +364,6 @@ public class DynmapCore implements DynmapCommonAPI {
         webpath = configuration.getString("webpath", "web");
         // And whether to disable web file update
         updatewebpathfiles = configuration.getBoolean("update-webpath-files", true);
-        
-        // Check if we are disabling the internal web server (implies external)
-        isInternalWebServerDisabled = configuration.getBoolean("disable-webserver", false);
 
         /* Prime the tiles directory */
         tilesDirectory = getFile(configuration.getString("tilespath", "web/tiles"));
@@ -593,12 +561,6 @@ public class DynmapCore implements DynmapCommonAPI {
         
         updateConfigHashcode(); /* Initialize/update config hashcode */
 
-        // If not disabled, load and initialize the internal web server
-        if (!isInternalWebServerDisabled) {
-        	loadWebserver();
-        }
-        
-
         enabledTriggers.clear();
         List<String> triggers = configuration.getStrings("render-triggers", new ArrayList<String>());
         if ((triggers != null) && (triggers.size() > 0)) 
@@ -619,29 +581,10 @@ public class DynmapCore implements DynmapCommonAPI {
         }
         Log.verboseinfo("Loaded " + componentManager.components.size() + " components.");
 
-        if (!isInternalWebServerDisabled) {	// If internal not disabled, we should be using it and not external
-            startWebserver();
-            if (!componentManager.isLoaded(InternalClientUpdateComponent.class)) {
-                Log.warning("Using internal server, but " + InternalClientUpdateComponent.class.toString() + " is DISABLED!");
-                webserverCompConfigWarn = true;
-            }
-            if (componentManager.isLoaded(JsonFileClientUpdateComponent.class)) {
-                Log.warning("Using internal server, but " + JsonFileClientUpdateComponent.class.toString() + " is ENABLED!");
-            }
-        }
-        else {
-            if (componentManager.isLoaded(InternalClientUpdateComponent.class)) {
-                Log.warning("Using external server, but " + InternalClientUpdateComponent.class.toString() + " is ENABLED!");
-            }
-            if (!componentManager.isLoaded(JsonFileClientUpdateComponent.class)) {
-                Log.warning("Using external server, but " + JsonFileClientUpdateComponent.class.toString() + " is DISABLED!");
-                webserverCompConfigWarn = true;
-            }
-        }
-        if (webserverCompConfigWarn) {
+        if (!componentManager.isLoaded(JsonFileClientUpdateComponent.class)) {
+            Log.warning("Using external server, but " + JsonFileClientUpdateComponent.class.toString() + " is DISABLED!");
             Log.warning("If the website is missing files or not loading/updating, this might be why.");
             Log.warning("For more info, read this: " + CompConfigWiki);
-            webserverCompConfigWarn = false;
         }
         
         /* Add login/logoff listeners */
@@ -872,113 +815,6 @@ public class DynmapCore implements DynmapCommonAPI {
         return config_hashcode;
     }
 
-    @SuppressWarnings("deprecation")
-	private org.eclipse.jetty.util.resource.FileResource createFileResource(String path) {
-        try {
-        	File f = new File(path);
-        	URI uri = f.toURI();
-        	URL url = uri.toURL();
-            return new org.eclipse.jetty.util.resource.FileResource(url);
-        } catch(Exception e) {
-            Log.info("Could not create file resource");
-            return null;
-        }
-    }
-
-    public void loadWebserver() {
-        org.eclipse.jetty.util.log.Log.setLog(new JettyNullLogger());
-        String ip = server.getServerIP();
-        if ((ip == null) || (ip.trim().length() == 0)) {
-            ip = "0.0.0.0";
-        }
-        webhostname = configuration.getString("webserver-bindaddress", ip);
-        webport = configuration.getInteger("webserver-port", 8123);
-
-        int maxconnections = configuration.getInteger("max-sessions", 30);
-        if(maxconnections < 2) maxconnections = 2;
-        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>(maxconnections);
-        ExecutorThreadPool pool = new ExecutorThreadPool(maxconnections, 2, queue);
-
-        webServer = new Server(pool);
-        webServer.setSessionIdManager(new DefaultSessionIdManager(webServer));
-
-        NetworkTrafficServerConnector connector = new NetworkTrafficServerConnector(webServer);
-        connector.setIdleTimeout(5000);
-        connector.setAcceptQueueSize(50);
-        if(webhostname.equals("0.0.0.0") == false)
-            connector.setHost(webhostname);
-        connector.setPort(webport);
-        webServer.setConnectors(new Connector[]{connector});
-
-        webServer.setStopAtShutdown(true);
-        //webServer.setGracefulShutdown(1000);
-        final boolean allow_symlinks = configuration.getBoolean("allow-symlinks", false);
-        router = new HandlerRouter() {{
-            FileResourceHandler fileResourceHandler = new FileResourceHandler() {{
-                this.setWelcomeFiles(new String[] { "index.html" });
-                this.setRedirectWelcome(false);
-                this.setDirectoriesListed(true);
-                this.setBaseResource(createFileResource(getFile(getWebPath()).getAbsolutePath()));
-            }};
-            try {
-                fileResourceHandler.doStart();
-            }catch (Exception ex){
-                ex.printStackTrace();
-                Log.severe("Failed to start resource handler: "+ex.getMessage());
-            }
-            ContextHandler fileResourceContext = new ContextHandler();
-            fileResourceContext.setHandler(fileResourceHandler);
-            fileResourceContext.clearAliasChecks();
-            if (allow_symlinks){
-                fileResourceContext.addAliasCheck(new ContextHandler.ApproveAliases());
-                fileResourceContext.addAliasCheck(new ContextHandler.ApproveNonExistentDirectoryAliases());
-                fileResourceContext.addAliasCheck(new AllowSymLinkAliasChecker());
-            }
-            try {
-                Class<?> handlerClass = fileResourceHandler.getClass().getSuperclass().getSuperclass();
-                Field field = handlerClass.getDeclaredField("_context");
-                field.setAccessible(true);
-                field.set(fileResourceHandler,fileResourceContext);
-            }catch (Exception e){
-                Log.severe("Failed to initialize resource handler: "+e.getMessage());
-            }
-            this.addHandler("/", fileResourceHandler);
-            this.addHandler("/tiles/*", new MapStorageResourceHandler() {{
-                this.setCore(DynmapCore.this);
-            }});
-        }};
-
-        if(allow_symlinks)
-            Log.verboseinfo("Web server is permitting symbolic links");
-        else
-            Log.verboseinfo("Web server is not permitting symbolic links");
-
-        List<Filter> filters = new LinkedList<Filter>();
-        
-        /* Check for banned IPs */
-        boolean checkbannedips = configuration.getBoolean("check-banned-ips", true);
-        if (checkbannedips) {
-            filters.add(new BanIPFilter(this));
-        }
-        filters.add(new FileNameFilter(this));
-        
-//        filters.add(new LoginFilter(this));
-        
-        /* Load customized response headers, if any */
-        filters.add(new CustomHeaderFilter(configuration.getNode("http-response-headers")));
-
-        FilterHandler fh = new FilterHandler(router, filters);
-        ContextHandler contextHandler = new ContextHandler();
-        contextHandler.setContextPath("/");
-        contextHandler.setHandler(fh);
-        HandlerList hlist = new HandlerList();
-        hlist.setHandlers(new org.eclipse.jetty.server.Handler[] { new SessionHandler(), contextHandler });
-        webServer.setHandler(hlist);
-        
-        addServlet("/up/configuration", new ClientConfigurationServlet(this));
-        addServlet("/standalone/config.js", new ConfigJSServlet(this));
-    }
-
     public boolean isCTMSupportEnabled() {
         return ctmsupport;
     }
@@ -990,41 +826,8 @@ public class DynmapCore implements DynmapCommonAPI {
     public Set<String> getIPBans() {
         return getServer().getIPBans();
     }
-    
-    public void addServlet(String path, HttpServlet servlet) {
-        new ServletHolder(servlet);
-        router.addServlet(path, servlet);
-     }
-
-    
-    public void startWebserver() {
-        try {
-            if(webServer != null) {
-                webServer.start();
-                Log.info("Web server started on address " + webhostname + ":" + webport);
-            }
-        } catch (Exception e) {
-            Log.severe("Failed to start WebServer on address " + webhostname + ":" + webport + " : " + e.getMessage());
-        }
-    }
 
     public void disableCore() {
-        if (webServer != null) {
-            try {
-                webServer.stop();
-                for(int i = 0; i < 100; i++) {	/* Limit wait to 10 seconds */
-                	if(webServer.isStopping())
-                		Thread.sleep(100);
-                }
-                if(webServer.isStopping()) {
-                	Log.warning("Graceful shutdown timed out - continuing to terminate");
-                }
-            } catch (Exception e) {
-                Log.severe("Failed to stop WebServer!", e);
-            }
-            webServer = null;
-        }
-
         if (componentManager != null) {
             int componentCount = componentManager.components.size();
             for(Component component : componentManager.components) {
