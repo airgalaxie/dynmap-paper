@@ -201,16 +201,6 @@ public abstract class MapType {
         cn.put("name", getName());  /* Get map name */
         return cn;
     }
-    public boolean isProtected() {
-        return is_protected;
-    }
-    public boolean setProtected(boolean p) {
-        if(is_protected != p) {
-            is_protected = p;
-            return true;
-        }
-        return false;
-    }
     /**
      * Is the map type read-only? (i.e. should not be updated by renderer)
      * @return true if read-only

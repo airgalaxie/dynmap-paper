@@ -1,22 +1,5 @@
 <?php
 
-ob_start();
-require 'dynmap_access.php';
-ob_end_clean();
-
-session_start();
-
-if (isset($_SESSION['userid'])) {
-    $userid = $_SESSION['userid'];
-} else {
-    $userid = '-guest-';
-}
-
-$loggedin = false;
-if (strcmp($userid, '-guest-')) {
-    $loggedin = true;
-}
-
 $path = htmlspecialchars($_REQUEST['marker']);
 if ((!isset($path)) || strstr($path, "..")) {
     header('HTTP/1.0 500 Error');

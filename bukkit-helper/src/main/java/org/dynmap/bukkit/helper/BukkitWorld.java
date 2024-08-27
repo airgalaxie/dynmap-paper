@@ -28,14 +28,12 @@ public class BukkitWorld extends DynmapWorld {
         this(w.getName(), w.getMaxHeight(), w.getSeaLevel(), w.getEnvironment(),
         	BukkitVersionHelper.helper.getWorldMinY(w));
         setWorldLoaded(w);
-        new Permission("dynmap.world." + getName(), "Dynmap access for world " + getName(), PermissionDefault.OP);
     }
     public BukkitWorld(String name, int height, int sealevel, World.Environment env, int miny) {
         super(name, height, sealevel, miny);
         world = null;
         this.env = env;
         skylight = (env == World.Environment.NORMAL);
-        new Permission("dynmap.world." + getName(), "Dynmap access for world " + getName(), PermissionDefault.OP);
         // Generate non-default environment lighting table
         switch (env) {
             case NETHER:

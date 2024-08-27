@@ -3,21 +3,7 @@
 ob_start();
 require_once 'MySQL_funcs.php';
 require 'MySQL_config.php';
-require 'MySQL_access.php';
 ob_end_clean();
-
-session_start();
-
-if (isset($_SESSION['userid'])) {
-    $userid = $_SESSION['userid'];
-} else {
-    $userid = '-guest-';
-}
-
-$loggedin = false;
-if (strcmp($userid, '-guest-')) {
-    $loggedin = true;
-}
 
 $path = htmlspecialchars($_REQUEST['marker']);
 if ((!isset($path)) || strstr($path, "..")) {

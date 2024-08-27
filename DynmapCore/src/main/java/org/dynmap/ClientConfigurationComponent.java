@@ -26,7 +26,7 @@ public class ClientConfigurationComponent extends Component {
                 s(t, "cyrillic", c.getBoolean("cyrillic-support", false));
                 s(t, "showlayercontrol", c.getString("showlayercontrol", "true"));
                 s(t, "grayplayerswhenhidden", c.getBoolean("grayplayerswhenhidden", true));
-                s(t, "login-enabled", core.isLoginSupportEnabled());
+                s(t, "login-enabled", false);
                 String sn = core.getServer().getServerName();
                 if(sn.equals("Unknown Server"))
                     sn = "Minecraft Dynamic Map";
@@ -48,7 +48,7 @@ public class ClientConfigurationComponent extends Component {
                     JSONObject wo = new JSONObject();
                     s(wo, "name", world.getName());
                     s(wo, "title", world.getTitle());
-                    s(wo, "protected", world.isProtected());
+                    s(wo, "protected", false);
                     DynmapLocation center = world.getCenterLocation();
                     s(wo, "center/x", center.x);
                     s(wo, "center/y", center.y);

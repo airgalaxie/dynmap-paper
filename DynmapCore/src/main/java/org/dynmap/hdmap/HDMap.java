@@ -151,7 +151,6 @@ public class HDMap extends MapType {
             this.mapzoomin = this.boostzoom;
         }
         this.append_to_world = configuration.getString("append_to_world", "");
-        setProtected(configuration.getBoolean("protected", false));
         setTileUpdateDelay(configuration.getInteger("tileupdatedelay", -1));
         setReadOnly(configuration.getBoolean("readonly", false));
     }
@@ -180,7 +179,7 @@ public class HDMap extends MapType {
         if(bg_night_cfg != null)
             cn.put("backgroundnight", bg_night_cfg);
         cn.put("append_to_world", append_to_world);
-        cn.put("protected", isProtected());
+        cn.put("protected", false);
         cn.put("readonly", isReadOnly());
         if(this.tileupdatedelay > 0) {
             cn.put("tileupdatedelay", this.tileupdatedelay);
@@ -281,7 +280,7 @@ public class HDMap extends MapType {
         s(o, "mapzoomin", mapzoomin);
         s(o, "boostzoom", boostzoom);
         s(o, "tilescale", tilescale);        
-        s(o, "protected", isProtected());
+        s(o, "protected", false);
         s(o, "image-format", imgformat.getFileExt());
         if(append_to_world.length() > 0)
             s(o, "append_to_world", append_to_world);

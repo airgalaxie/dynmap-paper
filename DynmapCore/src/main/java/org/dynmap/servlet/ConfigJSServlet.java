@@ -34,11 +34,11 @@ public class ConfigJSServlet extends HttpServlet {
         sb.append("',\n");
         /* Get login URL */
         sb.append("  login: '");
-        sb.append(core.configuration.getString("url/login", "up/login"));
+        sb.append("removed");
         sb.append("',\n");
         /* Get register URL */
         sb.append("  register: '");
-        sb.append(core.configuration.getString("url/register", "up/register"));
+        sb.append("removed");
         sb.append("',\n");
         /* Get tiles URL */
         sb.append("  tiles: '");

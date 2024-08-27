@@ -38,7 +38,6 @@ processResources {
         'shaders.txt',
         'extracted/web/version.js',
         'extracted/web/index.html',
-        'extracted/web/login.html',
     ]) {
         // replace version and mcversion
         expand(

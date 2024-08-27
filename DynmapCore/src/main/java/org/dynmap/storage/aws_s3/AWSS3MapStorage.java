@@ -243,10 +243,6 @@ public class AWSS3MapStorage extends MapStorage {
         	Log.severe("AWS S3 storage is not supported option with internal web server: set disable-webserver: true in configuration.txt");
             return false;
         }
-        if (core.isLoginSupportEnabled()) {
-        	Log.severe("AWS S3 storage is not supported option with loegin support enabled: set login-enabled: false in configuration.txt");
-            return false;        	
-        }
         // Get our settings
         bucketname = core.configuration.getString("storage/bucketname", "dynmap");
         access_key_id = core.configuration.getString("storage/aws_access_key_id", System.getenv("AWS_ACCESS_KEY_ID"));
@@ -631,30 +627,28 @@ public class AWSS3MapStorage extends MapStorage {
     
     @Override
     // For external web server only
-    public String getMarkersURI(boolean login_enabled) {
+    public String getMarkersURI() {
         return "tiles/";
     }
 
     @Override
     // For external web server only
-    public String getTilesURI(boolean login_enabled) {
+    public String getTilesURI() {
         return "tiles/";
     }
     
     /**
      * URI to use for loading configuration JSON files (for external web server only)
-     * @param login_enabled - selects based on login security enabled
      * @return URI
      */
-    public String getConfigurationJSONURI(boolean login_enabled) {
+    public String getConfigurationJSONURI() {
         return "standalone/dynmap_config.json?_={timestamp}";
     }
     /**
      * URI to use for loading update JSON files (for external web server only)
-     * @param login_enabled - selects based on login security enabled
      * @return URI
      */
-    public String getUpdateJSONURI(boolean login_enabled) {
+    public String getUpdateJSONURI() {
         return "standalone/dynmap_{world}.json?_={timestamp}";
     }
 

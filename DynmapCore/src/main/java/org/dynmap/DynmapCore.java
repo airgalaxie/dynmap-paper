@@ -12,11 +12,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -122,8 +119,6 @@ public class DynmapCore implements DynmapCommonAPI {
     private String def_image_format = "png";
     private HashSet<String> enabledTriggers = new HashSet<String>();
     public boolean disable_chat_to_web = false;
-    private WebAuthManager authmgr;
-    public boolean player_info_protected;
     private List<String> sortPermissionNodes;
     private int perTickLimit = 50;   // 50 ms
     private boolean dumpMissing = false;
@@ -143,8 +138,6 @@ public class DynmapCore implements DynmapCommonAPI {
     private String[] biomenames = new String[0];
     private Map<String, Integer> blockmap = null;
     private Map<String, Integer> itemmap = null;
-    
-    private boolean loginRequired;
 
     // WEBP support
     private String cwebpPath;
@@ -384,8 +377,6 @@ public class DynmapCore implements DynmapCommonAPI {
     public boolean initConfiguration(EnableCoreCallbacks cb) {
         /* Start with clean events */
         events = new Events();
-        /* Default to being unprotected - set to protected by update components */
-        player_info_protected = false;
         
         /* Load plugin version info */
         loadVersion();
@@ -488,11 +479,7 @@ public class DynmapCore implements DynmapCommonAPI {
     public boolean enableCore(EnableCoreCallbacks cb) {
         /* Update extracted files, if needed */
         updateExtractedFiles();
-        /* Initialize authorization manager */
-        if(configuration.getBoolean("login-enabled", false)) {
-            authmgr = new WebAuthManager(this);
-            defaultStorage.setLoginEnabled(this);
-        }
+
         // If storage serves web files, extract and publsh them
         if (defaultStorage.needsStaticWebFiles()) {
         	updateStaticWebToStorage();
@@ -597,13 +584,6 @@ public class DynmapCore implements DynmapCommonAPI {
         /* Now, process templates */
         Log.verboseinfo("Loading templates...");
         loadTemplates();
-
-        /* If we're persisting ids-by-ip, load it */
-        persist_ids_by_ip = configuration.getBoolean("persist-ids-by-ip", true);
-        if(persist_ids_by_ip) {
-            Log.verboseinfo("Loading userid-by-IP data...");
-            loadIDsByIP();
-        }
         
         loadDebuggers();
 
@@ -620,8 +600,7 @@ public class DynmapCore implements DynmapCommonAPI {
         playerfacemgr = new PlayerFaces(this);
         
         updateConfigHashcode(); /* Initialize/update config hashcode */
-        
-        loginRequired = configuration.getBoolean("login-required", false);
+
         // If not disabled, load and initialize the internal web server
         if (!isInternalWebServerDisabled) {
         	loadWebserver();
@@ -852,21 +831,6 @@ public class DynmapCore implements DynmapCommonAPI {
                 }
             }
         }
-        /* Add player info to IP-to-ID table */
-        InetSocketAddress addr = p.getAddress();
-        if(addr != null) {
-            String ip = addr.getAddress().getHostAddress();
-            LinkedList<String> ids = ids_by_ip.get(ip);
-            if(ids == null) {
-                ids = new LinkedList<String>();
-                ids_by_ip.put(ip, ids);
-            }
-            String pid = p.getName();
-            if(ids.indexOf(pid) != 0) {
-                ids.remove(pid);    /* Remove from list */
-                ids.addFirst(pid);  /* Put us first on list */
-            }
-        }
         /* Check sort weight permissions list */
         if ((sortPermissionNodes != null) && (sortPermissionNodes.size() > 0)) {
             int ord;
@@ -1021,19 +985,6 @@ public class DynmapCore implements DynmapCommonAPI {
         
         addServlet("/up/configuration", new ClientConfigurationServlet(this));
         addServlet("/standalone/config.js", new ConfigJSServlet(this));
-        if(authmgr != null) {
-            LoginServlet login = new LoginServlet(this);
-            addServlet("/up/login", login);
-            addServlet("/up/register", login);
-        }
-    }
-    
-    public boolean isLoginSupportEnabled() {
-        return (authmgr != null);
-    }
-
-    public boolean isLoginRequired() {
-        return loginRequired;
     }
 
     public boolean isCTMSupportEnabled() {
@@ -1066,9 +1017,6 @@ public class DynmapCore implements DynmapCommonAPI {
     }
 
     public void disableCore() {
-        if(persist_ids_by_ip)
-            saveIDsByIP();
-        
         if (webServer != null) {
             try {
                 webServer.stop();
@@ -1106,8 +1054,6 @@ public class DynmapCore implements DynmapCommonAPI {
         listenerManager.cleanup();
         
         /* Don't clean up markerAPI - other plugins may still be accessing it */
-        
-        authmgr = null;
         
         Debug.clearDebuggers();
     }
@@ -1210,11 +1156,6 @@ public class DynmapCore implements DynmapCommonAPI {
         "purgemap",
         "purgeworld",
         "quiet",
-        "ids-for-ip",
-        "ips-for-id",
-        "add-id-for-ip",
-        "del-id-for-ip",
-        "webregister",
         "dumpmemory",
         "url",
         "help"}));
@@ -1276,12 +1217,6 @@ public class DynmapCore implements DynmapCommonAPI {
         new CommandInfo("dynmap", "pause", "Show render pause state."),
         new CommandInfo("dynmap", "pause", "<all|none|full|update>", "Set render pause state."),
         new CommandInfo("dynmap", "quiet", "Stop output from active jobs."),
-        new CommandInfo("dynmap", "ids-for-ip", "<ipaddress>", "Show player IDs that have logged in from address <ipaddress>."),
-        new CommandInfo("dynmap", "ips-for-id", "<player>", "Show IP addresses that have been used for player <player>."),
-        new CommandInfo("dynmap", "add-id-for-ip", "<player> <ipaddress>", "Associate player <player> with IP address <ipaddress>."),
-        new CommandInfo("dynmap", "del-id-for-ip", "<player> <ipaddress>", "Disassociate player <player> from IP address <ipaddress>."),
-        new CommandInfo("dynmap", "webregister", "Start registration process for creating web login account"),
-        new CommandInfo("dynmap", "webregister", "<player>", "Start registration process for creating web login account for player <player>"),
         new CommandInfo("dynmap", "version", "Return version information"),
         new CommandInfo("dynmap", "dumpmemory", "Return mempry use information"),
         new CommandInfo("dynmap", "url", "Return confgured URL for Dynmap web"),
@@ -1849,65 +1784,6 @@ public class DynmapCore implements DynmapCommonAPI {
                     msg += args[i] + " ";
                 }
                 this.sendBroadcastToWeb("dynmap", msg);
-            } else if(c.equals("ids-for-ip") && checkPlayerPermission(sender, "ids-for-ip")) {
-                if(args.length > 1) {
-                    List<String> ids = getIDsForIP(args[1]);
-                    sender.sendMessage("IDs logged in from address " + args[1] + " (most recent to least):");
-                    if(ids != null) {
-                        for(String id : ids)
-                            sender.sendMessage("  " + id);
-                    }
-                }
-                else {
-                    sender.sendMessage("IP address required as parameter");
-                }
-            } else if(c.equals("ips-for-id") && checkPlayerPermission(sender, "ips-for-id")) {
-                if(args.length > 1) {
-                    sender.sendMessage("IP addresses logged for player " + args[1] + ":");
-                    for(String ip: ids_by_ip.keySet()) {
-                        LinkedList<String> ids = ids_by_ip.get(ip);
-                        if((ids != null) && ids.contains(args[1])) {
-                            sender.sendMessage("  " + ip);
-                        }
-                    }
-                }
-                else {
-                    sender.sendMessage("Player ID required as parameter");
-                }
-            } else if((c.equals("add-id-for-ip") && checkPlayerPermission(sender, "add-id-for-ip")) ||
-                    (c.equals("del-id-for-ip") && checkPlayerPermission(sender, "del-id-for-ip"))) {
-                if(args.length > 2) {
-                    String ipaddr = "";
-                    try {
-                        InetAddress ip = InetAddress.getByName(args[2]);
-                        ipaddr = ip.getHostAddress();
-                    } catch (UnknownHostException uhx) {
-                        sender.sendMessage("Invalid address : " + args[2]);
-                        return true;
-                    }
-                    LinkedList<String> ids = ids_by_ip.get(ipaddr);
-                    if(ids == null) {
-                        ids = new LinkedList<String>();
-                        ids_by_ip.put(ipaddr, ids);
-                    }
-                    ids.remove(args[1]); /* Remove existing, if any */
-                    if(c.equals("add-id-for-ip")) {
-                        ids.addFirst(args[1]);  /* And add us first */
-                        sender.sendMessage("Added player ID '" + args[1] + "' to address '" + ipaddr + "'");
-                    }
-                    else {
-                        sender.sendMessage("Removed player ID '" + args[1] + "' from address '" + ipaddr + "'");
-                    }
-                    saveIDsByIP();
-                }
-                else {
-                    sender.sendMessage("Needs player ID and IP address");
-                }
-            } else if(c.equals("webregister") && checkPlayerPermission(sender, "webregister")) {
-                if(authmgr != null)
-                    return authmgr.processWebRegisterCommand(this, sender, player, args);
-                else
-                    sender.sendMessage("Login support is not enabled");
             }
             else if (c.equals("quiet") && checkPlayerPermission(sender, "quiet")) {
                 mapManager.setJobsQuiet(sender);
@@ -2070,8 +1946,7 @@ public class DynmapCore implements DynmapCommonAPI {
             }
         } else if((subcommand.equals("ips-for-id") && checkPlayerPermission(sender, "ips-for-id"))
                 || (subcommand.equals("add-id-for-ip") && checkPlayerPermission(sender, "add-id-for-ip"))
-                || (subcommand.equals("del-id-for-ip") && checkPlayerPermission(sender, "del-id-for-ip"))
-                || (subcommand.equals("webregister") && checkPlayerPermission(sender, "webregister.other"))) {
+                || (subcommand.equals("del-id-for-ip") && checkPlayerPermission(sender, "del-id-for-ip"))) {
             if(args.length == 2) {
                 final String arg = args[1];
                 return Arrays.stream(playerList.getOnlinePlayers())
@@ -2363,61 +2238,6 @@ public class DynmapCore implements DynmapCommonAPI {
     public boolean getPauseUpdateRenders() {
         return mapManager.getPauseUpdateRenders();
     }
-    /**
-     * Get list of IDs seen on give IP (most recent to least recent)
-     * @param addr - IP address
-     * @return list of IDs
-     */
-    public List<String> getIDsForIP(InetAddress addr) {
-        return getIDsForIP(addr.getHostAddress());
-    }
-    /**
-     * Get list of IDs seen on give IP (most recent to least recent)
-     * @param ip - IP to check
-     * @return list of IDs
-     */
-    public List<String> getIDsForIP(String ip) {
-        LinkedList<String> ids = ids_by_ip.get(ip);
-        if(ids != null)
-            return new ArrayList<String>(ids);
-        return null;
-    }
-
-    private void loadIDsByIP() {
-        File f = new File(getDataFolder(), "ids-by-ip.txt");
-        if(f.exists() == false)
-            return;
-        ConfigurationNode fc = new ConfigurationNode(new File(getDataFolder(), "ids-by-ip.txt"));
-        try {
-            fc.load();
-            ids_by_ip.clear();
-            for(String k : fc.keySet()) {
-                List<String> ids = fc.getList(k);
-                if(ids != null) {
-                    k = k.replace("_", ".");
-                    ids_by_ip.put(k, new LinkedList<String>(ids));
-                }
-            }
-        } catch (Exception iox) {
-            Log.severe("Error loading " + f.getPath() + " - " + iox.getMessage());
-        }
-    }
-    private void saveIDsByIP() {
-        File f = new File(getDataFolder(), "ids-by-ip.txt");
-        ConfigurationNode fc = new ConfigurationNode();
-        for(String k : ids_by_ip.keySet()) {
-            List<String> v = ids_by_ip.get(k);
-            if(v != null) {
-                k = k.replace(".", "_");
-                fc.put(k, v);
-            }
-        }
-        try {
-            fc.save(f);
-        } catch (Exception x) {
-            Log.severe("Error saving " + f.getPath() + " - " + x.getMessage());
-        }
-    }
 
     public void setPlayerVisiblity(String player, boolean is_visible) {
         playerList.setVisible(player, is_visible);
@@ -2671,47 +2491,11 @@ public class DynmapCore implements DynmapCommonAPI {
         disable_chat_to_web = disable;
         return prev;
     }
-
-    public boolean getLoginRequired() {
-        return loginRequired;
-    }
-    
-    public boolean registerLogin(String uid, String pwd, String passcode) {
-        if(authmgr != null)
-            return authmgr.registerLogin(uid, pwd, passcode);
-        return false;
-    }
-    
-    public boolean checkLogin(String uid, String pwd) {
-        if(authmgr != null)
-            return authmgr.checkLogin(uid, pwd);
-        return false;
-    }
-    
-    String getLoginPHP(boolean wrap) {
-        if(authmgr != null)
-            return authmgr.getLoginPHP(wrap);
-        else
-            return null;
-    }
     
     String getAccessPHP(boolean wrap) {
-        if(authmgr != null)
-            return authmgr.getAccessPHP(wrap);
-        else
-            return WebAuthManager.getDisabledAccessPHP(this, wrap);
+        return WebAuthManager.getDisabledAccessPHP(this, wrap);
     }
-    
-    boolean pendingRegisters() {
-        if(authmgr != null)
-            return authmgr.pendingRegisters();
-        return false;
-    }
-    boolean processCompletedRegister(String uid, String pc, String hash) {
-        if(authmgr != null)
-            return authmgr.processCompletedRegister(uid, pc, hash);
-        return false;
-    }
+
     public boolean testIfPlayerVisibleToPlayer(String player, String player_to_see) {
         player = player.toLowerCase();
         player_to_see = player_to_see.toLowerCase();
@@ -2737,9 +2521,9 @@ public class DynmapCore implements DynmapCommonAPI {
      * @return true if protected, false if visible to guests and all players
      */
     public boolean testIfPlayerInfoProtected() {
-        return player_info_protected;
+        return false; // Removed
     }
-    
+
     public int getMaxPlayers() {
         return server.getMaxPlayers();
     }

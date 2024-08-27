@@ -67,8 +67,6 @@ components:
     hideifsneaking: false
     # optional, if true, players that are in spectator mode will be hidden
     hideifspectator: false
-    # If true, player positions/status is protected (login with ID with dynmap.playermarkers.seeall permission required for info other than self)
-    protected-player-info: false
     # If true, hide players with invisibility potion effects active
     hide-if-invisiblity-potion: true
     # If true, player names are not shown on map, chat, list
@@ -319,11 +317,6 @@ disable-webserver: false
 # Enable/disable having the web server allow symbolic links (true=compatible with existing code, false=more secure (default))
 allow-symlinks: true
 
-# Enable login support
-login-enabled: false
-# Require login to access website (requires login-enabled: true)
-login-required: false
-
 # Period between tile renders for fullrender, in seconds (non-zero to pace fullrenders, lessen CPU load)
 timesliceinterval: 0.0
 
@@ -396,9 +389,6 @@ defaultmap: flat
 #followzoom: 3
 #followmap: surface
 
-# If true, make persistent record of IP addresses used by player logins, to support web IP to player matching
-persist-ids-by-ip: true
-
 # If true, map text to cyrillic
 cyrillic-support: false
 
@@ -418,10 +408,6 @@ url:
     #configuration: "up/configuration"
     # update URL
     #update: "up/world/{world}/{timestamp}"
-    # login URL
-    #login: "up/login"
-    # register URL
-    #register: "up/register"
     # tiles base URL
     #tiles: "tiles/"
     # markers base URL

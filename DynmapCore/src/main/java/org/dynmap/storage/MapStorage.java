@@ -1,6 +1,5 @@
 package org.dynmap.storage;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -197,41 +196,36 @@ public abstract class MapStorage {
     
     /**
      * URI to use for loading marker data (for external web server)
-     * 
-     * @param login_enabled - selects based on login security enabled
+     *
      * @return URI
      */
-    public abstract String getMarkersURI(boolean login_enabled);
+    public abstract String getMarkersURI();
     /**
      * URI to use for loading tiles (for external web server only)
-     * 
-     * @param login_enabled - selects based on login security enabled
+     *
      * @return URI
      */
-    public abstract String getTilesURI(boolean login_enabled);
+    public abstract String getTilesURI();
     /**
      * Test if standalone JSON files should be PHP wrapped
-     * @param login_enabled - selects based on login security enabled
      * @return whether to wrap JSON
      */
-    public boolean wrapStandaloneJSON(boolean login_enabled) {
-        return login_enabled;
+    public boolean wrapStandaloneJSON() {
+        return false;
     }
     /**
      * URI to use for loading configuration JSON files (for external web server only)
-     * @param login_enabled - selects based on login security enabled
      * @return URI
      */
-    public String getConfigurationJSONURI(boolean login_enabled) {
-        return login_enabled?"standalone/configuration.php":"standalone/dynmap_config.json?_={timestamp}";
+    public String getConfigurationJSONURI() {
+        return "standalone/dynmap_config.json?_={timestamp}";
     }
     /**
      * URI to use for loading update JSON files (for external web server only)
-     * @param login_enabled - selects based on login security enabled
      * @return URI
      */
-    public String getUpdateJSONURI(boolean login_enabled) {
-        return login_enabled?"standalone/update.php?world={world}&ts={timestamp}":"standalone/dynmap_{world}.json?_={timestamp}";
+    public String getUpdateJSONURI() {
+        return "standalone/dynmap_{world}.json?_={timestamp}";
     }
     /**
      * Add settings to dynmap_access.php needed for external server scripts
@@ -446,18 +440,7 @@ public abstract class MapStorage {
     public boolean wrapStandalonePHP() {
         return true;
     }
-    // For external web server only
-    public String getStandaloneLoginURI() {
-        return "standalone/login.php";
-    }
-    // For external web server only
-    public String getStandaloneRegisterURI() {
-        return "standalone/register.php";
-    }
-    public void setLoginEnabled(DynmapCore core) {
-        
-    }
-    
+
     // Test if storage needs static web files
     public boolean needsStaticWebFiles() {
     	return false;

@@ -268,7 +268,6 @@ public class DynmapMapCommands {
             }
             sb.append(", extrazoomout=").append(w.getExtraZoomOutLevels()).append(", sendhealth=").append(w.sendhealth);
             sb.append(", sendposition=").append(w.sendposition);
-            sb.append(", protected=").append(w.is_protected);
             sb.append(", showborder=").append(w.showborder);
             if(w.tileupdatedelay > 0) {
                 sb.append(", tileupdatedelay=").append(w.tileupdatedelay);
@@ -697,7 +696,7 @@ public class DynmapMapCommands {
                 sb.append(", lighting=").append(hdmt.getLighting().getName()).append(", mapzoomin=").append(hdmt.getMapZoomIn()).append(", mapzoomout=").append(hdmt.getMapZoomOutLevels());
                 sb.append(", img-format=").append(hdmt.getImageFormatSetting()).append(", icon=").append(hdmt.getIcon());
                 sb.append(", append-to-world=").append(hdmt.getAppendToWorld()).append(", boostzoom=").append(hdmt.getBoostZoom());
-                sb.append(", protected=").append(hdmt.isProtected()).append(", tilescale=").append(hdmt.getTileScale()).append(", readonly=").append(hdmt.isReadOnly());
+                sb.append(", tilescale=").append(hdmt.getTileScale()).append(", readonly=").append(hdmt.isReadOnly());
                 if(hdmt.tileupdatedelay > 0) {
                     sb.append(", tileupdatedelay=").append(hdmt.tileupdatedelay);
                 }
@@ -993,9 +992,6 @@ public class DynmapMapCommands {
             }
             else if(tok[0].equalsIgnoreCase("append-to-world")) {
                 did_update |= mt.setAppendToWorld(tok[1]);
-            }
-            else if(tok[0].equalsIgnoreCase("protected")) {
-                did_update |= mt.setProtected(Boolean.parseBoolean(tok[1]));
             }
             else if(tok[0].equalsIgnoreCase("readonly")) {
                 did_update |= mt.setReadOnly(Boolean.parseBoolean(tok[1]));

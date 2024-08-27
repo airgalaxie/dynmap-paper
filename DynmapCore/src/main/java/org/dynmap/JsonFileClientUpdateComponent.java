@@ -1,9 +1,7 @@
 package org.dynmap;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,7 +10,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 import org.dynmap.storage.MapStorage;
-import org.dynmap.utils.BufferInputStream;
 import org.dynmap.utils.BufferOutputStream;
 import org.dynmap.web.Json;
 import org.json.simple.JSONObject;
@@ -126,8 +123,6 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
                     writeConfiguration();
                 }
                 writeUpdates();
-                if(core.isLoginSupportEnabled())
-                    handleRegister();
                 lastTimestamp = currentTimestamp;
                 core.getServer().scheduleServerTask(this, jsonInterval/50);
             }}, jsonInterval/50);
@@ -138,7 +133,7 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
                 s(t, "jsonfile", true);
                 s(t, "allowwebchat", false);
                 s(t, "webchat-requires-login", false);
-                s(t, "loginrequired", core.isLoginRequired());
+                s(t, "loginrequired", false);
                 s(t, "webchat-interval", 0);
                 s(t, "chatlengthlimit", 0);
             }
@@ -148,7 +143,6 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
             public void triggered(Object t) {
                 writeConfiguration();
                 writeUpdates(); /* Make sure we stay in sync */
-                writeLogins();
                 writeAccess();
             }
         });
@@ -157,7 +151,6 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
             public void triggered(Object t) {
                 writeConfiguration();
                 writeUpdates(); /* Make sure we stay in sync */
-                writeLogins();
                 writeAccess();
             }
         });
@@ -166,13 +159,6 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
             public void triggered(DynmapWorld t) {
                 writeConfiguration();
                 writeUpdates(); /* Make sure we stay in sync */
-                writeAccess();
-            }
-        });
-        core.events.addListener("loginupdated", new Event.Listener<Object>() {
-            @Override
-            public void triggered(Object t) {
-                writeLogins();
                 writeAccess();
             }
         });
@@ -185,13 +171,9 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
     }
         
     private void generateConfigJS(DynmapCore core) {
-        /* Test if login support is enabled */
-        boolean login_enabled = core.isLoginSupportEnabled();
-
         // configuration: 'standalone/dynmap_config.json?_={timestamp}',
         // update: 'standalone/dynmap_{world}.json?_={timestamp}',
         // sendmessage: 'standalone/sendmessage.php',
-        // login: 'standalone/login.php',
         // register: 'standalone/register.php',
         // tiles : 'tiles/',
         // markers : 'tiles/'
@@ -199,7 +181,6 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
         // configuration: 'standalone/configuration.php',
         // update: 'standalone/update.php?world={world}&ts={timestamp}',
         // sendmessage: 'standalone/sendmessage.php',
-        // login: 'standalone/login.php',
         // register: 'standalone/register.php',
         // tiles : 'standalone/tiles.php?tile=',
         // markers : 'standalone/markers.php?marker='
@@ -211,11 +192,11 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
         sb.append(" url : {\n");
         /* Get configuration URL */
         sb.append("  configuration: '");
-        sb.append(core.configuration.getString("url/configuration", store.getConfigurationJSONURI(login_enabled)));
+        sb.append(core.configuration.getString("url/configuration", store.getConfigurationJSONURI()));
         sb.append("',\n");
         /* Get update URL */
         sb.append("  update: '");
-        sb.append(core.configuration.getString("url/update", store.getUpdateJSONURI(login_enabled)));
+        sb.append(core.configuration.getString("url/update", store.getUpdateJSONURI()));
         sb.append("',\n");
         /* Get sendmessage URL */
         sb.append("  sendmessage: '");
@@ -223,19 +204,18 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
         sb.append("',\n");
         /* Get login URL */
         sb.append("  login: '");
-        sb.append(core.configuration.getString("url/login", store.getStandaloneLoginURI()));
+        sb.append("removed");
         sb.append("',\n");
         /* Get register URL */
         sb.append("  register: '");
-        sb.append(core.configuration.getString("url/register", store.getStandaloneRegisterURI()));
-        sb.append("',\n");
+        sb.append("removed");
         /* Get tiles URL */
         sb.append("  tiles: '");
-        sb.append(core.configuration.getString("url/tiles", store.getTilesURI(login_enabled)));
+        sb.append(core.configuration.getString("url/tiles", store.getTilesURI()));
         sb.append("',\n");
         /* Get markers URL */
         sb.append("  markers: '");
-        sb.append(core.configuration.getString("url/markers", store.getMarkersURI(login_enabled)));
+        sb.append(core.configuration.getString("url/markers", store.getMarkersURI()));
         sb.append("'\n }\n};\n");
         
         byte[] outputBytes = sb.toString().getBytes(cs_utf8);
@@ -274,16 +254,8 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
         
         byte[] content = clientConfiguration.toJSONString().getBytes(cs_utf8);
 
-        String outputFile;
-        boolean dowrap = storage.wrapStandaloneJSON(core.isLoginSupportEnabled());
-        if(dowrap) {
-            outputFile = "dynmap_config.php";
-        }
-        else {
-            outputFile = "dynmap_config.json";
-        }
-        
-        enqueueFileWrite(outputFile, content, dowrap);
+        String outputFile = "dynmap_config.json";
+        enqueueFileWrite(outputFile, content, false);
     }
     
     @SuppressWarnings("unchecked")
@@ -300,7 +272,7 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
             core.events.trigger("buildclientupdate", clientUpdate);
 
             String outputFile;
-            boolean dowrap = storage.wrapStandaloneJSON(core.isLoginSupportEnabled());
+            boolean dowrap = storage.wrapStandaloneJSON();
             if(dowrap) {
                 outputFile = "updates_" + dynmapWorld.getName() + ".php";
             }
@@ -313,29 +285,6 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
 
                 enqueueFileWrite(outputFile, content, dowrap);
             });
-        }
-    }
-    
-    private byte[] loginhash = new byte[16];
-    
-    protected void writeLogins() {
-        String loginFile = "dynmap_login.php";
-
-        if(core.isLoginSupportEnabled()) {
-            String s = core.getLoginPHP(storage.wrapStandalonePHP());
-            if(s != null) {
-                byte[] bytes = s.getBytes(cs_utf8);
-                md.reset();
-                byte[] hash = md.digest(bytes);
-                if(Arrays.equals(hash, loginhash)) {
-                    return;
-                }
-                enqueueFileWrite(loginFile, bytes, false);
-                loginhash = hash;
-            }
-        }
-        else {
-            enqueueFileWrite(loginFile, null, false);
         }
     }
 
@@ -357,42 +306,6 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
         }
     }
 
-    protected void handleRegister() {
-        if(core.pendingRegisters() == false)
-            return;
-        BufferInputStream bis = storage.getStandaloneFile("dynmap_reg.php");
-        if (bis != null) {
-            BufferedReader br = null;
-            ArrayList<String> lines = new ArrayList<String>();
-            try {
-                br = new BufferedReader(new InputStreamReader(bis));
-                String line;
-                while ((line = br.readLine()) != null)   {
-                    if(line.startsWith("<?") || line.startsWith("*/")) {
-                        continue;
-                    }
-                    lines.add(line);
-                }
-            } catch (IOException iox) {
-                Log.severe("Exception while reading dynmap_reg.php", iox);
-            } finally {
-                if (br != null) {
-                    try {
-                        br.close();
-                    } catch (IOException x) {
-                    }
-                    br = null;
-                }
-            }
-            for(int i = 0; i < lines.size(); i++) {
-                String[] vals = lines.get(i).split("=");
-                if(vals.length == 3) {
-                    core.processCompletedRegister(vals[0].trim(), vals[1].trim(), vals[2].trim());
-                }
-            }
-        }
-    }
-    
     @Override
     public void dispose() {
         super.dispose();

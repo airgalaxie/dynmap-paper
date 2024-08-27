@@ -26,11 +26,7 @@ function DynMap(options) {
 		return;
 	me.options = options;
 	$.getJSON(me.formatUrl("configuration", { timestamp: me.lasttimestamp }), function(configuration) {
-		if(configuration.error == 'login-required') {
-			me.saveURL();
-			window.location = 'login.html';
-		}
-		else if(configuration.error) {
+		if(configuration.error) {
 			alert(configuration.error);
 		}
 		else {
@@ -335,8 +331,6 @@ DynMap.prototype = {
 			return;
 		}
 
-		me.initLogin();
-
 		me.selectMap(me.defaultworld.defaultmap);
 
 		var componentstoload = 0;
@@ -626,13 +620,7 @@ DynMap.prototype = {
 				me.alertbox.hide();
 
 				if(update.error) {
-					if(update.error == 'login-required') {
-						me.saveURL();
-						window.location = 'login.html';
-					}
-					else {
-						alert(update.error);
-					}
+					alert(update.error);
 					return;
 				}
 				if (me.lasttimestamp == update.timestamp) { // Same as last update?
@@ -961,54 +949,6 @@ DynMap.prototype = {
 			url = url + "?worldname=" + me.world.name + "&mapname=" + me.maptype.options.name + "&zoom=" + me.map.getZoom() + "&x=" +
 				Math.round(center.x) + "&y=" + Math.round(center.y) + "&z=" + Math.round(center.z);
 		return url;
-	},
-	initLogin: function() {
-		var me = this;
-		if(!me.options['login-enabled'])
-			return;
-
-		var login = L.Control.extend({
-			onAdd: function(map) {
-				this._container = L.DomUtil.create('div', 'logincontainer');
-				this._map = map;
-				this._update();
-				return this._container;
-			},
-			getPosition: function() {
-				return 'bottomright';
-			},
-			getContainer: function() {
-				return this._container;
-			},
-			_update: function() {
-				if (!this._map) return;
-				var c = this._container;
-				var cls = 'loginbutton';
-				if(me.options.sidebaropened != 'false') {
-					cls = 'loginbutton pinnedloginbutton';
-				}
-				if (me.options.loggedin) {
-					c = $('<button/>').addClass(cls).click(function(event) {
-						$.ajax({
-							type: 'POST',
-		        				contentType: "application/json; charset=utf-8",
-								url: config.url.login,
-								success: function(response) {
-									window.location = "index.html";
-								}
-						});
-					}).text('Logout').appendTo(c)[0];
-				}
-				else {
-					c = $('<button/>').addClass(cls).click(function(event) {
-						me.saveURL();
-						window.location = "login.html";
-					}).text('Login').appendTo(c)[0];
-				}
-			}
-		});
-		var l = new login();
-		me.map.addControl(l);
 	},
 	saveURL : function() {
 		if(window.location.href.indexOf('?') > 0) {

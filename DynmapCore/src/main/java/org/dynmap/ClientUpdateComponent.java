@@ -14,7 +14,6 @@ public class ClientUpdateComponent extends Component {
     private boolean hideifsneaking;
     private boolean hideifspectator;
     private boolean hideifinvisiblepotion;
-    private boolean is_protected;
     public static boolean usePlayerColors;
     public static boolean hideNames;
     
@@ -27,10 +26,7 @@ public class ClientUpdateComponent extends Component {
         hideifsneaking = configuration.getBoolean("hideifsneaking", false);
         hideifspectator = configuration.getBoolean("hideifspectator", false);
         hideifinvisiblepotion = configuration.getBoolean("hide-if-invisiblity-potion", true);
-        is_protected = configuration.getBoolean("protected-player-info", false);
         usePlayerColors = configuration.getBoolean("use-name-colors", false);
-        if(is_protected)
-            core.player_info_protected = true;
         
         core.events.addListener("buildclientupdate", new Event.Listener<ClientUpdateEvent>() {
             @Override
@@ -45,17 +41,6 @@ public class ClientUpdateComponent extends Component {
         JSONObject u = e.update;
         long since = e.timestamp;
         String worldName = world.getName();
-        boolean see_all = true;
-        
-        if(is_protected && (!e.include_all_users)) {
-            if(e.user != null)
-                see_all = core.getServer().checkPlayerPermission(e.user, "playermarkers.seeall");
-            else
-                see_all = false;
-        }
-        if((e.include_all_users) && is_protected) { /* If JSON request AND protected, leave mark for script */
-            s(u, "protected", true);
-        }
         
         s(u, "confighash", core.getConfigHashcode());
 
@@ -104,14 +89,6 @@ public class ClientUpdateComponent extends Component {
             }
             if((!hide) && hideifspectator && p.isSpectator()) {
                 hide = true;
-            }
-            if((!hide) && is_protected && (!see_all)) {
-                if(e.user != null) {
-                    hide = !core.testIfPlayerVisibleToPlayer(e.user, p.getName());
-                }
-                else {
-                    hide = true;
-                }
             }
             if((!hide) && hideifinvisiblepotion && p.isInvisible()) {
                 hide = true;

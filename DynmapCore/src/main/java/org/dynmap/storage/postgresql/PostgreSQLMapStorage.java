@@ -352,7 +352,7 @@ public class PostgreSQLMapStorage extends MapStorage {
             fw.write(WebAuthManager.esc(prefix));
             fw.write("\';\n");
             fw.write("$loginenabled = ");
-            fw.write(core.isLoginSupportEnabled()?"true;\n":"false;\n");
+            fw.write("false;\n");
             fw.write("?>\n");
         } catch (IOException iox) {
             Log.severe("Error writing PostgreSQL_config.php", iox);
@@ -1061,25 +1061,25 @@ public class PostgreSQLMapStorage extends MapStorage {
 
     @Override
     // External web server only
-    public String getMarkersURI(boolean login_enabled) {
+    public String getMarkersURI() {
         return "standalone/PostgreSQL_markers.php?marker=";
    }
 
     @Override
     // External web server only
-    public String getTilesURI(boolean login_enabled) {
+    public String getTilesURI() {
         return "standalone/PostgreSQL_tiles.php?tile=";
     }
 
     @Override
     // External web server only
-    public String getConfigurationJSONURI(boolean login_enabled) {
+    public String getConfigurationJSONURI() {
         return "standalone/PostgreSQL_configuration.php"; // ?serverid={serverid}";
     }
     
     @Override
     // External web server only
-    public String getUpdateJSONURI(boolean login_enabled) {
+    public String getUpdateJSONURI() {
         return "standalone/PostgreSQL_update.php?world={world}&ts={timestamp}"; // &serverid={serverid}";
     }
 
@@ -1163,27 +1163,5 @@ public class PostgreSQLMapStorage extends MapStorage {
             releaseConnection(c, err);
         }
         return !err;
-    }
-    @Override
-    public boolean wrapStandaloneJSON(boolean login_enabled) {
-        return false;
-    }
-    @Override
-    public boolean wrapStandalonePHP() {
-        return false;
-    }
-    @Override
-    // External web server only
-    public String getStandaloneLoginURI() {
-        return "standalone/PostgreSQL_login.php";
-    }
-    @Override
-    // External web server only
-    public String getStandaloneRegisterURI() {
-        return "standalone/PostgreSQL_register.php";
-    }
-    @Override
-    public void setLoginEnabled(DynmapCore core) {
-        writeConfigPHP(core);
     }
 }

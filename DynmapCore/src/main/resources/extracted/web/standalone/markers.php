@@ -1,28 +1,11 @@
 <?php
 
-ob_start();
-require 'dynmap_access.php';
-ob_end_clean();
-
 if (!isset($markerspath)) {
     $markerspath = "../tiles/";
 }
 
 //Use this to force specific tiles path, versus using passed value
 //$markerspath = 'my-tiles-path';
-
-session_start();
-
-if (isset($_SESSION['userid'])) {
-    $userid = $_SESSION['userid'];
-} else {
-    $userid = '-guest-';
-}
-
-$loggedin = false;
-if (strcmp($userid, '-guest-')) {
-    $loggedin = true;
-}
 
 $path = htmlspecialchars($_REQUEST['marker']);
 if ((!isset($path)) || strstr($path, "..")) {
@@ -42,8 +25,6 @@ if (($parts[0] != "faces") && ($parts[0] != "_markers_")) {
     echo "Bad marker: " . $path;
     exit();
 }
-
-$uid = '[' . strtolower($userid) . ']';
 
 if (!is_readable($fname)) {
     if (strstr($path, ".jpg") || strstr($path, ".png")) {

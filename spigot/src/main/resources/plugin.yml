@@ -37,11 +37,6 @@ commands:
            /<command> pause - Show render pause state
            /<command> pause <all|none|full|update> - Set render pause state
            /<command> quiet - Stop progress messages from active jobs
-           /<command> ids-for-ip <ipaddress> - Show player IDs that have logged in from given IP address
-           /<command> ips-for-id <playerid> - Show IP addresses that have been used for the given player ID
-           /<command> add-id-for-ip <playerid> <ipaddress> - Add player ID to given IP address
-           /<command> del-id-for-ip <playerid> <ipaddress> - Delete player ID from given IP address
-           /<command> webregister - Start registration process for creating web login account
            /<command> url - Returns public URL for dynmap, if published
                        
   dmarker:
@@ -150,10 +145,6 @@ permissions:
       dynmap.purgemap: true
       dynmap.purgeworld: true
       dynmap.quiet: true
-      dynmap.ids-for-ip: true
-      dynmap.ips-for-id: true
-      dynmap.webregister: true
-      dynmap.webregister.other: true
       dynmap.dumpmemory: true
       dynmap.url: true
       dynmap.pause: true
@@ -249,18 +240,7 @@ permissions:
   dynmap.quiet:
     description: Allows /dynmap quiet
     default: true
-  dynmap.ids-for-ip:
-    description: Allows /dynmap ids-for-ip
-    default: op
-  dynmap.ips-for-id:
-    description: Allows /dynmap ips-for-id
-    default: op
-  dynmap.webregister:
-    description: Allows /dynmap webregister
-    default: true
-  dynmap.webregister.other:
-    description: Allows /dynmap webregister userid
-    default: op
+
   dynmap.dumpmemory:
     description: Allows /dynmap dumpmemory
     default: op

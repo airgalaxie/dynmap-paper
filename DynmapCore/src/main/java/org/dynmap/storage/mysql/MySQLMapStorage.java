@@ -367,7 +367,7 @@ public class MySQLMapStorage extends MapStorage {
             fw.write(WebAuthManager.esc(prefix));
             fw.write("\';\n");
             fw.write("$loginenabled = ");
-            fw.write(core.isLoginSupportEnabled()?"true;\n":"false;\n");
+            fw.write("false;\n");
             fw.write("?>\n");
         } catch (IOException iox) {
             Log.severe("Error writing MySQL_config.php", iox);
@@ -1131,25 +1131,25 @@ public class MySQLMapStorage extends MapStorage {
 
     @Override
     // External web server only
-    public String getMarkersURI(boolean login_enabled) {
+    public String getMarkersURI() {
         return "standalone/MySQL_markers.php?marker=";
    }
 
     @Override
     // External web server only
-    public String getTilesURI(boolean login_enabled) {
+    public String getTilesURI() {
         return "standalone/MySQL_tiles.php?tile=";
     }
 
     @Override
     // External web server only
-    public String getConfigurationJSONURI(boolean login_enabled) {
+    public String getConfigurationJSONURI() {
         return "standalone/MySQL_configuration.php"; // ?serverid={serverid}";
     }
     
     @Override
     // External web server only
-    public String getUpdateJSONURI(boolean login_enabled) {
+    public String getUpdateJSONURI() {
         return "standalone/MySQL_update.php?world={world}&ts={timestamp}"; // &serverid={serverid}";
     }
 
@@ -1234,27 +1234,10 @@ public class MySQLMapStorage extends MapStorage {
         }
         return !err;
     }
-    @Override
-    public boolean wrapStandaloneJSON(boolean login_enabled) {
-        return false;
-    }
+
     @Override
     public boolean wrapStandalonePHP() {
         return false;
-    }
-    @Override
-    // External web server only
-    public String getStandaloneLoginURI() {
-        return "standalone/MySQL_login.php";
-    }
-    @Override
-    // External web server only
-    public String getStandaloneRegisterURI() {
-        return "standalone/MySQL_register.php";
-    }
-    @Override
-    public void setLoginEnabled(DynmapCore core) {
-        writeConfigPHP(core);
     }
 
 }

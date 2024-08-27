@@ -1353,7 +1353,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     @Override
     public void assertPlayerInvisibility(Player player, boolean is_invisible,
             Plugin plugin) {
-        core.assertPlayerInvisibility(player.getName(), is_invisible, plugin.getDescription().getName());
+        core.assertPlayerInvisibility(player.getName(), is_invisible, plugin.getName());
     }
 
     @Override
@@ -1365,7 +1365,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     @Override
     public void assertPlayerVisibility(Player player, boolean is_visible,
             Plugin plugin) {
-        core.assertPlayerVisibility(player.getName(), is_visible, plugin.getDescription().getName());
+        core.assertPlayerVisibility(player.getName(), is_visible, plugin.getName());
     }
     @Override
     public boolean setDisableChatToWebProcessing(boolean disable) {
@@ -1377,7 +1377,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     }
     @Override
     public boolean testIfPlayerInfoProtected() {
-        return core.testIfPlayerInfoProtected();
+        return false; //Removed
     }
 
     @Override

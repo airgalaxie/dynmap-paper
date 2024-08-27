@@ -3,21 +3,7 @@
 ob_start();
 require_once 'PostgreSQL_funcs.php';
 require 'PostgreSQL_config.php';
-require 'PostgreSQL_access.php';
 ob_end_clean();
-
-session_start();
-
-if (isset($_SESSION['userid'])) {
-    $userid = $_SESSION['userid'];
-} else {
-    $userid = '-guest-';
-}
-
-$loggedin = false;
-if (strcmp($userid, '-guest-')) {
-    $loggedin = true;
-}
 
 $path = htmlspecialchars($_REQUEST['tile']);
 if ((!isset($path)) || strstr($path, "..")) {
@@ -35,18 +21,7 @@ if (count($parts) != 4) {
     exit;
 }
 
-$uid = '[' . strtolower($userid) . ']';
-
 $world = $parts[0];
-
-if (isset($worldaccess[$world])) {
-    $ss = stristr($worldaccess[$world], $uid);
-    if ($ss === false) {
-        header('Location: ../images/blank.png');
-        cleanupDb();
-        exit;
-    }
-}
 $variant = 'STANDARD';
 
 $prefix = $parts[1];
@@ -56,14 +31,6 @@ if (($plen > 4) && (substr($prefix, $plen - 4) === "_day")) {
     $variant = 'DAY';
 }
 $mapid = $world . "." . $prefix;
-if (isset($mapaccess[$mapid])) {
-    $ss = stristr($mapaccess[$mapid], $uid);
-    if ($ss === false) {
-        header('Location: ../images/blank.png');
-        cleanupDb();
-        exit;
-    }
-}
 
 $fparts = explode("_", $parts[3]);
 if (count($fparts) == 3) { // zoom_x_y

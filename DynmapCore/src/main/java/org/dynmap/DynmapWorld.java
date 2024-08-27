@@ -524,9 +524,6 @@ public abstract class DynmapWorld {
     public String getRawName() {
         return raw_wname;
     }
-    public boolean isProtected() {
-        return is_protected;
-    }
     public int getTileUpdateDelay() {
         if(tileupdatedelay > 0)
             return tileupdatedelay;
