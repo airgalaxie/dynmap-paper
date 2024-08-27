@@ -51,7 +51,6 @@ import org.dynmap.modsupport.ModSupportImpl;
 import org.dynmap.renderer.DynmapBlockState;
 import org.dynmap.servlet.*;
 import org.dynmap.storage.MapStorage;
-import org.dynmap.storage.aws_s3.AWSS3MapStorage;
 import org.dynmap.storage.filetree.FileTreeMapStorage;
 import org.dynmap.storage.mysql.MySQLMapStorage;
 import org.dynmap.storage.mssql.MicrosoftSQLMapStorage;
@@ -430,9 +429,6 @@ public class DynmapCore implements DynmapCommonAPI {
         }
         else if (storetype.equals("postgres") || storetype.equals("postgresql")) {
             defaultStorage = new PostgreSQLMapStorage();
-        }
-        else if (storetype.equals("aws_s3")) {
-            defaultStorage = new AWSS3MapStorage();
         }
         else if (storetype.equals("microsoftsql")) {
             defaultStorage = new MicrosoftSQLMapStorage();
