@@ -2,31 +2,20 @@ package org.dynmap.bukkit.helper.v121;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.ChunkSnapshot;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
 import org.bukkit.craftbukkit.v1_21_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_21_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.dynmap.DynmapChunk;
 import org.dynmap.Log;
 import org.dynmap.bukkit.helper.BukkitMaterial;
 import org.dynmap.bukkit.helper.BukkitVersionHelper;
 import org.dynmap.bukkit.helper.BukkitWorld;
-import org.dynmap.bukkit.helper.BukkitVersionHelperGeneric.TexturesPayload;
 import org.dynmap.renderer.DynmapBlockState;
 import org.dynmap.utils.MapChunkCache;
 import org.dynmap.utils.Polygon;
-
-import com.google.common.collect.Iterables;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.properties.PropertyMap;
 
 import net.minecraft.core.RegistryBlockID;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -56,10 +45,8 @@ import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -88,33 +75,6 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
     @Override
     public boolean isUnsafeAsync() {
         return unsafeAsync;
-    }
-
-     /**
-     * Get block short name list
-     */
-    @Override
-    public String[] getBlockNames() {
-    	RegistryBlockID<IBlockData> bsids = Block.q;
-        Block baseb = null;
-    	Iterator<IBlockData> iter = bsids.iterator();
-    	ArrayList<String> names = new ArrayList<String>();
-		while (iter.hasNext()) {
-			IBlockData bs = iter.next();
-            Block b = bs.b();
-    		// If this is new block vs last, it's the base block state
-    		if (b != baseb) {
-                baseb = b;
-                continue;
-    		}
-        	MinecraftKey id = BuiltInRegistries.e.b(b);
-    		String bn = id.toString();
-            if (bn != null) {
-            	names.add(bn);
-            	Log.info("block=" + bn);
-            }
-		}
-        return names.toArray(new String[0]);
     }
 
     private static IRegistry<BiomeBase> reg = null;
@@ -303,11 +263,6 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
 	}
 
 	@Override
-	public String getStateStringByCombinedId(int blkid, int meta) {
-        Log.severe("getStateStringByCombinedId not implemented");		
-		return null;
-	}
-	@Override
     /** Get ID string from biomebase */
     public String getBiomeBaseIDString(Object bb) {
 		return getBiomeReg().b((BiomeBase)bb).a();
@@ -329,13 +284,6 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
 		Log.warning("isInUnloadQueue not implemented yet");
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	@Override
-	public Object[] getBiomeBaseFromSnapshot(ChunkSnapshot css) {
-		Log.warning("getBiomeBaseFromSnapshot not implemented yet");
-		// TODO Auto-generated method stub
-		return new Object[256];
 	}
 
 	@Override
@@ -416,52 +364,15 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
         return p.toArray(new Player[0]);
 	}
 
-	@Override
-	public double getHealth(Player p) {
-		return p.getHealth();
-	}
-	
-    private static final Gson gson = new GsonBuilder().create();
-
     /**
      * Get skin URL for player
      * @param player
      */
 	@Override
     public String getSkinURL(Player player) {
-		URL compare = player.getPlayerProfile().getTextures().getSkin();
+		URL url = player.getPlayerProfile().getTextures().getSkin();
 
-    	String url = null;
-    	CraftPlayer cp = (CraftPlayer)player;
-    	GameProfile profile = cp.getProfile();
-    	if (profile != null) {
-    		PropertyMap pm = profile.getProperties();
-    		if (pm != null) {
-    			Collection<Property> txt = pm.get("textures");
-    	        Property textureProperty = Iterables.getFirst(pm.get("textures"), null);
-    	        if (textureProperty != null) {
-    				String val = textureProperty.value();
-    				if (val != null) {
-    					TexturesPayload result = null;
-    					try {
-                            String json = new String(Base64.getDecoder().decode(val), StandardCharsets.UTF_8);
-    						result = gson.fromJson(json, TexturesPayload.class);
-    					} catch (JsonParseException e) {
-    					} catch (IllegalArgumentException x) {
-    						Log.warning("Malformed response from skin URL check: " + val);
-    					}
-    					if ((result != null) && (result.textures != null) && (result.textures.containsKey("SKIN"))) {
-    						url = result.textures.get("SKIN").url;
-    					}
-    				}
-    			}
-    		}
-    	}
-
-		Log.info("New: " + compare);
-		Log.info("Old: " + url);
-
-    	return url;
+		return url != null ? url.toString() : null;
     }
 	// Get minY for world
 	@Override
