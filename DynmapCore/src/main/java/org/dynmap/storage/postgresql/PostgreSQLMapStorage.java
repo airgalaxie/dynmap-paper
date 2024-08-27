@@ -1084,12 +1084,6 @@ public class PostgreSQLMapStorage extends MapStorage {
     }
 
     @Override
-    // External web server only
-    public String getSendMessageURI() {
-        return "standalone/PostgreSQL_sendmessage.php";
-    }
-
-    @Override
     public BufferInputStream getStandaloneFile(String fileid) {
         Connection c = null;
         boolean err = false;

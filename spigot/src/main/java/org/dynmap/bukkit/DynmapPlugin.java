@@ -64,7 +64,6 @@ import org.dynmap.DynmapChunk;
 import org.dynmap.DynmapCommonAPIListener;
 import org.dynmap.DynmapCore;
 import org.dynmap.DynmapLocation;
-import org.dynmap.DynmapWebChatEvent;
 import org.dynmap.DynmapWorld;
 import org.dynmap.Log;
 import org.dynmap.MapManager;
@@ -311,12 +310,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             }
             registered.add(type);
             return true;
-        }
-        @Override
-        public boolean sendWebChatEvent(String source, String name, String msg) {
-            DynmapWebChatEvent evt = new DynmapWebChatEvent(source, name, msg);
-            getServer().getPluginManager().callEvent(evt);
-            return ((evt.isCancelled() == false) && (evt.isProcessed() == false));
         }
         @Override
         public void broadcastMessage(String msg) {

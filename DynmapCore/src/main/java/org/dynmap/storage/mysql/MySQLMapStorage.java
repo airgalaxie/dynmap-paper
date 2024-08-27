@@ -1154,12 +1154,6 @@ public class MySQLMapStorage extends MapStorage {
     }
 
     @Override
-    // External web server only
-    public String getSendMessageURI() {
-        return "standalone/MySQL_sendmessage.php";
-    }
-
-    @Override
     public BufferInputStream getStandaloneFile(String fileid) {
         Connection c = null;
         boolean err = false;

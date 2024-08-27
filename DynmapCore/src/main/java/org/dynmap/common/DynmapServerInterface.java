@@ -83,14 +83,6 @@ public abstract class DynmapServerInterface {
      */
     public abstract boolean requestEventNotification(EventType type);
     /**
-     * Send notification of web chat message
-     * @param source - source
-     * @param name - name
-     * @param msg - message text
-     * @return true if not cancelled
-     */
-    public abstract boolean sendWebChatEvent(String source, String name, String msg);
-    /**
      * Broadcast message to players
      * @param msg - message
      */

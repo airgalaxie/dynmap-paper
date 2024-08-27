@@ -17,7 +17,7 @@ public class ClientConfigurationComponent extends Component {
                 s(t, "showplayerfacesinmenu", c.getBoolean("showplayerfacesinmenu", true));
                 s(t, "joinmessage", c.getString("joinmessage", "%playername% joined"));
                 s(t, "quitmessage", c.getString("quitmessage", "%playername% quit"));
-                s(t, "spammessage", c.getString("spammessage", "You may only chat once every %interval% seconds."));
+                s(t, "spammessage", c.getString("spammessage", ""));
                 s(t, "webprefix", unescapeString(c.getString("webprefix", "[WEB] ")));
                 s(t, "defaultzoom", c.getInteger("defaultzoom", 0));
                 s(t, "sidebaropened", c.getString("sidebaropened", "false"));
@@ -33,8 +33,8 @@ public class ClientConfigurationComponent extends Component {
                 s(t, "title", c.getString("webpage-title", sn));
                 s(t, "msg-maptypes", c.getString("msg/maptypes", "Map Types"));
                 s(t, "msg-players", c.getString("msg/players", "Players"));
-                s(t, "msg-chatrequireslogin", c.getString("msg/chatrequireslogin", "Chat Requires Login"));
-                s(t, "msg-chatnotallowed", c.getString("msg/chatnotallowed", "You are not permitted to send chat messages"));
+                s(t, "msg-chatrequireslogin", "");
+                s(t, "msg-chatnotallowed", "");
                 s(t, "msg-hiddennamejoin", c.getString("msg/hiddennamejoin", "Player joined"));
                 s(t, "msg-hiddennamequit", c.getString("msg/hiddennamequit", "Player quit"));
                 s(t, "maxcount", core.getMaxPlayers());

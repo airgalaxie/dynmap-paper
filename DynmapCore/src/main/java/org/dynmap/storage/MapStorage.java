@@ -218,13 +218,6 @@ public abstract class MapStorage {
         return login_enabled;
     }
     /**
-     * Get sendmessage URI (for external web server only)
-     * @return URI
-     */
-    public String getSendMessageURI() {
-        return "standalone/sendmessage.php";
-    }
-    /**
      * URI to use for loading configuration JSON files (for external web server only)
      * @param login_enabled - selects based on login security enabled
      * @return URI

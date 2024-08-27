@@ -56,25 +56,9 @@ components:
   - class: org.dynmap.InternalClientUpdateComponent
     sendhealth: true
     sendposition: true
-    allowwebchat: true
-    webchat-interval: 5
-    hidewebchatip: false
-    trustclientname: false
     includehiddenplayers: false
     # (optional) if true, color codes in player display names are used
     use-name-colors: false
-    # (optional) if true, player login IDs will be used for web chat when their IPs match
-    use-player-login-ip: true
-    # (optional) if use-player-login-ip is true, setting this to true will cause chat messages not matching a known player IP to be ignored
-    require-player-login-ip: false
-    # (optional) block player login IDs that are banned from chatting
-    block-banned-player-chat: true
-    # Require login for web-to-server chat (requires login-enabled: true)
-    webchat-requires-login: false
-    # If set to true, users must have dynmap.webchat permission in order to chat
-    webchat-permissions: false
-    # Limit length of single chat messages
-    chatlengthlimit: 256
   #  # Optional - make players hidden when they are inside/underground/in shadows (#=light level: 0=full shadow,15=sky)
   #  hideifshadow: 4
   #  # Optional - make player hidden when they are under cover (#=sky light level,0=underground,15=open to sky)
@@ -93,30 +77,13 @@ components:
   #  writeinterval: 1
   #  sendhealth: true
   #  sendposition: true
-  #  allowwebchat: true
-  #  webchat-interval: 5
-  #  hidewebchatip: false
   #  includehiddenplayers: false
   #  use-name-colors: false
-  #  use-player-login-ip: false
-  #  require-player-login-ip: false
-  #  block-banned-player-chat: true
   #  hideifshadow: 0
   #  hideifundercover: 0
   #  hideifsneaking: false
-  #  # Require login for web-to-server chat (requires login-enabled: true)
-  #  webchat-requires-login: false
-  #  # If set to true, users must have dynmap.webchat permission in order to chat
-  #  webchat-permissions: false
-  #  # Limit length of single chat messages
-  #  chatlengthlimit: 256
   #  hide-if-invisiblity-potion: true
   #  hidenames: false
-   
-  - class: org.dynmap.SimpleWebChatComponent
-    allowchat: true
-    # If true, web UI users can supply name for chat using 'playername' URL parameter.  'trustclientname' must also be set true.
-    allowurlname: false
   
   # Note: this component is needed for the dmarker commands, and for the Marker API to be available to other plugins
   - class: org.dynmap.MarkersComponent
@@ -150,7 +117,6 @@ components:
     
   - class: org.dynmap.ClientComponent
     type: chat
-    allowurlname: false
   - class: org.dynmap.ClientComponent
     type: chatballoon
     focuschatballoons: false
@@ -162,8 +128,6 @@ components:
     #scrollback: 100
     # Optional: set maximum number of lines visible for chatbox
     #visiblelines: 10
-    # Optional: send push button
-    sendbutton: false
   - class: org.dynmap.ClientComponent
     type: playermarkers
     showplayerfaces: true
@@ -418,10 +382,6 @@ trusted-proxies:
 joinmessage: "%playername% joined"
 quitmessage: "%playername% quit"
 
-spammessage: "You may only chat once every %interval% seconds."
-# format for messages from web: %playername% substitutes sender ID (typically IP), %message% includes text
-webmsgformat: "&color;2[WEB] %playername%: &color;f%message%"
-
 # Control whether layer control is presented on the UI (default is true)
 showlayercontrol: true
 
@@ -449,8 +409,6 @@ round-coordinates: true
 msg:
     maptypes: "Map Types"
     players: "Players"
-    chatrequireslogin: "Chat Requires Login"
-    chatnotallowed: "You are not permitted to send chat messages"
     hiddennamejoin: "Player joined"
     hiddennamequit: "Player quit"
 
@@ -460,8 +418,6 @@ url:
     #configuration: "up/configuration"
     # update URL
     #update: "up/world/{world}/{timestamp}"
-    # sendmessage URL
-    #sendmessage: "up/sendmessage"
     # login URL
     #login: "up/login"
     # register URL

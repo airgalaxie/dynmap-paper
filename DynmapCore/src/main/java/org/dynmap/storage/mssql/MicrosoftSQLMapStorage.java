@@ -1025,12 +1025,6 @@ public class MicrosoftSQLMapStorage extends MapStorage {
     }
 
     @Override
-    // External web server only
-    public String getSendMessageURI() {
-        return "standalone/MSSQL_sendmessage.php";
-    }
-
-    @Override
     public BufferInputStream getStandaloneFile(String fileid) {
         Connection c = null;
         boolean err = false;

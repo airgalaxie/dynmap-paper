@@ -27,17 +27,7 @@ public abstract class DynmapCommonAPIListener {
      */
     public void apiListenerAdded() {
     }
-    /**
-     * Callback when web chat event is being processed:
-     * @param source
-     * @param name
-     * @param message
-     * @return true if not cancelled and not processed
-     */
-    public boolean webChatEvent(String source, String name, String message) {
-        return true;
-    }
-    
+
     private static DynmapCommonAPI dynmapapi = null;
     
     private static CopyOnWriteArrayList<DynmapCommonAPIListener> listeners = new CopyOnWriteArrayList<DynmapCommonAPIListener>();
@@ -86,15 +76,4 @@ public abstract class DynmapCommonAPIListener {
             dynmapapi = null;
         }
     }
-    // Internal call - MODS/PLUGINS MUST NOT USE
-    public static boolean fireWebChatEvent(String source, String name, String message) {
-        boolean noCancel = true;
-        if(dynmapapi != null) {
-            for (DynmapCommonAPIListener l : listeners) {
-                noCancel = l.webChatEvent(source, name, message) && noCancel;
-            }
-        }
-        return noCancel;
-    }
-    
 }

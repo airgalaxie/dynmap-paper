@@ -21,48 +21,6 @@ componentconstructors['chatbox'] = function(dynmap, configuration) {
 		messagelist.addClass('scrollback')
 			.click( function() { $(this).hide(); } );		 
 	}
-
-	if (dynmap.options.allowwebchat) {
-	  if(dynmap.options.loggedin || !dynmap.options['webchat-requires-login']) {
-		var chatinput = $('<input/>')
-			.addClass('chatinput')
-			.attr({
-				id: 'chatinput',
-				type: 'text',
-				value: '',
-				maxlength: dynmap.options.chatlengthlimit
-			})
-			.keydown(function(event) {
-				if (event.keyCode == '13') {
-					event.preventDefault();
-					if(chatinput.val() != '') {
-						$(dynmap).trigger('sendchat', [chatinput.val()]);
-						chatinput.val('');
-					}
-				}
-			});
-		if(configuration.sendbutton) {
-			var chatbutton = $('<button/>').addClass('chatsendbutton').click(function(event) {
-			  if(chatinput.val() != '') {
-				$(dynmap).trigger('sendchat', [chatinput.val()]);
-				chatinput.val('');
-			  }
-			}).text("+").appendTo(chat);
-		}
-		chatinput.appendTo(chat);
-		if (configuration.scrollback) {
-			chatinput.click(function(){ 
-				var m = $('.messagelist');
-				m.show().scrollTop(m.scrollHeight());
-			});
-		}
-	  }
-	  else {
-	  	var login = $('<button/>').addClass('loginbutton').click(function(event) {
-	  		window.location = 'login.html';
-	  	}).text(dynmap.options['msg-chatrequireslogin']).appendTo(chat);
-	  }
-	}
 	
 	var addrow = function(row) {
 		if (configuration.scrollback) {

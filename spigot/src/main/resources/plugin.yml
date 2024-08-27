@@ -390,9 +390,6 @@ permissions:
   dynmap.dmap.lightinglist:
     description: Allows /dmap lightinglist
     default: op
-  dynmap.webchat:
-    description: Allows web chat (if login required for webchat)
-    default: true
   dynmap.playermarkers.seeall:
     description: Allow all players to be seen by user on web UI
     default: op

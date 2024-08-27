@@ -2662,19 +2662,6 @@ public class DynmapCore implements DynmapCommonAPI {
 
     public String getDefImageFormat() { return def_image_format; }
 
-    public void webChat(final String name, final String message) {
-        if(mapManager == null)
-            return;
-
-        Runnable c = new Runnable() {
-            @Override
-            public void run() {
-                ChatEvent event = new ChatEvent("web", name, message);
-                events.trigger("webchat", event);
-            }
-        };
-        getServer().scheduleServerTask(c, 1);
-    }
     /**
      * Disable chat message processing (used by mods that will handle sending chat to the web themselves, via sendBroadcastToWeb()
      * @param disable - if true, suppress internal chat-to-web messages

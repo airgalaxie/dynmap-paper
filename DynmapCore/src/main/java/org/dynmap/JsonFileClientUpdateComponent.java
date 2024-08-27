@@ -4,25 +4,18 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.dynmap.storage.MapStorage;
 import org.dynmap.utils.BufferInputStream;
 import org.dynmap.utils.BufferOutputStream;
 import org.dynmap.web.Json;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import static org.dynmap.JSONUtils.*;
 
@@ -33,18 +26,6 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
     protected long jsonInterval;
     protected long currentTimestamp = 0;
     protected long lastTimestamp = 0;
-    protected long lastChatTimestamp = 0;
-    protected JSONParser parser = new JSONParser();
-    private boolean hidewebchatip;
-    private boolean useplayerloginip;
-    private boolean requireplayerloginip;
-    private boolean trust_client_name;
-    private boolean checkuserban;
-    private boolean req_login;
-    private boolean chat_perms;
-    private int lengthlimit;
-    private HashMap<String,String> useralias = new HashMap<String,String>();
-    private int aliasindex = 1;
     private long last_confighash;
     private MessageDigest md;
     private MapStorage storage;
@@ -123,16 +104,7 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
         	Log.severe("Using JsonFileClientUpdateComponent with disable-webserver=false is not supported: there will likely be problems");        	
         }
 
-        final boolean allowwebchat = configuration.getBoolean("allowwebchat", false);
         jsonInterval = (long)(configuration.getFloat("writeinterval", 1) * 1000);
-        hidewebchatip = configuration.getBoolean("hidewebchatip", false);
-        useplayerloginip = configuration.getBoolean("use-player-login-ip", true);
-        requireplayerloginip = configuration.getBoolean("require-player-login-ip", false);
-        trust_client_name = configuration.getBoolean("trustclientname", false);
-        checkuserban = configuration.getBoolean("block-banned-player-chat", true);
-        req_login = configuration.getBoolean("webchat-requires-login", false);
-        chat_perms = configuration.getBoolean("webchat-permissions", false);
-        lengthlimit = configuration.getInteger("chatlengthlimit", 256); 
         storage = core.getDefaultMapStorage();
         baseStandaloneDir = new File(core.configuration.getString("webpath", "web"), "standalone");
         if (!baseStandaloneDir.isAbsolute()) {
@@ -154,9 +126,6 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
                     writeConfiguration();
                 }
                 writeUpdates();
-                if (allowwebchat) {
-                    handleWebChat();
-                }
                 if(core.isLoginSupportEnabled())
                     handleRegister();
                 lastTimestamp = currentTimestamp;
@@ -167,12 +136,11 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
             @Override
             public void triggered(JSONObject t) {
                 s(t, "jsonfile", true);
-                s(t, "allowwebchat", allowwebchat);
-                s(t, "webchat-requires-login", req_login);
+                s(t, "allowwebchat", false);
+                s(t, "webchat-requires-login", false);
                 s(t, "loginrequired", core.isLoginRequired());
-                // For 'sendmessage.php'
-                s(t, "webchat-interval", configuration.getFloat("webchat-interval", 5.0f));
-                s(t, "chatlengthlimit", lengthlimit);
+                s(t, "webchat-interval", 0);
+                s(t, "chatlengthlimit", 0);
             }
         });
         core.events.addListener("initialized", new Event.Listener<Object>() {
@@ -251,7 +219,7 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
         sb.append("',\n");
         /* Get sendmessage URL */
         sb.append("  sendmessage: '");
-        sb.append(core.configuration.getString("url/sendmessage", store.getSendMessageURI()));
+        sb.append("removed");
         sb.append("',\n");
         /* Get login URL */
         sb.append("  login: '");
@@ -389,133 +357,6 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
         }
     }
 
-    private void processWebChat(JSONArray jsonMsgs) {
-    	Iterator<?> iter = jsonMsgs.iterator();
-		boolean init_skip = (lastChatTimestamp == 0);
-		while (iter.hasNext()) {
-			boolean ok = true;
-			JSONObject o = (JSONObject) iter.next();
-			String ts = String.valueOf(o.get("timestamp"));
-			if(ts.equals("null")) ts = "0";
-			long cts;
-			try {
-				cts = Long.parseLong(ts);
-			} catch (NumberFormatException nfx) {
-				try {
-					cts = (long) Double.parseDouble(ts);
-				} catch (NumberFormatException nfx2) {
-					cts = 0;
-				}
-			}
-			if (cts > lastChatTimestamp) {
-				String name = String.valueOf(o.get("name"));
-				String ip = String.valueOf(o.get("ip"));
-				String uid = null;
-				Object usr = o.get("userid");
-				if(usr != null) {
-					uid = String.valueOf(usr);
-				}
-				boolean isip = true;
-				lastChatTimestamp = cts;
-				if(init_skip)
-					continue;
-				if(uid == null) {
-					if((!trust_client_name) || (name == null) || (name.equals(""))) {
-						if(ip != null)
-							name = ip;
-					}
-					if(useplayerloginip) {  /* Try to match using IPs of player logins */
-						List<String> ids = core.getIDsForIP(name);
-						if(ids != null && !ids.isEmpty()) {
-							name = ids.get(0);
-							isip = false;
-							if(checkuserban) {
-								if(core.getServer().isPlayerBanned(name)) {
-									Log.info("Ignore message from '" + ip + "' - banned player (" + name + ")");
-									ok = false;
-								}
-							}
-							if(chat_perms && !core.getServer().checkPlayerPermission(name, "webchat")) {
-								Log.info("Rejected web chat from " + ip + ": not permitted (" + name + ")");
-								ok = false;
-							}
-						}
-						else if(requireplayerloginip) {
-							Log.info("Ignore message from '" + name + "' - no matching player login recorded");
-							ok = false;
-						}
-					}
-					if(hidewebchatip && isip) {
-						String n = useralias.get(name);
-						if(n == null) { /* Make ID */
-							n = String.format("web-%03d", aliasindex);
-							aliasindex++;
-							useralias.put(name, n);
-						}
-						name = n;
-					}
-				}
-				else {
-					if(core.getServer().isPlayerBanned(uid)) {
-						Log.info("Ignore message from '" + uid + "' - banned user");
-						ok = false;
-					}
-					if(chat_perms && !core.getServer().checkPlayerPermission(uid, "webchat")) {
-						Log.info("Rejected web chat from " + uid + ": not permitted");
-						ok = false;
-					}
-					name = uid;
-				}
-				if(ok) {
-					String message = String.valueOf(o.get("message"));
-					if((lengthlimit > 0) && (message.length() > lengthlimit))
-						message = message.substring(0, lengthlimit);
-					core.webChat(name, message);
-				}
-			}
-		}    	
-    }
-    
-    protected void handleWebChat() {
-    	MapManager.scheduleDelayedJob(new Runnable() {
-    		public void run() {
-    			BufferInputStream bis = storage.getStandaloneFile("dynmap_webchat.json");
-    			if (bis != null && lastTimestamp != 0) {
-    				JSONArray jsonMsgs = null;
-    				Reader inputFileReader = null;
-    				try {
-    					inputFileReader = new InputStreamReader(bis, cs_utf8);
-    					jsonMsgs = (JSONArray) parser.parse(inputFileReader);
-    				} catch (IOException ex) {
-    					Log.severe("Exception while reading JSON-file.", ex);
-    					storage.setStandaloneFile("dynmap_webchat.json", null);	// Delete it
-    				} catch (ParseException ex) {
-    					Log.severe("Exception while parsing JSON-file.", ex);
-    					storage.setStandaloneFile("dynmap_webchat.json", null);	// Delete it
-    				} finally {
-    					if(inputFileReader != null) {
-    						try {
-    							inputFileReader.close();
-    						} catch (IOException iox) {
-
-    						}
-    						inputFileReader = null;
-    					}
-    				}
-    				if (jsonMsgs != null) {
-        				final JSONArray json = jsonMsgs;
-    					// Process content on server thread
-    					core.getServer().scheduleServerTask(new Runnable() {
-    						@Override
-    						public void run() {
-    							processWebChat(json);
-    						}
-    					}, 0);
-    				}
-    			}
-    		}
-		}, 0);
-    }
     protected void handleRegister() {
         if(core.pendingRegisters() == false)
             return;

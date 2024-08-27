@@ -30,7 +30,7 @@ public class ConfigJSServlet extends HttpServlet {
         sb.append("',\n");
         /* Get sendmessage URL */
         sb.append("  sendmessage: '");
-        sb.append(core.configuration.getString("url/sendmessage", "up/sendmessage"));
+        sb.append("removed");
         sb.append("',\n");
         /* Get login URL */
         sb.append("  login: '");
