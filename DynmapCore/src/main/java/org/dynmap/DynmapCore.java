@@ -1945,8 +1945,12 @@ public class DynmapCore implements DynmapCommonAPI {
      * @return List of tab completion suggestions
      */
     public List<String> getTabCompletions(DynmapCommandSender sender, String cmd, String[] args) {
-        if (mapManager == null || args.length == 0) {
+        if (mapManager == null) {
             return Collections.emptyList();
+        }
+
+        if (args.length == 0) {
+            return getSubcommandSuggestions(sender, cmd, "");
         }
 
         if (args.length == 1) {

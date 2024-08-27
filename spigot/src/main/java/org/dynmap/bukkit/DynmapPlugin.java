@@ -2,7 +2,6 @@ package org.dynmap.bukkit;
 
 import java.io.File;
 import java.net.InetSocketAddress;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -14,13 +13,15 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import com.destroystokyo.paper.MaterialTags;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -89,8 +90,9 @@ import org.dynmap.utils.MapChunkCache;
 import org.dynmap.utils.Polygon;
 import org.dynmap.utils.VisibilityLimit;
 
+@SuppressWarnings("UnstableApiUsage")
 public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
-    private DynmapCore core;
+    DynmapCore core;
     private PermissionProvider permissions;
     private String version;
     public PlayerList playerList;
@@ -731,6 +733,19 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             return;
         }
 
+		LifecycleEventManager<Plugin> manager = this.getLifecycleManager();
+        manager.registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+            final Commands commands = event.registrar();
+            commands.register("dynmap", "Controls Dynmap",
+                              new CommandHandler(this, "dynmap"));
+            commands.register("dmarker", "Manipulate map markers",
+                              new CommandHandler(this, "dmarker"));
+            commands.register("dmap", "List and modify dynmap configuration",
+                              new CommandHandler(this, "dmap"));
+            commands.register("dynmapexp", "Map export commands",
+                              new CommandHandler(this, "dynmapexp"));
+        });
+
         doEnable();
 
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
@@ -797,37 +812,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         if (core != null) {
             core.serverTick(getServer().getTPS()[0]);
         }
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        DynmapCommandSender dsender;
-        if(sender instanceof Player) {
-            dsender = new BukkitPlayer((Player)sender);
-        }
-        else {
-            dsender = new BukkitCommandSender(sender);
-        }
-        if (core != null)
-        	return core.processCommand(dsender, cmd.getName(), commandLabel, args);
-        else
-        	return false;
-    }
-
-    @Override
-    public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
-        DynmapCommandSender dsender;
-        if(sender instanceof Player) {
-            dsender = new BukkitPlayer((Player)sender);
-        }
-        else {
-            dsender = new BukkitCommandSender(sender);
-        }
-
-        if (core != null)
-        	return core.getTabCompletions(dsender, cmd.getName(), args);
-        else
-        	return Collections.emptyList();
     }
 
     @Override

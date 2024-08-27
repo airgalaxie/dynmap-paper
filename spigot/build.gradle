@@ -38,7 +38,7 @@ dependencies {
 
 processResources {
     // replace stuff in mcmod.info, nothing else
-    filesMatching('plugin.yml') {
+    filesMatching('paper-plugin.yml') {
         // replace version and mcversion
         expand(
                 buildnumber: project.parent.ext.globals.buildNumber,
@@ -49,6 +49,10 @@ processResources {
 
 jar {
     archiveClassifier = 'unshaded'
+
+    manifest {
+        attributes["paperweight-mappings-namespace"] = "spigot"
+    }
 }
 
 shadowJar {
@@ -63,6 +67,10 @@ shadowJar {
     destinationDirectory = file '../target'
     archiveBaseName = "Dynmap"
     archiveClassifier = 'spigot'
+
+    manifest {
+        attributes["paperweight-mappings-namespace"] = "spigot"
+    }
 }
 shadowJar.doLast {
     task ->
