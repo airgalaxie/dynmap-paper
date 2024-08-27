@@ -56,7 +56,6 @@ import org.dynmap.storage.mysql.MySQLMapStorage;
 import org.dynmap.storage.mssql.MicrosoftSQLMapStorage;
 import org.dynmap.storage.mariadb.MariaDBMapStorage;
 import org.dynmap.storage.sqllte.SQLiteMapStorage;
-import org.dynmap.storage.postgresql.PostgreSQLMapStorage;
 import org.dynmap.utils.BlockStep;
 import org.dynmap.utils.BufferOutputStream;
 import org.dynmap.utils.ImageIOManager;
@@ -426,9 +425,6 @@ public class DynmapCore implements DynmapCommonAPI {
         }
         else if (storetype.equals("mariadb")) {
             defaultStorage = new MariaDBMapStorage();
-        }
-        else if (storetype.equals("postgres") || storetype.equals("postgresql")) {
-            defaultStorage = new PostgreSQLMapStorage();
         }
         else if (storetype.equals("microsoftsql")) {
             defaultStorage = new MicrosoftSQLMapStorage();
