@@ -49,10 +49,6 @@ processResources {
 
 jar {
     archiveClassifier = 'unshaded'
-
-    manifest {
-        attributes["paperweight-mappings-namespace"] = "spigot"
-    }
 }
 
 shadowJar {
@@ -67,10 +63,6 @@ shadowJar {
     destinationDirectory = file '../target'
     archiveBaseName = "Dynmap"
     archiveClassifier = 'spigot'
-
-    manifest {
-        attributes["paperweight-mappings-namespace"] = "spigot"
-    }
 }
 shadowJar.doLast {
     task ->

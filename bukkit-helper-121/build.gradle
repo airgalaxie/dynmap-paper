@@ -1,3 +1,7 @@
+plugins {
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.12"
+}
+
 eclipse {
     project {
         name = "Dynmap(Spigot-1.21)"
@@ -7,9 +11,9 @@ eclipse {
 description = 'bukkit-helper-1.21'
 
 dependencies {
-  implementation project(':bukkit-helper')
-  implementation project(':dynmap-api')
-  implementation project(path: ':DynmapCore', configuration: 'shadow')
-  compileOnly group: 'io.papermc.paper', name: 'paper-api', version:'1.21.1-R0.1-SNAPSHOT'
-  compileOnly group: 'org.spigotmc', name: 'spigot', version:'1.21-R0.1-SNAPSHOT'
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.21.4-R0.1-SNAPSHOT")
+
+    implementation project(':bukkit-helper')
+    implementation project(':dynmap-api')
+    implementation project(path: ':DynmapCore', configuration: 'shadow')
 }

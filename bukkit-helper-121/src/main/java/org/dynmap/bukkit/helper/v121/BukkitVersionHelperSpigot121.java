@@ -1,10 +1,18 @@
 package org.dynmap.bukkit.helper.v121;
 
+import net.minecraft.core.IdMapper;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
-import org.bukkit.craftbukkit.v1_21_R1.CraftWorld;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
 import org.dynmap.DynmapChunk;
 import org.dynmap.Log;
@@ -14,19 +22,9 @@ import org.dynmap.renderer.DynmapBlockState;
 import org.dynmap.utils.MapChunkCache;
 import org.dynmap.utils.Polygon;
 
-import net.minecraft.core.RegistryBlockID;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.core.BlockPosition;
-import net.minecraft.core.IRegistry;
-import net.minecraft.resources.MinecraftKey;
+import net.minecraft.core.Registry;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tags.TagsBlock;
-import net.minecraft.world.level.BlockAccessAir;
-import net.minecraft.world.level.biome.BiomeBase;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.BlockFluids;
-import net.minecraft.world.level.block.state.IBlockData;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -42,11 +40,11 @@ import java.util.List;
  * Helper for isolation of bukkit version specific issues
  */
 public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
-    private static IRegistry<BiomeBase> reg = null;
+    private static Registry<Biome> reg = null;
 
-    private static IRegistry<BiomeBase> getBiomeReg() {
+    private static Registry<Biome> getBiomeReg() {
     	if (reg == null) {
-    		reg = MinecraftServer.getServer().bc().d(Registries.aF);
+    		reg = MinecraftServer.getServer().registryAccess().lookupOrThrow(Registries.BIOME);
     	}
     	return reg;
     }
@@ -58,11 +56,11 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
     @Override
     public Object[] getBiomeBaseList() {
     	if (biomelist == null) {
-        	biomelist = new BiomeBase[256];
-        	Iterator<BiomeBase> iter = getBiomeReg().iterator();
+        	biomelist = new Biome[256];
+        	Iterator<Biome> iter = getBiomeReg().iterator();
         	while (iter.hasNext()) {
-                BiomeBase b = iter.next();
-                int bidx = getBiomeReg().a(b);
+                Biome b = iter.next();
+                int bidx = getBiomeReg().getId(b);
         		if (bidx >= biomelist.length) {
         			biomelist = Arrays.copyOf(biomelist, bidx + biomelist.length);
         		}
@@ -75,29 +73,30 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
     /** Get ID from biomebase */
     @Override
     public int getBiomeBaseID(Object bb) {
-    	return getBiomeReg().a((BiomeBase)bb);
+    	return getBiomeReg().getId((Biome)bb);
     }
 
-    public static IdentityHashMap<IBlockData, DynmapBlockState> dataToState;
+
+    public static IdentityHashMap<BlockState, DynmapBlockState> dataToState;
 
     /**
      * Initialize block states (org.dynmap.blockstate.DynmapBlockState)
      */
     @Override
     public void initializeBlockStates() {
-    	dataToState = new IdentityHashMap<IBlockData, DynmapBlockState>();
+    	dataToState = new IdentityHashMap<BlockState, DynmapBlockState>();
     	HashMap<String, DynmapBlockState> lastBlockState = new HashMap<String, DynmapBlockState>();
-    	RegistryBlockID<IBlockData> bsids = Block.q;
+    	IdMapper<BlockState> bsids = Block.BLOCK_STATE_REGISTRY;
         Block baseb = null;
-    	Iterator<IBlockData> iter = bsids.iterator();
+    	Iterator<BlockState> iter = bsids.iterator();
     	ArrayList<String> names = new ArrayList<String>();
 
     	// Loop through block data states
     	DynmapBlockState.Builder bld = new DynmapBlockState.Builder();
 		while (iter.hasNext()) {
-    		IBlockData bd = iter.next();
-    		Block b = bd.b();
-        	MinecraftKey id = BuiltInRegistries.e.b(b);
+    		BlockState bd = iter.next();
+    		Block b = bd.getBlock();
+        	ResourceLocation id = BuiltInRegistries.BLOCK.getKey(b);
     		String bname = id.toString();
     		DynmapBlockState lastbs = lastBlockState.get(bname);	// See if we have seen this one
     		int idx = 0;
@@ -112,15 +111,16 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
     			int off2 = fname.indexOf(']');
     			sb = fname.substring(off1+1, off2);
     		}
-            int lightAtten = bd.b(BlockAccessAir.a, BlockPosition.c);	// getLightBlock
+            int lightAtten = bd.getLightBlock();	// getLightBlock
             //Log.info("statename=" + bname + "[" + sb + "], lightAtten=" + lightAtten);
             // Fill in base attributes
             bld.setBaseState(lastbs).setStateIndex(idx).setBlockName(bname).setStateName(sb).setAttenuatesLight(lightAtten);
-            if (bd.e()) { bld.setSolid(); }
-            if (bd.i()) { bld.setAir(); }
-            if (bd.a(TagsBlock.t)) { bld.setLog(); }
-            if (bd.a(TagsBlock.P)) { bld.setLeaves(); }
-            if ((!bd.u().c()) && ((bd.b() instanceof BlockFluids) == false)) {	// Test if fluid type for block is not empty
+			bld.setMaterial(bd.getSoundType().toString());
+			if (bd.isSolid()) { bld.setSolid(); }
+            if (bd.isAir()) { bld.setAir(); }
+            if (bd.is(BlockTags.OVERWORLD_NATURAL_LOGS)) { bld.setLog(); }
+            if (bd.is(BlockTags.LEAVES)) { bld.setLeaves(); }
+            if ((!bd.getFluidState().isEmpty()) && (!(bd.getBlock() instanceof LiquidBlock))) {	// Test if fluid type for block is not empty
 				bld.setWaterlogged();
 				//Log.info("statename=" + bname + "[" + sb + "] = waterlogged");
 			}
@@ -131,6 +131,7 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
     		Log.verboseinfo("blk=" + bname + ", idx=" + idx + ", state=" + sb + ", waterlogged=" + dbs.isWaterlogged());
     	}
     }
+
     /**
      * Create chunk cache for given chunks of given world
      * @param dw - world
@@ -149,20 +150,20 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
 	 */
     @Override
 	public int getBiomeBaseWaterMult(Object bb) {
-    	BiomeBase biome = (BiomeBase) bb;
-    	return biome.i();	// waterColor
+    	Biome biome = (Biome) bb;
+    	return biome.getWaterColor();	// waterColor
 	}
 
     /** Get temperature from biomebase */
     @Override
     public float getBiomeBaseTemperature(Object bb) {
-    	return ((BiomeBase)bb).g();
+    	return ((Biome)bb).getBaseTemperature();
     }
 
     /** Get humidity from biomebase */
     @Override
     public float getBiomeBaseHumidity(Object bb) {
-    	String vals = ((BiomeBase)bb).i.toString();	// Sleazy
+    	String vals = ((Biome)bb).climateSettings.toString();	// Sleazy
     	float humidity = 0.5F;
     	int idx = vals.indexOf("downfall=");
     	if (idx >= 0) {
@@ -201,10 +202,10 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
 	public String[] getBiomeNames() {
     	if (biomenames == null) {
         	biomenames = new String[256];
-        	Iterator<BiomeBase> iter = getBiomeReg().iterator();
+        	Iterator<Biome> iter = getBiomeReg().iterator();
         	while (iter.hasNext()) {
-                BiomeBase b = iter.next();
-                int bidx = getBiomeReg().a(b);
+                Biome b = iter.next();
+                int bidx = getBiomeReg().getId(b);
         		if (bidx >= biomenames.length) {
         			biomenames = Arrays.copyOf(biomenames, bidx + biomenames.length);
         		}
@@ -217,11 +218,11 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
 	@Override
     /** Get ID string from biomebase */
     public String getBiomeBaseIDString(Object bb) {
-		return getBiomeReg().b((BiomeBase)bb).a();
+		return getBiomeReg().getKey((Biome)bb).getPath();
     }
 	@Override
     public String getBiomeBaseResourceLocsation(Object bb) {
-        return getBiomeReg().b((BiomeBase)bb).toString();
+        return getBiomeReg().getKey((Biome)bb).toString();
 	}
 
 	@Override

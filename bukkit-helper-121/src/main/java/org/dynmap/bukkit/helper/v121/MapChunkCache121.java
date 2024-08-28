@@ -1,9 +1,9 @@
 package org.dynmap.bukkit.helper.v121;
 
-import net.minecraft.world.level.biome.BiomeBase;
-import net.minecraft.world.level.biome.BiomeFog;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_21_R1.CraftWorld;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.dynmap.DynmapChunk;
 import org.dynmap.bukkit.helper.BukkitWorld;
 import org.dynmap.common.BiomeMap;
@@ -11,7 +11,7 @@ import org.dynmap.common.chunk.GenericChunk;
 import org.dynmap.common.chunk.GenericChunkCache;
 import org.dynmap.common.chunk.GenericMapChunkCache;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -35,9 +35,9 @@ public class MapChunkCache121 extends GenericMapChunkCache {
     // Load generic chunk from existing and already loaded chunk
     @Override
     protected Supplier<GenericChunk> getLoadedChunkAsync(DynmapChunk chunk) {
-        Supplier<NBTTagCompound> supplier = provider.getLoadedChunk((CraftWorld) w, chunk.x, chunk.z);
+        Supplier<CompoundTag> supplier = provider.getLoadedChunk((CraftWorld) w, chunk.x, chunk.z);
         return () -> {
-            NBTTagCompound nbt = supplier.get();
+            CompoundTag nbt = supplier.get();
             return nbt != null ? parseChunkFromNBT(new NBT.NBTCompound(nbt)) : null;
         };
     }
@@ -46,9 +46,9 @@ public class MapChunkCache121 extends GenericMapChunkCache {
     @Override
     protected Supplier<GenericChunk> loadChunkAsync(DynmapChunk chunk){
         try {
-            CompletableFuture<NBTTagCompound> nbt = provider.getChunk(((CraftWorld) w).getHandle(), chunk.x, chunk.z);
+            CompletableFuture<CompoundTag> nbt = provider.getChunk(((CraftWorld) w).getHandle(), chunk.x, chunk.z);
             return () -> {
-                NBTTagCompound compound;
+                CompoundTag compound;
                 try {
                     compound = nbt.get();
                 } catch (InterruptedException e) {
@@ -70,13 +70,14 @@ public class MapChunkCache121 extends GenericMapChunkCache {
 
     @Override
     public int getFoliageColor(BiomeMap bm, int[] colormap, int x, int z) {
-		return bm.<BiomeBase>getBiomeObject().map(BiomeBase::h).flatMap(BiomeFog::e).orElse(colormap[bm.biomeLookup()]);
+		return bm.<Biome>getBiomeObject().map(Biome::getSpecialEffects)
+                .flatMap(BiomeSpecialEffects::getFoliageColorOverride).orElse(colormap[bm.biomeLookup()]);
     }
 
     @Override
     public int getGrassColor(BiomeMap bm, int[] colormap, int x, int z) {
-        BiomeFog fog = bm.<BiomeBase>getBiomeObject().map(BiomeBase::h).orElse(null);
+        BiomeSpecialEffects fog = bm.<Biome>getBiomeObject().map(Biome::getSpecialEffects).orElse(null);
         if (fog == null) return colormap[bm.biomeLookup()];
-        return fog.g().a(x, z, fog.f().orElse(colormap[bm.biomeLookup()]));
+        return fog.getGrassColorModifier().modifyColor(x, z, fog.getGrassColorOverride().orElse(colormap[bm.biomeLookup()]));
     }
 }
