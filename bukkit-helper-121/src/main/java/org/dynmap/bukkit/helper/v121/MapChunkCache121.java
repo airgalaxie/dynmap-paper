@@ -5,7 +5,6 @@ import net.minecraft.world.level.biome.BiomeFog;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_21_R1.CraftWorld;
 import org.dynmap.DynmapChunk;
-import org.dynmap.bukkit.helper.BukkitVersionHelper;
 import org.dynmap.bukkit.helper.BukkitWorld;
 import org.dynmap.common.BiomeMap;
 import org.dynmap.common.chunk.GenericChunk;
@@ -13,14 +12,9 @@ import org.dynmap.common.chunk.GenericChunkCache;
 import org.dynmap.common.chunk.GenericMapChunkCache;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.level.ChunkCoordIntPair;
-import net.minecraft.world.level.chunk.storage.ChunkRegionLoader;
-import net.minecraft.world.level.chunk.Chunk;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
@@ -29,7 +23,7 @@ import java.util.function.Supplier;
  * Container for managing chunks - dependent upon using chunk snapshots, since rendering is off server thread
  */
 public class MapChunkCache121 extends GenericMapChunkCache {
-    private static final AsyncChunkProvider121 provider = BukkitVersionHelper.helper.isUnsafeAsync() ? null : new AsyncChunkProvider121();
+    private static final AsyncChunkProvider121 provider = new AsyncChunkProvider121();
     private World w;
     /**
      * Construct empty cache
@@ -46,14 +40,6 @@ public class MapChunkCache121 extends GenericMapChunkCache {
             NBTTagCompound nbt = supplier.get();
             return nbt != null ? parseChunkFromNBT(new NBT.NBTCompound(nbt)) : null;
         };
-    }
-    protected GenericChunk getLoadedChunk(DynmapChunk chunk) {
-        CraftWorld cw = (CraftWorld) w;
-        if (!cw.isChunkLoaded(chunk.x, chunk.z)) return null;
-        Chunk c = cw.getHandle().getChunkIfLoaded(chunk.x, chunk.z);
-        if (c == null || !c.q) return null;    // c.loaded
-        NBTTagCompound nbt = ChunkRegionLoader.a(cw.getHandle(), c);
-        return nbt != null ? parseChunkFromNBT(new NBT.NBTCompound(nbt)) : null;
     }
 
     // Load generic chunk from unloaded chunk
@@ -75,22 +61,6 @@ public class MapChunkCache121 extends GenericMapChunkCache {
         } catch (InvocationTargetException | IllegalAccessException ignored) {
             return () -> null;
         }
-    }
-
-    protected GenericChunk loadChunk(DynmapChunk chunk) {
-        CraftWorld cw = (CraftWorld) w;
-        NBTTagCompound nbt = null;
-        ChunkCoordIntPair cc = new ChunkCoordIntPair(chunk.x, chunk.z);
-        GenericChunk gc = null;
-        try {	// BUGBUG - convert this all to asyn properly, since now native async
-            nbt = cw.getHandle().l().a.d(cc).join().get();	// playerChunkMap
-        } catch (CancellationException cx) {
-        } catch (NoSuchElementException snex) {
-        }
-        if (nbt != null) {
-            gc = parseChunkFromNBT(new NBT.NBTCompound(nbt));
-        }
-        return gc;
     }
 
     public void setChunks(BukkitWorld dw, List<DynmapChunk> chunks) {

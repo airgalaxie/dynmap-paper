@@ -3,7 +3,6 @@ package org.dynmap.common.chunk;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.dynmap.DynmapChunk;
@@ -715,10 +714,6 @@ public abstract class GenericMapChunkCache extends MapChunkCache {
 		cache.putSnapshot(dw.getName(), chunk.x, chunk.z, ssr);
 	}
 
-	// Load generic chunk from existing and already loaded chunk
-	protected abstract GenericChunk getLoadedChunk(DynmapChunk ch);
-	// Load generic chunk from unloaded chunk
-	protected abstract GenericChunk loadChunk(DynmapChunk ch);
 	// Load generic chunk from existing and already loaded chunk async
 	protected Supplier<GenericChunk> getLoadedChunkAsync(DynmapChunk ch) {
 		throw new IllegalStateException("Not implemeted");
@@ -726,62 +721,6 @@ public abstract class GenericMapChunkCache extends MapChunkCache {
 	// Load generic chunks from unloaded chunk async
 	protected Supplier<GenericChunk> loadChunkAsync(DynmapChunk ch){
 		throw new IllegalStateException("Not implemeted");
-	}
-	
-	/**
-	 * Read NBT data from loaded chunks - needs to be called from server/world
-	 * thread to be safe
-	 * 
-	 * @returns number loaded
-	 */
-	public int getLoadedChunks() {
-		int cnt = 0;
-		if (!dw.isLoaded()) {
-			isempty = true;
-			unloadChunks();
-			return 0;
-		}
-		ListIterator<DynmapChunk> iter = chunks.listIterator();
-		while (iter.hasNext()) {
-			long startTime = System.nanoTime();
-			DynmapChunk chunk = iter.next();
-			int chunkindex = (chunk.x - x_min) + (chunk.z - z_min) * x_dim;
-			if (snaparray[chunkindex] != null)
-				continue; // Skip if already processed
-
-			boolean vis = isChunkVisible(chunk);
-
-			/* Check if cached chunk snapshot found */
-			if (tryChunkCache(chunk, vis)) {
-				endChunkLoad(startTime, ChunkStats.CACHED_SNAPSHOT_HIT);
-				cnt++;
-			}
-			// If chunk is loaded and not being unloaded, we're grabbing its NBT data
-			else {
-				// Get generic chunk from already loaded chunk, if we can
-				GenericChunk ss = getLoadedChunk(chunk);
-				if (ss != null) {
-					if (vis) { // If visible
-						prepChunkSnapshot(chunk, ss);
-					}
-					else {
-						if (hidestyle == HiddenChunkStyle.FILL_STONE_PLAIN) {
-							ss = getStone();
-						}
-						else if (hidestyle == HiddenChunkStyle.FILL_OCEAN) {
-							ss = getOcean();
-						}
-						else {
-							ss = getEmpty();
-						}
-					}
-					snaparray[chunkindex] = ss;
-					endChunkLoad(startTime, ChunkStats.LOADED_CHUNKS);
-					cnt++;
-				}
-			}
-		}
-		return cnt;
 	}
 
 	/**
@@ -849,11 +788,6 @@ public abstract class GenericMapChunkCache extends MapChunkCache {
 		});
 	}
 
-	@Override
-	public int loadChunks(int max_to_load) {
-		return getLoadedChunks() + readChunks(max_to_load);
-	}
-
 	/**
 	 * Loads all chunks in the world asynchronously.
 	 * <p>
@@ -862,86 +796,6 @@ public abstract class GenericMapChunkCache extends MapChunkCache {
 	public void loadChunksAsync() {
 		getLoadedChunksAsync();
 		readChunksAsync();
-	}
-
-	public int readChunks(int max_to_load) {
-		if (!dw.isLoaded()) {
-			isempty = true;
-			unloadChunks();
-			return 0;
-		}
-
-		int cnt = 0;
-
-		if (iterator == null) {
-			iterator = chunks.listIterator();
-		}
-
-		DynmapCore.setIgnoreChunkLoads(true);
-
-		// Load the required chunks.
-		while ((cnt < max_to_load) && iterator.hasNext()) {
-			long startTime = System.nanoTime();
-
-			DynmapChunk chunk = iterator.next();
-
-			int chunkindex = (chunk.x - x_min) + (chunk.z - z_min) * x_dim;
-
-			if (snaparray[chunkindex] != null)
-				continue; // Skip if already processed
-
-			boolean vis = isChunkVisible(chunk);
-
-			/* Check if cached chunk snapshot found */
-			if (tryChunkCache(chunk, vis)) {
-				endChunkLoad(startTime, ChunkStats.CACHED_SNAPSHOT_HIT);
-			}
-			else {
-				GenericChunk ss = loadChunk(chunk);
-				// If read was good
-				if (ss != null) {
-					// If hidden
-					if (!vis) {
-						if (hidestyle == HiddenChunkStyle.FILL_STONE_PLAIN) {
-							ss = getStone();
-						}
-						else if (hidestyle == HiddenChunkStyle.FILL_OCEAN) {
-							ss = getOcean();
-						}
-						else {
-							ss = getEmpty();
-						}
-					}
-					else {
-						// Prep snapshot
-						prepChunkSnapshot(chunk, ss);
-					}
-					snaparray[chunkindex] = ss;
-					endChunkLoad(startTime, ChunkStats.UNLOADED_CHUNKS);
-				}
-				else {
-					endChunkLoad(startTime, ChunkStats.UNGENERATED_CHUNKS);
-				}
-			}
-			cnt++;
-		}
-
-		DynmapCore.setIgnoreChunkLoads(false);
-
-		if (iterator.hasNext() == false) { /* If we're done */
-			isempty = true;
-
-			/* Fill missing chunks with empty dummy chunk */
-			for (int i = 0; i < snaparray.length; i++) {
-				if (snaparray[i] == null) {
-					snaparray[i] = getEmpty();
-				}
-				else if (!snaparray[i].isEmpty) {
-					isempty = false;
-				}
-			}
-		}
-		return cnt;
 	}
 
 	/**

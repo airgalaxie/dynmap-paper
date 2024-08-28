@@ -1,9 +1,7 @@
 package org.dynmap.bukkit.helper;
 
 import java.util.List;
-import java.util.Map;
 
-import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.dynmap.DynmapChunk;
@@ -22,10 +20,6 @@ public abstract class BukkitVersionHelper {
     protected BukkitVersionHelper() {
         
     }
-    /**
-     * Get if it's unsafe to load chunks async
-     */
-    public abstract boolean isUnsafeAsync();
     /**
      * Get list of defined biomebase objects
      */
@@ -51,46 +45,6 @@ public abstract class BukkitVersionHelper {
      */
     public abstract int getBiomeBaseID(Object bb);
     /**
-     *  Get unload queue for given NMS world
-     */
-    public abstract Object getUnloadQueue(World world);
-    /**
-     *  For testing unload queue for presence of givne chunk
-     */
-    public abstract boolean isInUnloadQueue(Object unloadqueue, int x, int z);
-    /**
-     * Get inhabited ticks count from chunk
-     */
-    public abstract long getInhabitedTicks(Chunk c);
-    /** 
-     * Get tile entities map from chunk
-     */
-    public abstract Map<?, ?> getTileEntitiesForChunk(Chunk c);
-    /**
-     * Get X coordinate of tile entity
-     */
-    public abstract int getTileEntityX(Object te);
-    /**
-     * Get Y coordinate of tile entity
-     */
-    public abstract int getTileEntityY(Object te);
-    /**
-     * Get Z coordinate of tile entity
-     */
-    public abstract int getTileEntityZ(Object te);
-    /**
-     * Read tile entity NBT
-     */
-    public abstract Object readTileEntityNBT(Object te, World world);
-    /**
-     * Get field value from NBT compound
-     */
-    public abstract Object getFieldValue(Object nbt, String field);
-    /**
-     * Unload chunk no save needed
-     */
-    public abstract void unloadChunkNoSave(World w, Chunk c, int cx, int cz);
-    /**
      * Get biome name list
      */
     public abstract String[] getBiomeNames();
@@ -107,18 +61,10 @@ public abstract class BukkitVersionHelper {
      */
     public abstract int getWorldMinY(World world);
     /**
-     * Test if broken unloadChunk
-     */
-    public boolean isUnloadChunkBroken() { return false; }
-    /**
      * Get skin URL for player
      * @param player
      */
     public abstract String getSkinURL(Player player);
-    /**
-     * Get material map by block ID
-     */
-    public abstract BukkitMaterial[] getMaterialList();
     /**
      * Initialize block states (org.dynmap.blockstate.DynmapBlockState)
      */

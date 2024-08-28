@@ -45,12 +45,6 @@ public abstract class MapChunkCache {
      */
     public abstract boolean setChunkDataTypes(boolean blockdata, boolean biome, boolean highestblocky, boolean rawbiome);
     /**
-     * Load chunks into cache
-     * @param maxToLoad - maximum number to load at once
-     * @return number loaded
-     */
-    public abstract int loadChunks(int maxToLoad);
-    /**
      * Test if done loading
      * @return true if load completed
      */

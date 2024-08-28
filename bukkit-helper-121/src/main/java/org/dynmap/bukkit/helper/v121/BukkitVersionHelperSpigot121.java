@@ -1,16 +1,13 @@
 package org.dynmap.bukkit.helper.v121;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
-import org.bukkit.craftbukkit.v1_21_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_21_R1.CraftWorld;
 import org.bukkit.entity.Player;
 import org.dynmap.DynmapChunk;
 import org.dynmap.Log;
-import org.dynmap.bukkit.helper.BukkitMaterial;
 import org.dynmap.bukkit.helper.BukkitVersionHelper;
 import org.dynmap.bukkit.helper.BukkitWorld;
 import org.dynmap.renderer.DynmapBlockState;
@@ -22,27 +19,14 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.IRegistry;
-import net.minecraft.nbt.NBTTagByteArray;
-import net.minecraft.nbt.NBTTagByte;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagFloat;
-import net.minecraft.nbt.NBTTagIntArray;
-import net.minecraft.nbt.NBTTagInt;
-import net.minecraft.nbt.NBTTagLong;
-import net.minecraft.nbt.NBTTagShort;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraft.resources.MinecraftKey;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.TagsBlock;
 import net.minecraft.world.level.BlockAccessAir;
 import net.minecraft.world.level.biome.BiomeBase;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BlockFluids;
-import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.block.state.IBlockData;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -52,31 +36,12 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 
 /**
  * Helper for isolation of bukkit version specific issues
  */
 public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
-    private final boolean unsafeAsync;
-
-    public BukkitVersionHelperSpigot121() {
-        boolean unsafeAsync1;
-        try {
-            Class.forName("io.papermc.paper.chunk.system.io.RegionFileIOThread");
-            unsafeAsync1 = false;
-        } catch (ClassNotFoundException e) {
-            unsafeAsync1 = true;
-        }
-        this.unsafeAsync = unsafeAsync1;
-    }
-
-    @Override
-    public boolean isUnsafeAsync() {
-        return unsafeAsync;
-    }
-
     private static IRegistry<BiomeBase> reg = null;
 
     private static IRegistry<BiomeBase> getBiomeReg() {
@@ -112,9 +77,9 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
     public int getBiomeBaseID(Object bb) {
     	return getBiomeReg().a((BiomeBase)bb);
     }
-    
+
     public static IdentityHashMap<IBlockData, DynmapBlockState> dataToState;
-    
+
     /**
      * Initialize block states (org.dynmap.blockstate.DynmapBlockState)
      */
@@ -126,7 +91,7 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
         Block baseb = null;
     	Iterator<IBlockData> iter = bsids.iterator();
     	ArrayList<String> names = new ArrayList<String>();
-    	
+
     	// Loop through block data states
     	DynmapBlockState.Builder bld = new DynmapBlockState.Builder();
 		while (iter.hasNext()) {
@@ -160,7 +125,7 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
 				//Log.info("statename=" + bname + "[" + sb + "] = waterlogged");
 			}
             DynmapBlockState dbs = bld.build(); // Build state
-            
+
     		dataToState.put(bd,  dbs);
     		lastBlockState.put(bname, (lastbs == null) ? dbs : lastbs);
     		Log.verboseinfo("blk=" + bname + ", idx=" + idx + ", state=" + sb + ", waterlogged=" + dbs.isWaterlogged());
@@ -230,19 +195,6 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
     		p.sendTitle(title, subtitle, fadeInTicks, stayTicks, fadeOutTIcks);
     	}
     }
-    
-    /**
-     * Get material map by block ID
-     */
-    @Override
-    public BukkitMaterial[] getMaterialList() {
-    	return new BukkitMaterial[4096];	// Not used
-    }
-
-	@Override
-	public void unloadChunkNoSave(World w, org.bukkit.Chunk c, int cx, int cz) {
-		Log.severe("unloadChunkNoSave not implemented");
-	}
 
 	private String[] biomenames;
 	@Override
@@ -270,92 +222,6 @@ public class BukkitVersionHelperSpigot121 extends BukkitVersionHelper {
 	@Override
     public String getBiomeBaseResourceLocsation(Object bb) {
         return getBiomeReg().b((BiomeBase)bb).toString();
-	}
-
-	@Override
-	public Object getUnloadQueue(World world) {
-		Log.warning("getUnloadQueue not implemented yet");
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean isInUnloadQueue(Object unloadqueue, int x, int z) {
-		Log.warning("isInUnloadQueue not implemented yet");
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public long getInhabitedTicks(Chunk c) {
-		return ((CraftChunk)c).getHandle(ChunkStatus.n).u();
-	}
-
-	@Override
-	public Map<?, ?> getTileEntitiesForChunk(Chunk c) {
-		return ((CraftChunk)c).getHandle(ChunkStatus.n).k;
-	}
-
-	@Override
-	public int getTileEntityX(Object te) {
-		TileEntity tileent = (TileEntity) te;
-		return tileent.aD_().u();
-	}
-
-	@Override
-	public int getTileEntityY(Object te) {
-		TileEntity tileent = (TileEntity) te;
-		return tileent.aD_().v();
-	}
-
-	@Override
-	public int getTileEntityZ(Object te) {
-		TileEntity tileent = (TileEntity) te;
-		return tileent.aD_().w();
-	}
-
-	@Override
-	public Object readTileEntityNBT(Object te, org.bukkit.World w) {
-		TileEntity tileent = (TileEntity) te;
-		CraftWorld cw = (CraftWorld) w;
-		//NBTTagCompound nbt = tileent.o(world.registrtAccess());
-		NBTTagCompound nbt = tileent.e(cw.getHandle().H_());
-        return nbt;
-	}
-
-	@Override
-	public Object getFieldValue(Object nbt, String field) {
-		NBTTagCompound rec = (NBTTagCompound) nbt;
-		NBTBase val = rec.c(field);
-        if(val == null) return null;
-        if(val instanceof NBTTagByte) {
-            return ((NBTTagByte)val).i();
-        }
-        else if(val instanceof NBTTagShort) {
-            return ((NBTTagShort)val).g();
-        }
-        else if(val instanceof NBTTagInt) {
-            return ((NBTTagInt)val).f();
-        }
-        else if(val instanceof NBTTagLong) {
-            return ((NBTTagLong)val).e();
-        }
-        else if(val instanceof NBTTagFloat) {
-            return ((NBTTagFloat)val).j();
-        }
-        else if(val instanceof NBTTagDouble) {
-            return ((NBTTagDouble)val).i();
-        }
-        else if(val instanceof NBTTagByteArray) {
-            return ((NBTTagByteArray)val).d();
-        }
-        else if(val instanceof NBTTagString) {
-            return ((NBTTagString)val).s_();
-        }
-        else if(val instanceof NBTTagIntArray) {
-            return ((NBTTagIntArray)val).f();
-        }
-        return null;
 	}
 
 	@Override

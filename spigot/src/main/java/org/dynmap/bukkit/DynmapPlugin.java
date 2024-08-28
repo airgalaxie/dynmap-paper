@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import com.destroystokyo.paper.MaterialTags;
@@ -118,11 +116,8 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     // TPS calculator
     private double tps;
     private long lasttick;
-    private long perTickLimit;
-    private long cur_tick_starttime;
     private long avgticklen = 50000000;
 
-    private int chunks_in_cur_tick = 0;
     private long cur_tick;
     private long prev_tick;
 
@@ -486,70 +481,16 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
                 Log.severe("CraftBukkit build does not support biome APIs");
             }
             if(chunks.size() == 0) {    /* No chunks to get? */
-                c.loadChunks(0);
+                ((GenericMapChunkCache) c).loadChunksAsync();
                 return c;
             }
 
-            final MapChunkCache cc = c;
-
-            while(!cc.isDoneLoading()) {
-                if (BukkitVersionHelper.helper.isUnsafeAsync()) {
-                    Future<Boolean> f = core.getServer().callSyncMethod(new Callable<Boolean>() {
-                        public Boolean call() throws Exception {
-                            boolean exhausted = true;
-
-                            if (prev_tick != cur_tick) {
-                                prev_tick = cur_tick;
-                                cur_tick_starttime = System.nanoTime();
-                            }
-                            if (chunks_in_cur_tick > 0) {
-                                boolean done = false;
-                                while (!done) {
-                                    int cnt = chunks_in_cur_tick;
-                                    if (cnt > 5) cnt = 5;
-                                    chunks_in_cur_tick -= cc.loadChunks(cnt);
-                                    exhausted = (chunks_in_cur_tick == 0) || ((System.nanoTime() - cur_tick_starttime) > perTickLimit);
-                                    done = exhausted || cc.isDoneLoading();
-                                }
-                            }
-                            return exhausted;
-                        }
-                    });
-                    if (f == null) {
-                        return null;
-                    }
-                    Boolean delay;
-                    try {
-                        delay = f.get();
-                    } catch (CancellationException cx) {
-                        return null;
-                    } catch (InterruptedException cx) {
-                        return null;
-                    } catch (ExecutionException ex) {
-                        Log.severe("Exception while fetching chunks: ", ex.getCause());
-                        return null;
-                    } catch (Exception ix) {
-                        Log.severe(ix);
-                        return null;
-                    }
-
-                    if ((delay != null) && delay.booleanValue()) {
-                        try {
-                            Thread.sleep(25);
-                        } catch (InterruptedException ix) {
-                        }
-                    }
-                } else {
-                    if (prev_tick != cur_tick) {
-                        prev_tick = cur_tick;
-                        cur_tick_starttime = System.nanoTime();
-                    }
-                    if (cc instanceof GenericMapChunkCache) {
-                        ((GenericMapChunkCache) cc).loadChunksAsync();
-                    } else {
-                        cc.loadChunks(Integer.MAX_VALUE);
-                    }
+			while(!c.isDoneLoading()) {
+                if (prev_tick != cur_tick) {
+                    prev_tick = cur_tick;
                 }
+
+                ((GenericMapChunkCache) c).loadChunksAsync();
             }
             /* If cancelled due to world unload return nothing */
             if(w.isLoaded() == false)
@@ -1007,7 +948,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         // Start tps calculation
         lasttick = System.nanoTime();
         tps = 20.0;
-        perTickLimit = core.getMaxTickUseMS() * 1000000;
 
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             public void run() {
@@ -1076,9 +1016,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         lasttick = now;
         avgticklen = ((avgticklen * 99) / 100) + (elapsed / 100);
         tps = (double)1E9 / (double)avgticklen;
-        if (mapManager != null) {
-            chunks_in_cur_tick = mapManager.getMaxChunkLoadsPerTick();
-        }
         cur_tick++;
         
         // Tick core
