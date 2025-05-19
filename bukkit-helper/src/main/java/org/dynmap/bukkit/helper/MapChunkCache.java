@@ -1,11 +1,10 @@
-package org.dynmap.bukkit.helper.v121;
+package org.dynmap.bukkit.helper;
 
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.dynmap.DynmapChunk;
-import org.dynmap.bukkit.helper.BukkitWorld;
 import org.dynmap.common.BiomeMap;
 import org.dynmap.common.chunk.GenericChunk;
 import org.dynmap.common.chunk.GenericChunkCache;
@@ -22,13 +21,13 @@ import java.util.function.Supplier;
 /**
  * Container for managing chunks - dependent upon using chunk snapshots, since rendering is off server thread
  */
-public class MapChunkCache121 extends GenericMapChunkCache {
-    private static final AsyncChunkProvider121 provider = new AsyncChunkProvider121();
+public class MapChunkCache extends GenericMapChunkCache {
+    private static final AsyncChunkProvider provider = new AsyncChunkProvider();
     private World w;
     /**
      * Construct empty cache
      */
-    public MapChunkCache121(GenericChunkCache cc) {
+    public MapChunkCache(GenericChunkCache cc) {
         super(cc);
     }
 

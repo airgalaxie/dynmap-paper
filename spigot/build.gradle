@@ -31,9 +31,6 @@ dependencies {
     implementation(project(':bukkit-helper')) {
         transitive = false
     }
-    implementation(project(':bukkit-helper-121')) {
-        transitive = false
-    }
 }
 
 processResources {
@@ -56,9 +53,6 @@ shadowJar {
         include(dependency(':dynmap-api'))
         include(dependency(":DynmapCore"))
         include(dependency(':bukkit-helper'))
-        include(dependency(':bukkit-helper-121'))
-        include(dependency(':bukkit-helper-121-3'))
-        include(dependency(':bukkit-helper-121-4'))
     }
     destinationDirectory = file '../target'
     archiveBaseName = "Dynmap"

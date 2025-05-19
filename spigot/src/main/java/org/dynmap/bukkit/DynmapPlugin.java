@@ -71,7 +71,6 @@ import org.dynmap.MapManager;
 import org.dynmap.PlayerList;
 import org.dynmap.bukkit.helper.BukkitVersionHelper;
 import org.dynmap.bukkit.helper.BukkitWorld;
-import org.dynmap.bukkit.helper.SnapshotCache;
 import org.dynmap.bukkit.permissions.BukkitPermissions;
 import org.dynmap.bukkit.permissions.GroupManagerPermissions;
 import org.dynmap.bukkit.permissions.PermissionProvider;
@@ -325,16 +324,11 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         }
         @Override
         public double getCacheHitRate() {
-        	return helper.useGenericCache() ? BukkitVersionHelper.gencache.getHitRate() : SnapshotCache.sscache.getHitRate();
+        	return BukkitVersionHelper.gencache.getHitRate();
         }
         @Override
         public void resetCacheStats() {
-        	if (helper.useGenericCache()) {
-        		BukkitVersionHelper.gencache.resetStats();
-        	}
-        	else {
-        		SnapshotCache.sscache.resetStats();
-        	}
+        	BukkitVersionHelper.gencache.resetStats();
         }
         @Override
         public DynmapWorld getWorldByName(String wname) {
@@ -655,7 +649,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     public void onLoad() {
         Log.setLogger(this.getLogger(), "");
         
-        helper = Helper.getHelper();
+        helper = new BukkitVersionHelper();
         pm = this.getServer().getPluginManager();
         
         ModSupportImpl.init();
@@ -762,12 +756,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             return;
         }
         playerList = core.playerList;
-        if (helper.useGenericCache()) {
-        	BukkitVersionHelper.gencache = new GenericChunkCache(core.getSnapShotCacheSize(), core.useSoftRefInSnapShotCache());        	
-        }
-        else {
-            SnapshotCache.sscache = new SnapshotCache(core.getSnapShotCacheSize(), core.useSoftRefInSnapShotCache());
-        }
+        BukkitVersionHelper.gencache = new GenericChunkCache(core.getSnapShotCacheSize(), core.useSoftRefInSnapShotCache());
 
         /* Get map manager from core */
         mapManager = core.getMapManager();
@@ -794,10 +783,6 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         /* Disable core */
         core.disableCore();
 
-        if(SnapshotCache.sscache != null) {
-        	SnapshotCache.sscache.cleanup();
-        	SnapshotCache.sscache = null; 
-        }
         if (BukkitVersionHelper.gencache != null) {
         	BukkitVersionHelper.gencache.cleanup();
         	BukkitVersionHelper.gencache = null; 
@@ -1010,20 +995,10 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
     private boolean onblockredstone;
 
     private void invalidateSnapshot(String wn, int x, int y, int z) {
-    	if (helper.useGenericCache()) {
-    		BukkitVersionHelper.gencache.invalidateSnapshot(wn, x, y, z);      	
-    	}
-    	else {
-    		SnapshotCache.sscache.invalidateSnapshot(wn, x, y, z);  
-    	}
+    	BukkitVersionHelper.gencache.invalidateSnapshot(wn, x, y, z);
     }
     private void invalidateSnapshot(String wname, int minx, int miny, int minz, int maxx, int maxy, int maxz) {
-    	if (helper.useGenericCache()) {
-    		BukkitVersionHelper.gencache.invalidateSnapshot(wname, minx, miny, minz, maxx, maxy, maxz);
-    	}
-    	else {
-    		SnapshotCache.sscache.invalidateSnapshot(wname, minx, miny, minz, maxx, maxy, maxz); 
-    	}
+    	BukkitVersionHelper.gencache.invalidateSnapshot(wname, minx, miny, minz, maxx, maxy, maxz);
     }
 
     private void registerEvents() {

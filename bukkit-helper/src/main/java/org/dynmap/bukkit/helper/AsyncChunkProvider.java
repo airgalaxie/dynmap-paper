@@ -1,4 +1,4 @@
-package org.dynmap.bukkit.helper.v121;
+package org.dynmap.bukkit.helper;
 
 import ca.spottedleaf.concurrentutil.util.Priority;
 import ca.spottedleaf.moonrise.patches.chunk_system.io.MoonriseRegionFileIO;
@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 /**
  * The provider used to work with paper libs
  */
-public class AsyncChunkProvider121 {
+public class AsyncChunkProvider {
     private int currTick = MinecraftServer.currentTick;
     private int currChunks = 0;
 

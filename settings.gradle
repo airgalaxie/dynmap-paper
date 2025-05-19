@@ -7,14 +7,12 @@ pluginManagement {
 rootProject.name = 'dynmap-common'
 
 include ':spigot'
-include ':bukkit-helper-121'
 include ':bukkit-helper'
 include ':dynmap-api'
 include ':DynmapCore'
 include ':DynmapCoreAPI'
 
 project(':spigot').projectDir = "$rootDir/spigot" as File
-project(':bukkit-helper-121').projectDir = "$rootDir/bukkit-helper-121" as File
 project(':bukkit-helper').projectDir = "$rootDir/bukkit-helper" as File
 project(':dynmap-api').projectDir = "$rootDir/dynmap-api" as File
 project(':DynmapCore').projectDir = "$rootDir/DynmapCore" as File
