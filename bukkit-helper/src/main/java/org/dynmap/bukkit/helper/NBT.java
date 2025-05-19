@@ -1,5 +1,6 @@
 package org.dynmap.bukkit.helper;
 
+import net.minecraft.nbt.Tag;
 import org.dynmap.common.chunk.GenericBitStorage;
 import org.dynmap.common.chunk.GenericNBTCompound;
 import org.dynmap.common.chunk.GenericNBTList;
@@ -18,7 +19,7 @@ public class NBT {
 		}
 		@Override
 		public Set<String> getAllKeys() {
-			return obj.getAllKeys();
+			return obj.keySet();
 		}
 		@Override
 		public boolean contains(String s) {
@@ -26,63 +27,80 @@ public class NBT {
 		}
 		@Override
 		public boolean contains(String s, int i) {
-			return obj.contains(s, i);
+			Tag tag = obj.get(s);
+
+			if(tag == null) {
+				return false;
+			}
+
+			int type = tag.getId();
+
+			if(type == i) {
+				return true;
+			} else if(i != TAG_ANY_NUMERIC) {
+				return false;
+			} else {
+				return type == TAG_BYTE || type == TAG_SHORT || type == TAG_INT || type == TAG_LONG || type == TAG_FLOAT
+					|| type == TAG_DOUBLE;
+			}
 		}
 		@Override
 		public byte getByte(String s) {
-			return obj.getByte(s);
+			return obj.getByteOr(s, (byte) 0);
 		}
 		@Override
 		public short getShort(String s) {
-			return obj.getShort(s);
+			return obj.getShortOr(s, (short) 0);
 		}
 		@Override
 		public int getInt(String s) {
-			return obj.getInt(s);
+			return obj.getIntOr(s, 0);
 		}
 		@Override
 		public long getLong(String s) {
-			return obj.getLong(s);
+			return obj.getLongOr(s, 0);
 		}
 		@Override
 		public float getFloat(String s) {
-			return obj.getFloat(s);
+			return obj.getFloatOr(s, 0.0f);
 		}
 		@Override
 		public double getDouble(String s) {
-			return obj.getDouble(s);
+			return obj.getDoubleOr(s, 0.0);
 		}
 		@Override
 		public String getString(String s) {
-			return obj.getString(s);
+			return obj.getStringOr(s, "");
 		}
 		@Override
 		public byte[] getByteArray(String s) {
-			return obj.getByteArray(s);
+			return obj.getByteArray(s).orElseGet(() -> new byte[0]);
 		}
 		@Override
 		public int[] getIntArray(String s) {
-			return obj.getIntArray(s);
+			return obj.getIntArray(s).orElseGet(() -> new int[0]);
 		}
 		@Override
 		public long[] getLongArray(String s) {
-			return obj.getLongArray(s);
+			return obj.getLongArray(s).orElseGet(() -> new long[0]);
 		}
 		@Override
 		public GenericNBTCompound getCompound(String s) {
-			return new NBTCompound(obj.getCompound(s));
+			return new NBTCompound(obj.getCompoundOrEmpty(s));
 		}
 		@Override
 		public GenericNBTList getList(String s, int i) {
-			return new NBTList(obj.getList(s, i));
+			return new NBTList(obj.getListOrEmpty(s));
 		}
 		@Override
 		public boolean getBoolean(String s) {
-			return obj.getBoolean(s);
+			return obj.getBooleanOr(s, false);
 		}
 		@Override
 		public String getAsString(String s) {
-			return obj.get(s).getAsString();
+			Tag tag = obj.get(s);
+
+			return tag != null ? tag.asString().orElse("") : "";
 		}
 		@Override
 		public GenericBitStorage makeBitStorage(int bits, int count, long[] data) {
@@ -103,11 +121,11 @@ public class NBT {
 		}
 		@Override
 		public String getString(int idx) {
-			return obj.getString(idx);
+			return obj.getString(idx).orElse("");
 		}
 		@Override
 		public GenericNBTCompound getCompound(int idx) {
-			return new NBTCompound(obj.getCompound(idx));
+			return new NBTCompound(obj.getCompoundOrEmpty(idx));
 		}
 		public String toString() {
 			return obj.toString();
@@ -124,4 +142,3 @@ public class NBT {
 		}
 	}
 }
-
