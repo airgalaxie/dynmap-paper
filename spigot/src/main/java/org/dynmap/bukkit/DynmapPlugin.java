@@ -506,6 +506,13 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             return false;
         }
         @Override
+        public boolean isVanished() {
+            if(player != null) {
+                return player.hasMetadata("vanished");
+            }
+            return false;
+        }
+        @Override
         public boolean isSpectator() {
           if(player != null) {
               return player.getGameMode() == GameMode.SPECTATOR;

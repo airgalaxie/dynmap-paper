@@ -53,6 +53,7 @@ components:
   #  hideifundercover: 0
   #  hideifsneaking: false
   #  hide-if-invisiblity-potion: true
+  #  hide-if-vanished: true
   #  hidenames: false
   
   # Note: this component is needed for the dmarker commands, and for the Marker API to be available to other plugins

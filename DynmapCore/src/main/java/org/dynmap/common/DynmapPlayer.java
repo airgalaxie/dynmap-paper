@@ -81,6 +81,11 @@ public interface DynmapPlayer extends DynmapCommandSender {
      */
     public boolean isInvisible();
     /**
+     * Is vanished
+     * @return true if vanished
+     */
+    public boolean isVanished();
+    /**
      * Get sort weight (ordered lowest to highest in player list: 0=default)
      * @return sort weight
      */

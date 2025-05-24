@@ -14,6 +14,7 @@ public class ClientUpdateComponent extends Component {
     private boolean hideifsneaking;
     private boolean hideifspectator;
     private boolean hideifinvisiblepotion;
+    private boolean hideIfVanished;
     public static boolean usePlayerColors;
     public static boolean hideNames;
     
@@ -26,6 +27,7 @@ public class ClientUpdateComponent extends Component {
         hideifsneaking = configuration.getBoolean("hideifsneaking", false);
         hideifspectator = configuration.getBoolean("hideifspectator", false);
         hideifinvisiblepotion = configuration.getBoolean("hide-if-invisiblity-potion", true);
+        hideIfVanished = configuration.getBoolean("hide-if-vanished", true);
         usePlayerColors = configuration.getBoolean("use-name-colors", false);
         
         core.events.addListener("buildclientupdate", new Event.Listener<ClientUpdateEvent>() {
@@ -92,6 +94,9 @@ public class ClientUpdateComponent extends Component {
             }
             if((!hide) && hideifinvisiblepotion && p.isInvisible()) {
                 hide = true;
+            }
+            if((!hide) && hideIfVanished && p.isVanished()) {
+                continue;
             }
                 
             /* Don't leak player location for world not visible on maps, or if sendposition disbaled */
