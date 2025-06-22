@@ -1,7 +1,7 @@
 name: dynmap
 main: org.dynmap.bukkit.DynmapPlugin
 version: "${version}-${buildnumber}"
-api-version: '1.21.5'
+api-version: '1.21.6'
 authors: [mikeprimm]
 website: "https://www.reddit.com/r/Dynmap/"
 softdepend: [ GroupManager, LuckPerms, Vault ]
