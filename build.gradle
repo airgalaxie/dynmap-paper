@@ -12,8 +12,7 @@ buildscript {
 }
 
 plugins {
-    //id  "com.github.johnrengelman.shadow" version "7.1.0"
-    id  "io.github.goooler.shadow" version "8.1.7"
+    id  "com.gradleup.shadow" version "8.3.8"
     id  'java'
     id  'maven-publish'
 }
@@ -54,7 +53,7 @@ ext {
 }
 
 subprojects {  
-  apply plugin: "io.github.goooler.shadow"
+  apply plugin: "com.gradleup.shadow"
   apply plugin: 'java'
   apply plugin: 'maven-publish'
 
