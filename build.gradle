@@ -4,11 +4,9 @@ plugins {
     id  'maven-publish'
 }
 
-apply plugin: 'eclipse'
-
-eclipse {
-    project {
-        name = "Dynmap"
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -44,8 +42,12 @@ subprojects {
   apply plugin: 'java'
   apply plugin: 'maven-publish'
 
-  sourceCompatibility = 21
-  targetCompatibility = 21
+  java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+  }
+
   tasks.withType(JavaCompile) {
   	options.encoding = 'UTF-8'
   }

@@ -1,9 +1,8 @@
-
 description = 'dynmap'
 
-eclipse {
-    project {
-        name = "Dynmap(Spigot)"
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -56,10 +55,6 @@ shadowJar {
     destinationDirectory = file '../target'
     archiveBaseName = "Dynmap"
     archiveClassifier = 'spigot'
-}
-shadowJar.doLast {
-    task ->
-        ant.checksum file: task.archivePath
 }
 
 artifacts {

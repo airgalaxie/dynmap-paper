@@ -1,14 +1,10 @@
 description = "DynmapCore"
 
-apply plugin: 'eclipse'
-
-eclipse {
-    project {
-        name = "Dynmap(DynmapCore)"
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
-
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
 dependencies {
     implementation project(':DynmapCoreAPI')

@@ -3,9 +3,9 @@ plugins {
 
 }
 
-eclipse {
-    project {
-        name = "Dynmap(Spigot-Common)"
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
