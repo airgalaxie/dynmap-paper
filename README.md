@@ -3,7 +3,7 @@ This is a (Very opinionated) fork of [Dynmap](https://github.com/webbukkit/dynma
 It has been stripped of everything we don't use and cleaned up a bit.
 
 Changes include:
-- Removal of all platform support except Paper 1.21.9
+- Removal of all platform support except Paper 1.21.10
 - Now a Mojang mapped Paper plugin
 - Removal of web chat
 - Removal of login support
