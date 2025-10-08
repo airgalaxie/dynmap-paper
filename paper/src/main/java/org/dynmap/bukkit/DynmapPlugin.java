@@ -780,7 +780,9 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         DynmapCommonAPIListener.apiTerminated();
 
         /* Disable core */
-        core.disableCore();
+	    if (core != null) {
+		    core.disableCore();
+	    }
 
         if (BukkitVersionHelper.gencache != null) {
         	BukkitVersionHelper.gencache.cleanup();
