@@ -70,13 +70,13 @@ public class MapChunkCache extends GenericMapChunkCache {
     @Override
     public int getFoliageColor(BiomeMap bm, int[] colormap, int x, int z) {
 		return bm.<Biome>getBiomeObject().map(Biome::getSpecialEffects)
-                .flatMap(BiomeSpecialEffects::getFoliageColorOverride).orElse(colormap[bm.biomeLookup()]);
+                .flatMap(BiomeSpecialEffects::foliageColorOverride).orElse(colormap[bm.biomeLookup()]);
     }
 
     @Override
     public int getGrassColor(BiomeMap bm, int[] colormap, int x, int z) {
         BiomeSpecialEffects fog = bm.<Biome>getBiomeObject().map(Biome::getSpecialEffects).orElse(null);
         if (fog == null) return colormap[bm.biomeLookup()];
-        return fog.getGrassColorModifier().modifyColor(x, z, fog.getGrassColorOverride().orElse(colormap[bm.biomeLookup()]));
+        return fog.grassColorModifier().modifyColor(x, z, fog.grassColorOverride().orElse(colormap[bm.biomeLookup()]));
     }
 }

@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    implementation('io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT')
+    implementation('io.papermc.paper:paper-api:1.21.11-rc2-R0.1-SNAPSHOT')
     compileOnly('net.luckperms:api:5.0')  { transitive = false }
     compileOnly('com.github.MilkBowl:VaultAPI:1.7') { transitive = false }
     implementation(project(":dynmap-api"))  { transitive = false }

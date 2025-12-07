@@ -2,7 +2,7 @@ package org.dynmap.bukkit.helper;
 
 import net.minecraft.core.IdMapper;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -100,7 +100,7 @@ public class BukkitVersionHelper {
 		while (iter.hasNext()) {
     		BlockState bd = iter.next();
     		Block b = bd.getBlock();
-        	ResourceLocation id = BuiltInRegistries.BLOCK.getKey(b);
+        	Identifier id = BuiltInRegistries.BLOCK.getKey(b);
     		String bname = id.toString();
     		DynmapBlockState lastbs = lastBlockState.get(bname);	// See if we have seen this one
     		int idx = 0;
