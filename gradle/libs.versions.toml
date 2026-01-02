@@ -10,6 +10,7 @@ paperweightUserdev = "2.0.0-beta.19"
 luckperms = "5.0"
 vault = "1.7"
 groupManager = "2.10.1"
+pluginYmlPaper = "0.8.0"
 
 [libraries]
 paperApi = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
@@ -26,3 +27,4 @@ groupManager = { group = "org.anjocaido", name = "EssentialsGroupManager", versi
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 paperweightUserdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweightUserdev" }
+pluginYmlPaper = { id = "de.eldoria.plugin-yml.paper", version.ref = "pluginYmlPaper" }
