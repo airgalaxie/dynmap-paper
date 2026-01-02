@@ -12,8 +12,8 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import com.destroystokyo.paper.MaterialTags;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.plugin.configuration.PluginMeta;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.*;
@@ -55,7 +55,6 @@ import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
@@ -470,7 +469,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         @Override
         public double getHealth() {
             if(player != null) {
-            	return Math.ceil(2.0 * player.getHealth() / player.getMaxHealth() * player.getHealthScale()) / 2.0;
+            	return Math.ceil(2.0 * player.getHealth() / player.getAttribute(Attribute.MAX_HEALTH).getValue() * player.getHealthScale()) / 2.0;
             }
             else
                 return 0;
@@ -484,7 +483,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         }
         @Override
         public DynmapLocation getBedSpawnLocation() {
-            Location loc = offplayer.getBedSpawnLocation();
+            Location loc = offplayer.getRespawnLocation();
             if(loc != null) {
                 return toLoc(loc);
             }
@@ -492,7 +491,7 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         }
         @Override
         public long getLastLoginTime() {
-            return offplayer.getLastPlayed();
+            return offplayer.getLastSeen();
         }
         @Override
         public long getFirstLoginTime() {
@@ -668,8 +667,8 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
             this.setEnabled(false);
             return;
         }
-        PluginDescriptionFile pdfFile = this.getDescription();
-        version = pdfFile.getVersion();
+        PluginMeta meta = this.getPluginMeta();
+        version = meta.getVersion();
 
         /* Get MC version */
         String bukkitver = getServer().getVersion();
@@ -691,8 +690,8 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
         registerPlayerLoginListener();
 
         /* Build default permissions from our plugin */
-        Map<String, Boolean> perdefs = new HashMap<String, Boolean>();
-        List<Permission> pd = plugin.getDescription().getPermissions();
+        Map<String, Boolean> perdefs = new HashMap<>();
+        List<Permission> pd = plugin.getPluginMeta().getPermissions();
         for(Permission p : pd) {
             perdefs.put(p.getName(), p.getDefault() == PermissionDefault.TRUE);
         }
@@ -1104,11 +1103,11 @@ public class DynmapPlugin extends JavaPlugin implements DynmapAPI {
                 public void onBlockFromTo(BlockFromToEvent event) {
                     Block b = event.getBlock();
                     Material m = b.getType();
-                    if(!MaterialTags.PRESSURE_PLATES.isTagged(m))
+                    if(!Tag.PRESSURE_PLATES.isTagged(m))
                         checkBlock(b, "blockfromto");
                     b = event.getToBlock();
                     m = b.getType();
-                    if(!MaterialTags.PRESSURE_PLATES.isTagged(m))
+                    if(!Tag.PRESSURE_PLATES.isTagged(m))
                         checkBlock(b, "blockfromto");
                 }
             };
