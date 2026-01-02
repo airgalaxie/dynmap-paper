@@ -42,7 +42,7 @@ tasks {
 
         destinationDirectory = file("../target")
         archiveBaseName = "Dynmap"
-        archiveClassifier = "spigot"
+        archiveClassifier = "paper"
     }
 
     artifacts {
