@@ -25,7 +25,7 @@ public class GenericChunkSection {
 			blocks = bs;
 		}
 		public final DynmapBlockState getBlock(int x, int y, int z) {
-			return blocks[(256 * (y & 0xF)) + (16 * (z & 0xF)) + (x & 0xF)];
+			return blocks[((y & 0xF) << 8) | ((z & 0xF) << 4) | (x & 0xF)];
 		}
 		public final DynmapBlockState getBlock(GenericChunkPos pos) {
 			return blocks[pos.soffset];
@@ -40,7 +40,7 @@ public class GenericChunkSection {
 			palette = pal;
 		}
 		public final DynmapBlockState getBlock(int x, int y, int z) {
-			return palette[blocks[(256 * (y & 0xF)) + (16 * (z & 0xF)) + (x & 0xF)]];
+			return palette[blocks[((y & 0xF) << 8) | ((z & 0xF) << 4) | (x & 0xF)]];
 		}
 		public final DynmapBlockState getBlock(GenericChunkPos pos) {
 			return palette[blocks[pos.soffset]];
@@ -126,12 +126,12 @@ public class GenericChunkSection {
 			light = new long[256];
 			if (lig != null) {
 				for (int off = 0; (off < lig.length) && (off < 2048); off++) {
-					light[off >> 3] |= (0xFFL & (long)lig[off]) << (8 * (off & 0x7));
+					light[off >> 3] |= (0xFFL & (long)lig[off]) << ((off & 0x7) << 3);
 				}
 			}
 		}
 		public final int getLight(int x, int y, int z) {
-			return 0xF & (int)(light[(16 * (y & 0xF)) + (z & 0xF)] >> (4 * (x & 0xF)));
+			return 0xF & (int)(light[((y & 0xF) << 4) | (z & 0xF)] >> ((x & 0xF) << 2));
 		}
 		public final int getLight(GenericChunkPos pos) {
 			return 0xF & (int)(light[pos.soffset >> 4] >> (4 * pos.sx));			

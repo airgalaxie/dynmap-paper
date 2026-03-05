@@ -38,7 +38,7 @@ public class GenericChunk {
 	// Get section for given block Y coord
 	public final GenericChunkSection getSection(int y) {
 		int idx = (y >> 4) - this.cy_min;
-		if ((idx < 0) || (idx >= sectionCnt)) {
+		if ((idx < 0) || (idx >= sections.length)) {
 			return GenericChunkSection.EMPTY;
 		}
 		return this.sections[idx];

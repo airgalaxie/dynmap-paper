@@ -154,9 +154,7 @@ public class ShadowHDLighting extends DefaultHDLighting {
             }
         }
         if(cscale < 256) {
-            Color c = outcolor[0];
-            c.setRGBA((c.getRed() * cscale) >> 8, (c.getGreen() * cscale) >> 8, 
-                (c.getBlue() * cscale) >> 8, c.getAlpha());
+            outcolor[0].scaleRGB(cscale);
         }
         if(outcolor.length > 1) {
             ll0 = getLightLevel(skyemit0, false);
@@ -194,9 +192,7 @@ public class ShadowHDLighting extends DefaultHDLighting {
                 }
             }
             if(cscale < 256) {
-                Color c = outcolor[1];
-                c.setRGBA((c.getRed() * cscale) >> 8, (c.getGreen() * cscale) >> 8, 
-                    (c.getBlue() * cscale) >> 8, c.getAlpha());
+                outcolor[1].scaleRGB(cscale);
             }
         }
     }
@@ -269,8 +265,7 @@ public class ShadowHDLighting extends DefaultHDLighting {
     private final void shadowColor(Color c, int lightlevel, int[] shadowscale) {
         int scale = shadowscale[lightlevel];
         if(scale < 256)
-            c.setRGBA((c.getRed() * scale) >> 8, (c.getGreen() * scale) >> 8, 
-                (c.getBlue() * scale) >> 8, c.getAlpha());
+            c.scaleRGB(scale);
     }
 
 
