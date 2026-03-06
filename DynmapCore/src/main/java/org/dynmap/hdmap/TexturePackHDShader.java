@@ -181,6 +181,7 @@ public class TexturePackHDShader implements HDShader {
          * Process next ray step - called for each block on route
          * @return true if ray is done, false if ray needs to continue
          */
+        @Override
         public boolean processBlock(HDPerspectiveState ps) {
             DynmapBlockState blocktype = ps.getBlockState();
             if ((hiddenids != null) && hiddenids.get(blocktype.globalStateIndex)) {
@@ -265,7 +266,7 @@ public class TexturePackHDShader implements HDShader {
                 if(color[0].isTransparent()) {
                     for(int i = 0; i < color.length; i++)
                         color[i].setColor(tmpcolor[i]);
-                    return (color[0].getAlpha() == 255);
+                    return (tmpcolor[0].getAlpha() == 255);
                 }
                 /* Else, blend and generate new alpha */
                 else {
@@ -273,14 +274,18 @@ public class TexturePackHDShader implements HDShader {
                     int alpha2 = tmpcolor[0].getAlpha() * (255-alpha) / 255;
                     int talpha = alpha + alpha2;
                     if(talpha > 0)
-                    	for(int i = 0; i < color.length; i++)
-                    		color[i].setRGBA((tmpcolor[i].getRed()*alpha2 + color[i].getRed()*alpha) / talpha,
-                                  (tmpcolor[i].getGreen()*alpha2 + color[i].getGreen()*alpha) / talpha,
-                                  (tmpcolor[i].getBlue()*alpha2 + color[i].getBlue()*alpha) / talpha, talpha);
+                        for(int i = 0; i < color.length; i++) {
+                            int tc = tmpcolor[i].getARGB();
+                            int cc = color[i].getARGB();
+                            color[i].setARGB((talpha << 24)
+                                | (((((tc >> 16) & 0xFF) * alpha2 + ((cc >> 16) & 0xFF) * alpha) / talpha) << 16)
+                                | (((((tc >>  8) & 0xFF) * alpha2 + ((cc >>  8) & 0xFF) * alpha) / talpha) <<  8)
+                                |   ((( tc        & 0xFF) * alpha2 + ( cc        & 0xFF) * alpha) / talpha));
+                        }
                     else
                     	for(int i = 0; i < color.length; i++)
                     		color[i].setTransparent();
-                    	
+
                     return (talpha >= 254);   /* If only one short, no meaningful contribution left */
                 }
             }
@@ -290,6 +295,7 @@ public class TexturePackHDShader implements HDShader {
         /**
          * Ray ended - used to report that ray has exited map (called if renderer has not reported complete)
          */
+        @Override
         public void rayFinished(HDPerspectiveState ps) {
         }
         /**
@@ -297,12 +303,14 @@ public class TexturePackHDShader implements HDShader {
          * @param c - object to store color value in
          * @param index - index of color to request (renderer specific - 0=default, 1=day for night/day renderer
          */
+        @Override
         public void getRayColor(Color c, int index) {
             c.setColor(color[index]);
         }
         /**
          * Clean up state object - called after last ray completed
          */
+        @Override
         public void cleanup() {
             if (ctm_cache != null) {
                 ctm_cache.clear();
@@ -338,11 +346,13 @@ public class TexturePackHDShader implements HDShader {
      * @param scale - scale of perspective
      * @return state object to use for all rays in tile
      */
+    @Override
     public HDShaderState getStateInstance(HDMap map, MapChunkCache cache, MapIterator mapiter, int scale) {
         return new ShaderState(mapiter, map, cache, scale);
     }
     
     /* Add shader's contributions to JSON for map object */
+    @Override
     public void addClientConfiguration(JSONObject mapObject) {
         s(mapObject, "shader", name);
     }
