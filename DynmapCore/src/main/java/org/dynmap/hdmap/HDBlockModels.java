@@ -41,7 +41,7 @@ import org.dynmap.utils.Vector3D;
  */
 public class HDBlockModels {
     private static int max_patches;
-    static HashMap<Integer, HDBlockModel> models_by_id_data = new HashMap<Integer, HDBlockModel>();
+    static HDBlockModel[] models_by_id_data = new HDBlockModel[0];
     static PatchDefinitionFactory pdf = new PatchDefinitionFactory();
     static BitSet customModelsRequestingTileData = new BitSet(); // Index by globalStateIndex
     static BitSet changeIgnoredBlocks = new BitSet();   // Index by globalStateIndex
@@ -53,17 +53,19 @@ public class HDBlockModels {
 
     /* Reset model if defined by different block set */
     public static boolean resetIfNotBlockSet(DynmapBlockState blk, String blockset) {
-        HDBlockModel bm = models_by_id_data.get(blk.globalStateIndex);
+        int idx = blk.globalStateIndex;
+        HDBlockModel bm = (idx < models_by_id_data.length) ? models_by_id_data[idx] : null;
         if((bm != null) && (bm.getBlockSet().equals(blockset) == false)) {
             Debug.debug("Reset block model for " + blk + " from " + bm.getBlockSet() + " due to new def from " + blockset);
-            models_by_id_data.remove(blk.globalStateIndex);
+            models_by_id_data[idx] = null;
             return true;
         }
         return false;
     }
     /* Get texture count needed for model */
     public static int getNeededTextureCount(DynmapBlockState blk) {
-        HDBlockModel bm = models_by_id_data.get(blk.globalStateIndex);
+        int idx = blk.globalStateIndex;
+        HDBlockModel bm = (idx < models_by_id_data.length) ? models_by_id_data[idx] : null;
         if(bm != null) {
             return bm.getTextureCount();
         }
@@ -88,18 +90,12 @@ public class HDBlockModels {
 
     private static void remapModel(String bn, String newbn) {
         DynmapBlockState frombs = DynmapBlockState.getBaseStateByName(bn);
-        DynmapBlockState tobs = DynmapBlockState.getBaseStateByName(bn);
+        DynmapBlockState tobs = DynmapBlockState.getBaseStateByName(newbn);
         int fcnt = frombs.getStateCount();
         for (int bs = 0; bs < tobs.getStateCount(); bs++) {
             DynmapBlockState tb = tobs.getState(bs);
-            DynmapBlockState fs = tobs.getState(bs % fcnt);
-            HDBlockModel m = models_by_id_data.get(fs.globalStateIndex);
-            if (m != null) {
-                models_by_id_data.put(tb.globalStateIndex, m);
-            }
-            else {
-                models_by_id_data.remove(tb.globalStateIndex);
-            }
+            DynmapBlockState fs = frombs.getState(bs % fcnt);
+            models_by_id_data[tb.globalStateIndex] = models_by_id_data[fs.globalStateIndex];
             customModelsRequestingTileData.set(tb.globalStateIndex, customModelsRequestingTileData.get(fs.globalStateIndex));
             changeIgnoredBlocks.set(tb.globalStateIndex, changeIgnoredBlocks.get(fs.globalStateIndex));
         }
@@ -113,7 +109,7 @@ public class HDBlockModels {
     public static final String[] getTileEntityFieldsNeeded(DynmapBlockState blk) {
         int idx = blk.globalStateIndex;
         if(customModelsRequestingTileData.get(idx)) {
-            HDBlockModel mod = models_by_id_data.get(idx);
+            HDBlockModel mod = (idx < models_by_id_data.length) ? models_by_id_data[idx] : null;
             if(mod instanceof CustomBlockModel) {
                 return ((CustomBlockModel)mod).render.getTileEntityFieldsNeeded();
             }
@@ -166,7 +162,7 @@ public class HDBlockModels {
         File datadir = core.getDataFolder();
         max_patches = 6;    /* Reset to default */
         /* Reset models-by-ID-Data cache */
-        models_by_id_data.clear();
+        models_by_id_data = new HDBlockModel[DynmapBlockState.getGlobalIndexMax()];
         /* Reset scaled models by scale cache */
         scaled_models_by_scale.clear();
         /* Reset change-ignored flags */
@@ -455,7 +451,7 @@ public class HDBlockModels {
                         Log.severe("Invalid rotate ID: " + bs + " on line " + lineNum + " of file: " + fname);
                         continue;
                     }
-                    HDBlockModel mod = models_by_id_data.get(bs.globalStateIndex);
+                    HDBlockModel mod = models_by_id_data[bs.globalStateIndex];
                     if (modlist.isEmpty()) {
                     }
                     else if ((mod != null) && ((rot%90) == 0) && (mod instanceof HDBlockVolumetricModel)) {
@@ -524,7 +520,7 @@ public class HDBlockModels {
                         Log.severe("Invalid patchrotate ID: " + bs + " on line " + lineNum + "of file: " + fname);
                         continue;
                     }
-                    HDBlockModel mod = models_by_id_data.get(bs.globalStateIndex);
+                    HDBlockModel mod = models_by_id_data[bs.globalStateIndex];
                     if (pmodlist.isEmpty()) {
                     }
                     else if ((mod != null) && (mod instanceof HDBlockPatchModel)) {

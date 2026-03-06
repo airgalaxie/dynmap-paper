@@ -19,7 +19,8 @@ public abstract class HDBlockModel {
             for (int i = 0; i < bblk.getStateCount(); i++) {
                 if (databits.isEmpty() || databits.get(i)) {
                     DynmapBlockState bs = bblk.getState(i);
-                    HDBlockModel prev = HDBlockModels.models_by_id_data.put(bs.globalStateIndex, this);
+                    HDBlockModel prev = HDBlockModels.models_by_id_data[bs.globalStateIndex];
+                    HDBlockModels.models_by_id_data[bs.globalStateIndex] = this;
                     if((prev != null) && (prev != this)) {
                         prev.removed(bs);
                     }

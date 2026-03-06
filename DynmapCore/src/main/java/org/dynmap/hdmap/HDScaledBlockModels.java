@@ -21,9 +21,10 @@ public class HDScaledBlockModels {
         	newcustom = new CustomBlockModel[DynmapBlockState.getGlobalIndexMax()];
         	custom = newcustom;
         }
-        for(Integer gidx : HDBlockModels.models_by_id_data.keySet()) {
-            HDBlockModel m = HDBlockModels.models_by_id_data.get(gidx);
-            
+        for(int gidx = 0; gidx < HDBlockModels.models_by_id_data.length; gidx++) {
+            HDBlockModel m = HDBlockModels.models_by_id_data[gidx];
+            if(m == null) continue;
+
             if(m instanceof HDBlockVolumetricModel) {
                 HDBlockVolumetricModel vm = (HDBlockVolumetricModel)m;
                 short[] smod = vm.getScaledMap(scale);
@@ -58,37 +59,34 @@ public class HDScaledBlockModels {
     }
     
     public final short[] getScaledModel(DynmapBlockState blk) {
-        short[] m = null;
-        try {
-            m = modelvectors[blk.globalStateIndex];
-        } catch (ArrayIndexOutOfBoundsException aioobx) {
-            short[][] newmodels = new short[blk.globalStateIndex+1][];
+        int idx = blk.globalStateIndex;
+        if(idx >= modelvectors.length) {
+            short[][] newmodels = new short[idx + 1][];
             System.arraycopy(modelvectors, 0, newmodels, 0, modelvectors.length);
             modelvectors = newmodels;
+            return null;
         }
-        return m;
+        return modelvectors[idx];
     }
     public PatchDefinition[] getPatchModel(DynmapBlockState blk) {
-        PatchDefinition[] p = null;
-        try {
-            p = patches[blk.globalStateIndex];
-        } catch (ArrayIndexOutOfBoundsException aioobx) {
-            PatchDefinition[][] newpatches = new PatchDefinition[blk.globalStateIndex+1][];
+        int idx = blk.globalStateIndex;
+        if(idx >= patches.length) {
+            PatchDefinition[][] newpatches = new PatchDefinition[idx + 1][];
             System.arraycopy(patches, 0, newpatches, 0, patches.length);
             patches = newpatches;
+            return null;
         }
-        return p;
+        return patches[idx];
     }
-    
+
     public CustomBlockModel getCustomBlockModel(DynmapBlockState blk) {
-        CustomBlockModel m = null;
-        try {
-            m = custom[blk.globalStateIndex];
-        } catch (ArrayIndexOutOfBoundsException aioobx) {
-            CustomBlockModel[] newcustom = new CustomBlockModel[blk.globalStateIndex+1];
+        int idx = blk.globalStateIndex;
+        if(idx >= custom.length) {
+            CustomBlockModel[] newcustom = new CustomBlockModel[idx + 1];
             System.arraycopy(custom, 0, newcustom, 0, custom.length);
             custom = newcustom;
-        }   
-        return m;
+            return null;
+        }
+        return custom[idx];
     }
 }
