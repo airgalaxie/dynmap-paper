@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "us.dynmap"
-version = "3.7-SNAPSHOT"
+version = "3.8-SNAPSHOT"
 
 //https://github.com/gradle/gradle/issues/15383
 val libs = the<LibrariesForLibs>()
