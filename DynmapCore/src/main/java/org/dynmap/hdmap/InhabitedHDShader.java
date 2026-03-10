@@ -1,7 +1,5 @@
 package org.dynmap.hdmap;
 
-import static org.dynmap.JSONUtils.s;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.TreeSet;
@@ -9,6 +7,7 @@ import java.util.TreeSet;
 import org.dynmap.Color;
 import org.dynmap.ConfigurationNode;
 import org.dynmap.DynmapCore;
+import static org.dynmap.JSONUtils.s;
 import org.dynmap.Log;
 import org.dynmap.MapManager;
 import org.dynmap.common.DynmapCommandSender;
@@ -50,7 +49,7 @@ public class InhabitedHDShader implements HDShader {
                 }
             }
         }
-        TreeSet<Long> keys = new TreeSet<Long>(map.keySet());
+        TreeSet<Long> keys = new TreeSet<>(map.keySet());
         filllevel = new long[keys.size()];
         fillcolor = new Color[keys.size()];
         int idx = 0;
@@ -98,7 +97,7 @@ public class InhabitedHDShader implements HDShader {
     
     private class OurShaderState implements HDShaderState {
         private final Color color[];
-        private Color c;
+        private final Color c;
         protected HDMap map;
         private final HDLighting lighting;
         final int[] lightingTable;
@@ -246,9 +245,9 @@ public class InhabitedHDShader implements HDShader {
     public void exportAsMaterialLibrary(DynmapCommandSender sender, OBJExport out) throws IOException {
         throw new IOException("Export unsupported");
     }
-    private static final String[] nulllist = new String[0];
+    private static final String[] NULLLIST = new String[0];
     @Override
     public String[] getCurrentBlockMaterials(DynmapBlockState blk, MapIterator mapiter, int[] txtidx, BlockStep[] steps) {
-        return nulllist;
+        return NULLLIST;
     }
 }

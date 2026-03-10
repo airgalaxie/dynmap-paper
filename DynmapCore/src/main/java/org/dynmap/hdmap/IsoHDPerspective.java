@@ -1,9 +1,5 @@
 package org.dynmap.hdmap;
 
-import static org.dynmap.JSONUtils.s;
-
-import org.dynmap.DynmapWorld;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -14,11 +10,14 @@ import org.dynmap.Color;
 import org.dynmap.ConfigurationNode;
 import org.dynmap.DynmapChunk;
 import org.dynmap.DynmapCore;
+import org.dynmap.DynmapWorld;
+import static org.dynmap.JSONUtils.s;
 import org.dynmap.Log;
 import org.dynmap.MapManager;
 import org.dynmap.MapTile;
 import org.dynmap.MapType;
 import org.dynmap.MapTypeState;
+import org.dynmap.hdmap.TexturePack.BlockTransparency;
 import org.dynmap.markers.impl.MarkerAPIImpl;
 import org.dynmap.renderer.DynmapBlockState;
 import org.dynmap.renderer.RenderPatch;
@@ -26,10 +25,9 @@ import org.dynmap.renderer.RenderPatchFactory.SideVisible;
 import org.dynmap.storage.MapStorage;
 import org.dynmap.storage.MapStorageTile;
 import org.dynmap.utils.BlockStep;
-import org.dynmap.hdmap.TexturePack.BlockTransparency;
+import org.dynmap.utils.DynLongHashMap;
 import org.dynmap.utils.DynmapBufferedImage;
 import org.dynmap.utils.LightLevels;
-import org.dynmap.utils.DynLongHashMap;
 import org.dynmap.utils.MapChunkCache;
 import org.dynmap.utils.MapIterator;
 import org.dynmap.utils.Matrix3D;
@@ -455,9 +453,9 @@ public class IsoHDPerspective implements HDPerspective {
                 return hitcnt;
             }
             /* Compute parametric value of intercept */
-            double t = inv_det * pd.v.innerProduct(vS);
-            if (t > 0.000001) { /* We've got a hit */
-                patch_t[hitcnt] = t;
+            double tt = inv_det * pd.v.innerProduct(vS);
+            if (tt > 0.000001) { /* We've got a hit */
+                patch_t[hitcnt] = tt;
                 patch_u[hitcnt] = u;
                 patch_v[hitcnt] = v;
                 patch_shade[hitcnt] = pd.shade;
@@ -496,8 +494,8 @@ public class IsoHDPerspective implements HDPerspective {
             int hitcnt = 0;
             int water_hit = Integer.MAX_VALUE; // hit index of first water hit
             /* Loop through patches : compute intercept values for each */
-            for(int i = 0; i < patches.length; i++) {
-                hitcnt = handlePatch((PatchDefinition)patches[i], hitcnt);
+            for (RenderPatch patche : patches) {
+                hitcnt = handlePatch((PatchDefinition) patche, hitcnt);
             }
             if ((fluidpatches != null) && (fluidpatches.length > 0)) {
                 int prev_hitcnt = hitcnt;
@@ -608,7 +606,7 @@ public class IsoHDPerspective implements HDPerspective {
         /**
          * Process visit of ray to block
          */
-        private final boolean visit_block(HDShaderState[] shaderstate, boolean[] shaderdone) {
+        private boolean visit_block(HDShaderState[] shaderstate, boolean[] shaderdone) {
             lastblocktype = blocktype;
             blocktype = mapiter.getBlockType();
             if (skiptoair) {	/* If skipping until we see air */
@@ -652,7 +650,7 @@ public class IsoHDPerspective implements HDPerspective {
         }
         
         /* Skip empty : return false if exited */
-        private final boolean raytraceSkipEmpty(MapChunkCache cache) {
+        private boolean raytraceSkipEmpty(MapChunkCache cache) {
         	int minsy = cache.getWorld().minY >> 4;
             while(cache.isEmptySection(sx, sy, sz)) {
                 /* If Y step is next best */
@@ -685,7 +683,7 @@ public class IsoHDPerspective implements HDPerspective {
         /**
          * Step block iterator: false if done
          */
-        private final boolean raytraceStepIterator(int miny, int maxy) {
+        private boolean raytraceStepIterator(int miny, int maxy) {
             /* If Y step is next best */
             if ((t_next_y <= t_next_x) && (t_next_y <= t_next_z)) {
                 y += y_inc;
@@ -1076,7 +1074,7 @@ public class IsoHDPerspective implements HDPerspective {
 
     @Override
     public List<TileFlags.TileCoord> getTileCoords(DynmapWorld world, int x, int y, int z, int tilescale) {
-        HashSet<TileFlags.TileCoord> tiles = new HashSet<TileFlags.TileCoord>();
+        HashSet<TileFlags.TileCoord> tiles = new HashSet<>();
         Vector3D block = new Vector3D();
         block.x = x;
         block.y = y;
@@ -1099,12 +1097,12 @@ public class IsoHDPerspective implements HDPerspective {
             block.y = inity;
             block.x += 1;
         }
-        return new ArrayList<TileFlags.TileCoord>(tiles);
+        return new ArrayList<>(tiles);
     }
 
     @Override
     public List<TileFlags.TileCoord> getTileCoords(DynmapWorld world, int minx, int miny, int minz, int maxx, int maxy, int maxz, int tilescale) {
-        ArrayList<TileFlags.TileCoord> tiles = new ArrayList<TileFlags.TileCoord>();
+        ArrayList<TileFlags.TileCoord> tiles = new ArrayList<>();
         Vector3D blocks[] = new Vector3D[] { new Vector3D(), new Vector3D() };
         blocks[0].x = minx - 1;
         blocks[0].y = miny - 1;
@@ -1194,7 +1192,7 @@ public class IsoHDPerspective implements HDPerspective {
          * 6 = bottom-upper-right (XYz), 
          * 7 = top-upper-right (XYZ) */  
         Vector3D corners[] = new Vector3D[8];
-        double dx = -basemodscale, dy = -basemodscale;    /* Add 1 block on each axis */
+        double dx = -basemodscale, dy;    /* Add 1 block on each axis */
         for(int x = t.tx, idx = 0; x <= (t.tx+1); x++) {
             dy = -basemodscale;
             for(int y = t.ty; y <= (t.ty+1); y++) {
@@ -1229,7 +1227,7 @@ public class IsoHDPerspective implements HDPerspective {
             }
         }
         /* Now, need to walk through the min/max range to see which chunks are actually needed */
-        ArrayList<DynmapChunk> chunks = new ArrayList<DynmapChunk>();
+        ArrayList<DynmapChunk> chunks = new ArrayList<>();
         
         for(int x = min_chunk_x; x <= max_chunk_x; x++) {
             for(int z = min_chunk_z; z <= max_chunk_z; z++) {
@@ -1340,7 +1338,6 @@ public class IsoHDPerspective implements HDPerspective {
                     ps.raytrace(cache, shaderstate, shaderdone);
                 } catch (Exception ex) {
                     Log.severe("Error while raytracing tile: perspective=" + this.name + ", coord=" + mapiter.getX() + "," + mapiter.getY() + "," + mapiter.getZ() + ", blockid=" + mapiter.getBlockType() + ", lighting=" + mapiter.getBlockSkyLight() + ":" + mapiter.getBlockEmittedLight() + ", biome=" + mapiter.getBiome().toString(), ex);
-                    ex.printStackTrace();
                 }
                 final int rowOffset = (tilePixelSize - y - 1) * tilePixelSize + x;
                 for(int i = 0; i < numshaders; i++) {
@@ -1469,7 +1466,7 @@ public class IsoHDPerspective implements HDPerspective {
         return name;
     }
 
-    private static String[] directions = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" };
+    private static final String[] directions = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" };
     @Override
     public void addClientConfiguration(JSONObject mapObject) {
         s(mapObject, "perspective", name);
@@ -1482,7 +1479,7 @@ public class IsoHDPerspective implements HDPerspective {
         s(mapObject, "compassview", directions[dir]);
     }
     
-    private static final int fastFloor(double f) {
+    private static int fastFloor(double f) {
         return ((int)(f + 1000000000.0)) - 1000000000;
     }
     

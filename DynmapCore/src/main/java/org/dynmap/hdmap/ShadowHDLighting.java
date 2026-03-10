@@ -45,7 +45,7 @@ public class ShadowHDLighting extends DefaultHDLighting {
         smooth = configuration.getBoolean("smooth-lighting", MapManager.mapman.getSmoothLighting());
     }
     
-    private void applySmoothLighting(HDPerspectiveState ps, HDShaderState ss, Color incolor, Color[] outcolor, int[] shadowscale) {
+    private void applySmoothLighting(HDPerspectiveState ps, Color incolor, Color[] outcolor, int[] shadowscale) {
         int[] xyz = ps.getSubblockCoord();
         int scale = (int)ps.getScale();
         int mid = scale / 2;
@@ -141,7 +141,7 @@ public class ShadowHDLighting extends DefaultHDLighting {
             shadowscale = defLightingTable;
         }
         if(smooth && ps.getShade()) {
-            applySmoothLighting(ps, ss, incolor, outcolor, shadowscale);
+            applySmoothLighting(ps, incolor, outcolor, shadowscale);
             checkGrayscale(outcolor);
             return;
         }

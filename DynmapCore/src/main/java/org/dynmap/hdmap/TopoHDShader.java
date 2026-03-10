@@ -345,9 +345,9 @@ public class TopoHDShader implements HDShader {
     public void exportAsMaterialLibrary(DynmapCommandSender sender, OBJExport out) throws IOException {
         throw new IOException("Export unsupported");
     }
-    private static final String[] nulllist = new String[0];
+    private static final String[] NULLLIST = new String[0];
     @Override
     public String[] getCurrentBlockMaterials(DynmapBlockState blk, MapIterator mapiter, int[] txtidx, BlockStep[] steps) {
-        return nulllist;
+        return NULLLIST;
     }
 }
