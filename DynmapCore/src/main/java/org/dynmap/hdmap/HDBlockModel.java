@@ -5,7 +5,7 @@ import java.util.BitSet;
 import org.dynmap.renderer.DynmapBlockState;
 
 public abstract class HDBlockModel {
-    private String blockset;
+    private final String blockset;
     /**
      * Block definition - positions correspond to Bukkit coordinates (+X is south, +Y is up, +Z is west)
      * @param bstate - block state

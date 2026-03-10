@@ -59,34 +59,37 @@ public class HDScaledBlockModels {
     }
     
     public final short[] getScaledModel(DynmapBlockState blk) {
+        short[][] mv = modelvectors;  // hoist instance field to local — avoids redundant reload
         int idx = blk.globalStateIndex;
-        if(idx >= modelvectors.length) {
+        if(idx >= mv.length) {
             short[][] newmodels = new short[idx + 1][];
-            System.arraycopy(modelvectors, 0, newmodels, 0, modelvectors.length);
+            System.arraycopy(mv, 0, newmodels, 0, mv.length);
             modelvectors = newmodels;
             return null;
         }
-        return modelvectors[idx];
+        return mv[idx];
     }
-    public PatchDefinition[] getPatchModel(DynmapBlockState blk) {
+    public final PatchDefinition[] getPatchModel(DynmapBlockState blk) {
+        PatchDefinition[][] p = patches;  // hoist static field to local — avoids redundant reload
         int idx = blk.globalStateIndex;
-        if(idx >= patches.length) {
+        if(idx >= p.length) {
             PatchDefinition[][] newpatches = new PatchDefinition[idx + 1][];
-            System.arraycopy(patches, 0, newpatches, 0, patches.length);
+            System.arraycopy(p, 0, newpatches, 0, p.length);
             patches = newpatches;
             return null;
         }
-        return patches[idx];
+        return p[idx];
     }
 
-    public CustomBlockModel getCustomBlockModel(DynmapBlockState blk) {
+    public final CustomBlockModel getCustomBlockModel(DynmapBlockState blk) {
+        CustomBlockModel[] c = custom;  // hoist static field to local — avoids redundant reload
         int idx = blk.globalStateIndex;
-        if(idx >= custom.length) {
+        if(idx >= c.length) {
             CustomBlockModel[] newcustom = new CustomBlockModel[idx + 1];
-            System.arraycopy(custom, 0, newcustom, 0, custom.length);
+            System.arraycopy(c, 0, newcustom, 0, c.length);
             custom = newcustom;
             return null;
         }
-        return custom[idx];
+        return c[idx];
     }
 }

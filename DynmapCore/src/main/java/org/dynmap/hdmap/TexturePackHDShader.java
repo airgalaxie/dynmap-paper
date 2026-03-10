@@ -1,7 +1,5 @@
 package org.dynmap.hdmap;
 
-import static org.dynmap.JSONUtils.s;
-
 import java.io.IOException;
 import java.util.BitSet;
 import java.util.List;
@@ -9,6 +7,7 @@ import java.util.List;
 import org.dynmap.Color;
 import org.dynmap.ConfigurationNode;
 import org.dynmap.DynmapCore;
+import static org.dynmap.JSONUtils.s;
 import org.dynmap.Log;
 import org.dynmap.MapManager;
 import org.dynmap.common.DynmapCommandSender;
@@ -53,7 +52,7 @@ public class TexturePackHDShader implements HDShader {
         }
     }
     
-    private final TexturePack getTexturePack() {
+    private TexturePack getTexturePack() {
         if (!did_tp_load) {
             tp = TexturePack.getTexturePack(this.core, this.tpname);
             if(tp == null) {
@@ -171,8 +170,9 @@ public class TexturePackHDShader implements HDShader {
          */
         @Override
         public void reset(HDPerspectiveState ps) {
-            for(int i = 0; i < color.length; i++)
-                color[i].setTransparent();
+            for (Color color1 : color) {
+                color1.setTransparent();
+            }
             setLastBlockState(DynmapBlockState.AIR);
             lastblkhit = DynmapBlockState.AIR;
         }
@@ -256,9 +256,9 @@ public class TexturePackHDShader implements HDShader {
                     int xx = mapiter.getX() % gridscale;
                     int zz = mapiter.getZ() % gridscale;
                     if(((xx == 0) && ((zz & 2) == 0)) || ((zz == 0) && ((xx & 2) == 0))) {
-                        for(int i = 0; i < tmpcolor.length; i++) {
-                            int v = tmpcolor[i].getARGB();
-                            tmpcolor[i].setARGB((v & 0xFF000000) | ((v & 0xFEFEFE) >> 1) | 0x808080);
+                        for (Color tmpcolor1 : tmpcolor) {
+                            int v = tmpcolor1.getARGB();
+                            tmpcolor1.setARGB((v & 0xFF000000) | ((v & 0xFEFEFE) >> 1) | 0x808080);
                         }
                     }
                 }
@@ -273,7 +273,7 @@ public class TexturePackHDShader implements HDShader {
                     int alpha = color[0].getAlpha();
                     int alpha2 = tmpcolor[0].getAlpha() * (255-alpha) / 255;
                     int talpha = alpha + alpha2;
-                    if(talpha > 0)
+                    if(talpha > 0) {
                         for(int i = 0; i < color.length; i++) {
                             int tc = tmpcolor[i].getARGB();
                             int cc = color[i].getARGB();
@@ -282,10 +282,12 @@ public class TexturePackHDShader implements HDShader {
                                 | (((((tc >>  8) & 0xFF) * alpha2 + ((cc >>  8) & 0xFF) * alpha) / talpha) <<  8)
                                 |   ((( tc        & 0xFF) * alpha2 + ( cc        & 0xFF) * alpha) / talpha));
                         }
-                    else
-                    	for(int i = 0; i < color.length; i++)
-                    		color[i].setTransparent();
-
+                    }
+                    else {
+                    	for (Color color1 : color) {
+                            color1.setTransparent();
+                        }
+                    }
                     return (talpha >= 254);   /* If only one short, no meaningful contribution left */
                 }
             }

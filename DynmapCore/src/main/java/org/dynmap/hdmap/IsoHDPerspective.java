@@ -70,8 +70,8 @@ public class IsoHDPerspective implements HDPerspective {
     public static final int MAX_SCALE = 64;
     public static final int MIN_SCALE = 1;
     
-    private boolean need_biomedata = false;
-    private boolean need_rawbiomedata = false;
+    private final boolean need_biomedata = false;
+    private final boolean need_rawbiomedata = false;
 
     private static final BlockStep [] semi_steps = { BlockStep.Y_PLUS, BlockStep.X_MINUS, BlockStep.X_PLUS, BlockStep.Z_MINUS, BlockStep.Z_PLUS };
     
@@ -106,7 +106,7 @@ public class IsoHDPerspective implements HDPerspective {
         boolean nonairhit;
         /* Subblock tracer state */
         int mx, my, mz;
-        double xx, yy, zz;
+        //double xx, yy, zz;
         double mdt_dx;
         double mdt_dy;
         double mdt_dz;
@@ -116,6 +116,10 @@ public class IsoHDPerspective implements HDPerspective {
         double mt;
         double mtend;
         int mxout, myout, mzout;
+        /* Incremental subblock index: midx = modscale2*my + modscale*mz + mx, updated each step */
+        int midx;
+        int mstep_y;    // y_inc * modscale2 — midx delta per my step
+        int mstep_z;    // z_inc * modscale  — midx delta per mz step
         /* Patch state and work variables */
         Vector3D v0 = new Vector3D();
         Vector3D vS = new Vector3D();
@@ -158,20 +162,20 @@ public class IsoHDPerspective implements HDPerspective {
             scalemodels = HDBlockModels.getModelsForScale(basemodscale << scaled);
         }
         
-        private final void updateSemitransparentLight(LightLevels ll) {
+        private void updateSemitransparentLight(LightLevels ll) {
         	int emitted = 0, sky = 0;
-        	for(int i = 0; i < semi_steps.length; i++) {
-        		int emit_sky_light = mapiter.getBlockLight(semi_steps[i]);
-        		if ((emit_sky_light >> 8) > emitted) emitted = (emit_sky_light >> 8);
-        		if ((emit_sky_light & 0xF) > sky) sky = (emit_sky_light & 0xF);
-        	}
+            for (BlockStep semi_step : semi_steps) {
+                int emit_sky_light = mapiter.getBlockLight(semi_step);
+                if ((emit_sky_light >> 8) > emitted) emitted = (emit_sky_light >> 8);
+                if ((emit_sky_light & 0xF) > sky) sky = (emit_sky_light & 0xF);
+            }
         	ll.sky = sky;
         	ll.emitted = emitted;
         }
         /**
          * Update sky and emitted light 
          */
-        private final void updateLightLevel(DynmapBlockState blk, LightLevels ll) {
+        private void updateLightLevel(DynmapBlockState blk, LightLevels ll) {
             /* Look up transparency for current block */
             BlockTransparency bt = HDBlockStateTextureMap.getTransparency(blk);
             switch(bt) {
@@ -372,7 +376,7 @@ public class IsoHDPerspective implements HDPerspective {
             skiptoair = isnether;
         }
 
-        private final boolean handleSubModel(short[] model, HDShaderState[] shaderstate, boolean[] shaderdone) {
+        private boolean handleSubModel(short[] model, HDShaderState[] shaderstate, boolean[] shaderdone) {
             boolean firststep = true;
             
             while(!raytraceSubblock(model, firststep)) {
@@ -397,7 +401,7 @@ public class IsoHDPerspective implements HDPerspective {
             return false;
         }
         
-        private final int handlePatch(PatchDefinition pd, int hitcnt) {
+        private int handlePatch(PatchDefinition pd, int hitcnt) {
             /* Compute origin of patch */
             v0.x = (double)x + pd.x0;
             v0.y = (double)y + pd.y0;
@@ -460,15 +464,21 @@ public class IsoHDPerspective implements HDPerspective {
                 patch_id[hitcnt] = pd.textureindex;
                 if(det > 0) {
                     patch_step[hitcnt] = pd.step.opposite();
-                    if (pd.sidevis == SideVisible.TOPFLIP) {
-                        patch_u[hitcnt] = 1 - u;
-                    }
-                    else if (pd.sidevis == SideVisible.TOPFLIPV) {
-                        patch_v[hitcnt] = 1 - v;                    	
-                    }
-                    else if (pd.sidevis == SideVisible.TOPFLIPHV) {
-                        patch_u[hitcnt] = 1 - u;
-                        patch_v[hitcnt] = 1 - v;                    	
+                    if (null != pd.sidevis) {
+                        switch (pd.sidevis) {
+                            case TOPFLIP:
+                                patch_u[hitcnt] = 1 - u;
+                                break;
+                            case TOPFLIPV:
+                                patch_v[hitcnt] = 1 - v;
+                                break;
+                            case TOPFLIPHV:
+                                patch_u[hitcnt] = 1 - u;                    	
+                                patch_v[hitcnt] = 1 - v;
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
                 else {
@@ -482,7 +492,7 @@ public class IsoHDPerspective implements HDPerspective {
             return hitcnt;
         }
         
-        private final boolean handlePatches(RenderPatch[] patches, HDShaderState[] shaderstate, boolean[] shaderdone, DynmapBlockState fluidstate, RenderPatch[] fluidpatches) {
+        private boolean handlePatches(RenderPatch[] patches, HDShaderState[] shaderstate, boolean[] shaderdone, DynmapBlockState fluidstate, RenderPatch[] fluidpatches) {
             int hitcnt = 0;
             int water_hit = Integer.MAX_VALUE; // hit index of first water hit
             /* Loop through patches : compute intercept values for each */
@@ -491,8 +501,8 @@ public class IsoHDPerspective implements HDPerspective {
             }
             if ((fluidpatches != null) && (fluidpatches.length > 0)) {
                 int prev_hitcnt = hitcnt;
-                for(int i = 0; i < fluidpatches.length; i++) {
-                    hitcnt = handlePatch((PatchDefinition)fluidpatches[i], hitcnt);
+                for (RenderPatch fp : fluidpatches) {
+                    hitcnt = handlePatch((PatchDefinition)fp, hitcnt);
                 }
                 if (prev_hitcnt < hitcnt) { // At least one water hit?
                     water_hit = prev_hitcnt;    // Remember index
@@ -710,7 +720,7 @@ public class IsoHDPerspective implements HDPerspective {
         /**
          * Trace ray, based on "Voxel Tranversal along a 3D line"
          */
-        private final void raytrace(MapChunkCache cache, HDShaderState[] shaderstate, boolean[] shaderdone) {
+        private void raytrace(MapChunkCache cache, HDShaderState[] shaderstate, boolean[] shaderdone) {
         	int minY = cache.getWorld().minY;
         	int height = cache.getWorld().worldheight;
         	
@@ -738,7 +748,7 @@ public class IsoHDPerspective implements HDPerspective {
             }
         }
 
-        private final void raytrace_section_init() {
+        private void raytrace_section_init() {
             t = t - 0.000001;
             double xx = top.x + t * direction.x;
             double yy = top.y + t * direction.y;
@@ -782,15 +792,19 @@ public class IsoHDPerspective implements HDPerspective {
             }
         }
 
-        private final boolean raytraceSubblock(short[] model, boolean firsttime) {
+        private 
+        boolean raytraceSubblock(short[] model, boolean firsttime) {
             if(firsttime) {
             	mt = t + 0.00000001;
-            	xx = top.x + mt * direction.x;  
-            	yy = top.y + mt * direction.y;  
-            	zz = top.z + mt * direction.z;
+            	double xx = top.x + mt * direction.x;  
+            	double yy = top.y + mt * direction.y;  
+            	double zz = top.z + mt * direction.z;
             	mx = (int)((xx - fastFloor(xx)) * modscale);
             	my = (int)((yy - fastFloor(yy)) * modscale);
             	mz = (int)((zz - fastFloor(zz)) * modscale);
+            	midx = modscale2*my + modscale*mz + mx;
+            	mstep_y = y_inc * modscale2;
+            	mstep_z = z_inc * modscale;
             	mdt_dx = dt_dx / modscale;
             	mdt_dy = dt_dy / modscale;
             	mdt_dz = dt_dz / modscale;
@@ -815,14 +829,14 @@ public class IsoHDPerspective implements HDPerspective {
             boolean skip = !firsttime;	/* Skip first block on continue */
             while(mt <= mtend) {
             	if(!skip) {
-            		try {
-            			int blkalpha = model[modscale2*my + modscale*mz + mx];
-            			if(blkalpha > 0) {
-            				subalpha = blkalpha;
-            				return false;
-            			}
-            		} catch (ArrayIndexOutOfBoundsException aioobx) {	/* We're outside the model, so miss */
-            			return true;
+            		/* Bounds check: bitmask — sign bit set if any index < 0 or >= modscale */
+            		if ((mx | my | mz | (modscale - 1 - mx) | (modscale - 1 - my) | (modscale - 1 - mz)) < 0) {
+            			return true;  /* Outside model bounds */
+            		}
+            		int blkalpha = model[midx];
+            		if(blkalpha > 0) {
+            			subalpha = blkalpha;
+            			return false;
             		}
             	}
             	else {
@@ -832,6 +846,7 @@ public class IsoHDPerspective implements HDPerspective {
                 /* If X step is next best */
                 if((mt_next_x <= mt_next_y) && (mt_next_x <= mt_next_z)) {
                     mx += x_inc;
+                    midx += x_inc;
                     mt = mt_next_x;
                     mt_next_x += mdt_dx;
                     laststep = stepx;
@@ -842,6 +857,7 @@ public class IsoHDPerspective implements HDPerspective {
                 /* If Y step is next best */
                 else if((mt_next_y <= mt_next_x) && (mt_next_y <= mt_next_z)) {
                     my += y_inc;
+                    midx += mstep_y;
                     mt = mt_next_y;
                     mt_next_y += mdt_dy;
                     laststep = stepy;
@@ -852,6 +868,7 @@ public class IsoHDPerspective implements HDPerspective {
                 /* Else, Z step is next best */
                 else {
                     mz += z_inc;
+                    midx += mstep_z;
                     mt = mt_next_z;
                     mt_next_z += mdt_dz;
                     laststep = stepz;

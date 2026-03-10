@@ -39,7 +39,7 @@ public class InhabitedHDShader implements HDShader {
     }
     public InhabitedHDShader(DynmapCore core, ConfigurationNode configuration) {
         name = (String) configuration.get("name");
-        HashMap<Long, Color> map = new HashMap<Long, Color>();
+        HashMap<Long, Color> map = new HashMap<>();
         for (String key : configuration.keySet()) {
             if (key.startsWith("color")) {
                 try {
@@ -97,13 +97,13 @@ public class InhabitedHDShader implements HDShader {
     }
     
     private class OurShaderState implements HDShaderState {
-        private Color color[];
+        private final Color color[];
         private Color c;
         protected HDMap map;
-        private HDLighting lighting;
+        private final HDLighting lighting;
         final int[] lightingTable;
         
-        private OurShaderState(MapIterator mapiter, HDMap map, MapChunkCache cache, int scale) {
+        private OurShaderState(HDMap map, MapChunkCache cache) {
             this.map = map;
             this.lighting = map.getLighting();
             if(lighting.isNightAndDayEnabled()) {
@@ -123,6 +123,7 @@ public class InhabitedHDShader implements HDShader {
         /**
          * Get our shader
          */
+        @Override
         public HDShader getShader() {
             return InhabitedHDShader.this;
         }
@@ -130,6 +131,7 @@ public class InhabitedHDShader implements HDShader {
         /**
          * Get our map
          */
+        @Override
         public HDMap getMap() {
             return map;
         }
@@ -137,6 +139,7 @@ public class InhabitedHDShader implements HDShader {
         /**
          * Get our lighting
          */
+        @Override
         public HDLighting getLighting() {
             return lighting;
         }
@@ -144,14 +147,17 @@ public class InhabitedHDShader implements HDShader {
         /**
          * Reset renderer state for new ray
          */
+        @Override
         public void reset(HDPerspectiveState ps) {
-            for(int i = 0; i < color.length; i++)
-                color[i].setTransparent();
+            for (Color color1 : color) {
+                color1.setTransparent();
+            }
         }
         /**
          * Process next ray step - called for each block on route
          * @return true if ray is done, false if ray needs to continue
          */
+        @Override
         public boolean processBlock(HDPerspectiveState ps) {
             if (ps.getBlockState().isAir()) {
                 return false;
@@ -187,6 +193,7 @@ public class InhabitedHDShader implements HDShader {
         /**
          * Ray ended - used to report that ray has exited map (called if renderer has not reported complete)
          */
+        @Override
         public void rayFinished(HDPerspectiveState ps) {
         }
         /**
@@ -194,12 +201,14 @@ public class InhabitedHDShader implements HDShader {
          * @param c - object to store color value in
          * @param index - index of color to request (renderer specific - 0=default, 1=day for night/day renderer
          */
+        @Override
         public void getRayColor(Color c, int index) {
             c.setColor(color[index]);
         }
         /**
          * Clean up state object - called after last ray completed
          */
+        @Override
         public void cleanup() {
         }
         @Override
@@ -225,10 +234,11 @@ public class InhabitedHDShader implements HDShader {
      */
     @Override
     public HDShaderState getStateInstance(HDMap map, MapChunkCache cache, MapIterator mapiter, int scale) {
-        return new OurShaderState(mapiter, map, cache, scale);
+        return new OurShaderState(map, cache);
     }
     
     /* Add shader's contributions to JSON for map object */
+    @Override
     public void addClientConfiguration(JSONObject mapObject) {
         s(mapObject, "shader", name);
     }

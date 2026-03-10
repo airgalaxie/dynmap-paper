@@ -2523,7 +2523,7 @@ public class TexturePack {
      * @param lastblocktype - last block ID
      * @param ss - shader state
      */
-    public final void readColor(final HDPerspectiveState ps, final MapIterator mapiter, final Color rslt, final DynmapBlockState blk, final DynmapBlockState lastblocktype,
+    public void readColor(final HDPerspectiveState ps, final MapIterator mapiter, final Color rslt, final DynmapBlockState blk, final DynmapBlockState lastblocktype,
             final TexturePackHDShader.ShaderState ss) {
         HDBlockStateTextureMap map = HDBlockStateTextureMap.getByBlockState(blk);
         BlockStep laststep = ps.getLastBlockStep();
@@ -2536,11 +2536,7 @@ public class TexturePack {
         else {
             faceindex = laststep.ordinal();
         }
-        try {
-        	textid = map.faces[faceindex];
-        } catch (ArrayIndexOutOfBoundsException aioob) {
-        	textid = -1;
-        }
+        textid = (faceindex < map.faces.length) ? map.faces[faceindex] : -1;
         if (ctm != null) {
             int mod = 0;
             if(textid >= COLORMOD_MULT_INTERNAL) {
@@ -2563,7 +2559,7 @@ public class TexturePack {
     /**
      * Read color for given subblock coordinate, with given block id and data and face
      */
-    private final void readColor(final HDPerspectiveState ps, final MapIterator mapiter, final Color rslt, final DynmapBlockState blk, final DynmapBlockState lastblocktype,
+    private void readColor(final HDPerspectiveState ps, final MapIterator mapiter, final Color rslt, final DynmapBlockState blk, final DynmapBlockState lastblocktype,
                 final TexturePackHDShader.ShaderState ss, HDBlockStateTextureMap map, BlockStep laststep, int patchid, int textid, boolean stdrot) {
         if(textid < 0) {
             rslt.setTransparent();
@@ -2617,16 +2613,12 @@ public class TexturePack {
                 u = fastFloor(ps.getPatchU() * native_scale);
                 v = native_scale - fastFloor(ps.getPatchV() * native_scale) - 1;
             }
-            /* Read color from texture */
-            try {
-                rslt.setARGB(texture[v*native_scale + u]);
-            } catch(ArrayIndexOutOfBoundsException aoobx) {
-                u = ((u < 0) ? 0 : ((u >= native_scale) ? (native_scale-1) : u));
-                v = ((v < 0) ? 0 : ((v >= native_scale) ? (native_scale-1) : v));
-                try {
-                    rslt.setARGB(texture[v*native_scale + u]);
-                } catch(ArrayIndexOutOfBoundsException oob2) { }
+            /* Read color from texture — clamp instead of try-catch for hot-path speed */
+            if ((u | v | (native_scale - 1 - u) | (native_scale - 1 - v)) < 0) {
+                u = (u < 0) ? 0 : (u >= native_scale ? native_scale-1 : u);
+                v = (v < 0) ? 0 : (v >= native_scale ? native_scale-1 : v);
             }
+            rslt.setARGB(texture[v*native_scale + u]);
             
             return;            
         }
@@ -2657,7 +2649,7 @@ public class TexturePack {
         int u = 0, v = 0, tmp;
         
         if(patchid < 0) {
-            if (xyz == null) xyz = ps.getSubblockCoord();
+            xyz = ps.getSubblockCoord();
             switch(laststep) {
                 case X_MINUS: /* South face: U = East (Z-), V = Down (Y-) */
                     u = native_scale-xyz[2]-1; v = native_scale-xyz[1]-1; 
@@ -2794,9 +2786,9 @@ public class TexturePack {
                 break;
         }
         /* Read color from texture */
-        try {
+        if ((u | v | (native_scale - 1 - u) | (native_scale - 1 - v)) >= 0) {
             rslt.setARGB(texture[v*native_scale + u]);
-        } catch (ArrayIndexOutOfBoundsException aioobx) {
+        } else {
             rslt.setARGB(0);
         }
 
@@ -2806,7 +2798,7 @@ public class TexturePack {
         // If block has custom coloring
         if (hasblockcoloring) {
             Integer idx = this.blockColoring.getBlkStateValue(blk);
-            LoadedImage img = imgs[idx.intValue()];
+            LoadedImage img = imgs[idx];
             if (img.argb != null) {
                 custclrmult = mapiter.getSmoothWaterColorMultiplier(img.argb);
             }
@@ -2922,14 +2914,14 @@ public class TexturePack {
         }
     }
     
-    private static final void makeAlphaPure(int[] argb) {
+    private static void makeAlphaPure(int[] argb) {
         for(int i = 0; i < argb.length; i++) {
             if((argb[i] & 0xFF000000) != 0)
                 argb[i] |= 0xFF000000;
         }
     }
 
-    private static final int fastFloor(double f) {
+    private static int fastFloor(double f) {
         return ((int)(f + 1000000000.0)) - 1000000000;
     }
 
@@ -3217,7 +3209,7 @@ public class TexturePack {
     }
 
     private static class ExportedTexturePack {
-        Map<String, ExportedTexture> txtids = new HashMap<String, ExportedTexture>();
+        Map<String, ExportedTexture> txtids = new HashMap<>();
         DynmapBufferedImage img;
         OBJExport exp;
         String name;
@@ -3237,9 +3229,7 @@ public class TexturePack {
             }
         }
         else {  // Else, just copy into destination
-            for (int i = 0; i < etp.img.argb_buf.length; i++) {
-                etp.img.argb_buf[i] = argb[i];
-            }
+            System.arraycopy(argb, 0, etp.img.argb_buf, 0, etp.img.argb_buf.length);
         }
         boolean hasAlpha = false;
         // Compute simple color

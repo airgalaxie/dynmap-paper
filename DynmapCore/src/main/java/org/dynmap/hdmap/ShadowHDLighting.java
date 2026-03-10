@@ -5,8 +5,8 @@ import org.dynmap.ConfigurationNode;
 import org.dynmap.DynmapCore;
 import org.dynmap.DynmapWorld;
 import org.dynmap.MapManager;
-import org.dynmap.utils.LightLevels;
 import org.dynmap.utils.BlockStep;
+import org.dynmap.utils.LightLevels;
 
 public class ShadowHDLighting extends DefaultHDLighting {
 
@@ -125,7 +125,7 @@ public class ShadowHDLighting extends DefaultHDLighting {
             : shadowscale[ll0];
     }
 
-    private final int getLightLevel(final LightLevels ll, boolean useambient) {
+    private int getLightLevel(final LightLevels ll, boolean useambient) {
         int lightlevel = useambient ? lightscale[ll.sky] : ll.sky;
         if(lightlevel < 15) {
             lightlevel = Math.max(ll.emitted, lightlevel);
@@ -134,6 +134,7 @@ public class ShadowHDLighting extends DefaultHDLighting {
     }
 
     /* Apply lighting to given pixel colors (1 outcolor if normal, 2 if night/day) */
+    @Override
     public void applyLighting(HDPerspectiveState ps, HDShaderState ss, Color incolor, Color[] outcolor) {
         int[] shadowscale = ss.getLightingTable();
         if(shadowscale == null) {
@@ -176,12 +177,15 @@ public class ShadowHDLighting extends DefaultHDLighting {
 
 
     /* Test if night/day is enabled for this renderer */
+    @Override
     public boolean isNightAndDayEnabled() { return night_and_day; }
     
     /* Test if sky light level needed */
+    @Override
     public boolean isSkyLightLevelNeeded() { return true; }
     
     /* Test if emitted light level needed */
+    @Override
     public boolean isEmittedLightLevelNeeded() { return true; }    
 
     @Override
