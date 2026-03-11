@@ -2,8 +2,8 @@ package org.dynmap.common.chunk;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
 import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
@@ -20,13 +20,13 @@ public class GenericChunkCache {
 
     private CacheHashMap snapcache;
     private final Object snapcachelock;
-    private ReferenceQueue<ChunkCacheRec> refqueue;
+    private final ReferenceQueue<ChunkCacheRec> refqueue;
     private long cache_attempts;
     private long cache_success;
-    private boolean softref;
+    private final boolean softref;
     // World name -> small integer ID, used to build long cache keys without String concatenation.
     // Accessed only while holding snapcachelock.
-    private final HashMap<String, Integer> worldIds = new HashMap<String, Integer>();
+    private final HashMap<String, Integer> worldIds = new HashMap<>();
     private int nextWorldId = 0;
 
     private static class CacheRec {
@@ -35,14 +35,15 @@ public class GenericChunkCache {
 
     @SuppressWarnings("serial")
     public class CacheHashMap extends LinkedHashMap<Long, CacheRec> {
-        private int limit;
+        private final int limit;
         private IdentityHashMap<Reference<ChunkCacheRec>, Long> reverselookup;
 
         public CacheHashMap(int lim) {
             super(16, (float)0.75, true);
             limit = lim;
-            reverselookup = new IdentityHashMap<Reference<ChunkCacheRec>, Long>();
+            reverselookup = new IdentityHashMap<>();
         }
+        @Override
         protected boolean removeEldestEntry(Map.Entry<Long, CacheRec> last) {
             boolean remove = (size() >= limit);
             if(remove && (last != null) && (last.getValue() != null)) {
@@ -58,7 +59,7 @@ public class GenericChunkCache {
     public GenericChunkCache(int max_size, boolean softref) {
     	snapcachelock = new Object();
         snapcache = new CacheHashMap(max_size);
-        refqueue = new ReferenceQueue<ChunkCacheRec>();
+        refqueue = new ReferenceQueue<>();
         this.softref = softref;
     }
     /**
@@ -137,9 +138,9 @@ public class GenericChunkCache {
         processRefQueue();
         CacheRec rec = new CacheRec();
         if (softref)
-            rec.ref = new SoftReference<ChunkCacheRec>(ss, refqueue);
+            rec.ref = new SoftReference<>(ss, refqueue);
         else
-            rec.ref = new WeakReference<ChunkCacheRec>(ss, refqueue);
+            rec.ref = new WeakReference<>(ss, refqueue);
         synchronized(snapcachelock) {
             long key = getKey(w, chunkx, chunkz);
             CacheRec prevrec = (snapcache != null) ? snapcache.put(key, rec) : null;
