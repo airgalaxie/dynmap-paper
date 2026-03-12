@@ -1319,17 +1319,44 @@ public class IsoHDPerspective implements HDPerspective {
         
         final int tilePixelSize = tileSize * sizescale;
         final double invSizescale = 1.0 / sizescale;
+
+        /* Precompute ray direction — constant for all pixels in this tile.
+         * direction = map_to_world * (0, 0, (miny-0.5) - (height+0.5)) */
+        ps.direction.x = 0.0; ps.direction.y = 0.0;
+        ps.direction.z = (miny - 0.5) - (height + 0.5);
+        map_to_world.transform(ps.direction);
+
+        /* Decompose map_to_world into per-axis step vectors so we can compute
+         * ps.top incrementally (3 muls + 9 adds/pixel) rather than doing two
+         * full 3x3 matrix transforms (18 muls + 12 adds) + a subtract/pixel. */
+        /* xstep = map_to_world * (1,0,0) — how top shifts per unit of px (map-x) */
+        Vector3D xstep = new Vector3D(1.0, 0.0, 0.0);
+        map_to_world.transform(xstep);
+        /* ystep = map_to_world * (0,1,0) — how top shifts per unit of py (map-y) */
+        Vector3D ystep = new Vector3D(0.0, 1.0, 0.0);
+        map_to_world.transform(ystep);
+        /* zbase = map_to_world * (0,0,height+0.5) — constant z contribution */
+        Vector3D zbase = new Vector3D(0.0, 0.0, height + 0.5);
+        map_to_world.transform(zbase);
+
         for(int x = 0; x < tilePixelSize; x++) {
             ps.px = x;
             final double px_center = xbase + (x + 0.5) * invSizescale;
+            /* Column-constant portion: zbase + xstep * px_center */
+            final double colx = zbase.x + xstep.x * px_center;
+            final double coly = zbase.y + xstep.y * px_center;
+            final double colz = zbase.z + xstep.z * px_center;
+            double py_center = ybase + 0.5 * invSizescale;
             for(int y = 0; y < tilePixelSize; y++) {
-                ps.top.x = ps.bottom.x = px_center;
-                ps.top.y = ps.bottom.y = ybase + (y + 0.5) * invSizescale;
-                ps.top.z = height + 0.5; ps.bottom.z = miny - 0.5;
-                map_to_world.transform(ps.top);            /* Transform to world coordinates */
-                map_to_world.transform(ps.bottom);
-                ps.direction.set(ps.bottom);
-                ps.direction.subtract(ps.top);
+                /* top = column-contribution + ystep * py_center */
+                ps.top.x = colx + ystep.x * py_center;
+                ps.top.y = coly + ystep.y * py_center;
+                ps.top.z = colz + ystep.z * py_center;
+                /* bottom = top + direction (avoids second matrix transform) */
+                ps.bottom.x = ps.top.x + ps.direction.x;
+                ps.bottom.y = ps.top.y + ps.direction.y;
+                ps.bottom.z = ps.top.z + ps.direction.z;
+                py_center += invSizescale;
                 ps.py = y / sizescale;
                 for(int i = 0; i < numshaders; i++) {
                     shaderstate[i].reset(ps);
