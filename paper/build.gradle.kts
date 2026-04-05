@@ -58,7 +58,7 @@ paper {
     name = "dynmap"
     main = "org.dynmap.bukkit.DynmapPlugin"
     version = "${project.version}-${project.parent!!.ext.get("buildNumber")}"
-    apiVersion = libs.versions.paper.get().replace(Regex("\\-R\\d.\\d-SNAPSHOT"), "")
+    apiVersion = libs.versions.paper.get().replace(".build.+", "")
     authors = listOf("Jim (AnEnragedPigeon)", "mikeprimm")
     description = "Real time web-based map system"
     website = "https://www.reddit.com/r/Dynmap/"

@@ -7,7 +7,7 @@ description = "dynmap-api"
 
 dependencies {
     compileOnly(project(":DynmapCoreAPI"))
-    compileOnly(libs.bukkitApi)
+    compileOnly(libs.paperApi)
 }
 
 tasks {
