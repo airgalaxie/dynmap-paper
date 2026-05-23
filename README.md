@@ -1,6 +1,6 @@
 # Dynmap v26.1.2++ (Modernized Fork)
 
-This is a heavily modified **fork** of the airgalaxie repository, which builds upon the work of [JLyne](https://github.com) and is based on the original [Dynmap](https://github.com) project.
+This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.com/airgalaxie/dynmap) repository, which builds upon the work of [JLyne's fork](https://github.com/JLyne/dynmap) and is based on the original [Dynmap project](https://github.com/webbukkit/dynmap).
 
 > [!NOTE]
 > **Development Environment:** Active development and compilation on **Linux** using **Java 26** and **Gradle 9.5.1**.  
@@ -25,9 +25,19 @@ This is a heavily modified **fork** of the airgalaxie repository, which builds u
 
 ## 🛠️ Main Changes in this Fork (Summary)
 
-* **Java 26 & Gradle 9.5.1**: Cutting-edge Linux-based compilation environment for maximum performance and future-proofing.
-* **jQuery 4.0.x & Leaflet 1.9.4**: Replaced outdated frontend web assets to resolve performance drops and security flaws.
-* **Model Text Fixes**: Corrected specific structure and block rendering bugs in the `Modelsxx.txt` configuration data.
+*   **Java 26 & Gradle 9.5.1**: Cutting-edge Linux-based compilation environment for maximum performance and future-proofing.
+*   **jQuery 4.0.x & Leaflet 1.9.4**: Replaced outdated frontend web assets to resolve performance drops and security flaws.
+*   **Model Text Fixes**: Corrected specific structure and block rendering bugs in the `Modelsxx.txt` configuration data.
+
+---
+
+## 📝 Configuration and Platform Notes
+
+*   **Configuration:** Dynmap's configuration is primarily managed through `configuration.txt` and other related files within the plugin's data folder. Please refer to the official Dynmap documentation for detailed configuration instructions. This fork does not introduce new configuration methods, but focuses on updating underlying technologies.
+*   **No Internal Webserver:** This fork, like the original Dynmap, does **not** include an internal webserver. You need to deploy the generated web files to an external web server (e.g., Nginx, Apache) for the map to be accessible via a web browser.
+*   **Platform Support:** This project is specifically built and tested for **Paper** servers (versions 1.21.10 & 26.1.2+ architectures). There are currently **no builds or explicit support for Fabric** or other Minecraft server platforms. Attempting to use this fork on unsupported platforms may lead to unexpected behavior or failures.
+
+---
 
 ### ⚠️ Support Disclaimer
-Just like the original repositories: No official support will be provided. Please do not contact the original [Dynmap Team](https://github.com), [JLyne](https://github.com), or airgalaxie for help regarding the changes implemented in this specific fork.
+Just like the original repositories: No official support will be provided. Please do not contact the original [Dynmap Team](https://github.com/webbukkit/dynmap), [JLyne](https://github.com/JLyne/dynmap), or the maintainers of this specific fork ([airgalaxie/dynmap](https://github.com/airgalaxie/dynmap)) for help regarding the changes implemented in this specific fork.
