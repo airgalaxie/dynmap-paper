@@ -28,9 +28,8 @@ tasks {
             "lightings.txt",
             "perspectives.txt",
             "shaders.txt",
-            "extracted/web/version.js",
-            "extracted/web/index.html",
-                )) {
+            "extracted/web/version.js"
+                )) { // "extracted/web/index.html" wurde entfernt
             // replace version and mcversion
             expand(
                     "buildnumber" to project.parent!!.ext.get("buildNumber").toString(),
@@ -64,4 +63,3 @@ tasks {
         archives(shadowJar)
     }
 }
-

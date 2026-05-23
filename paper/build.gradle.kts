@@ -6,7 +6,12 @@ plugins {
     alias(libs.plugins.pluginYmlPaper)
     id("dynmap.java-conventions")
 }
-
+/*
+repositories {
+    mavenCentral()
+    maven { url = uri("https://jitpack.io") }
+}
+*/
 description = "dynmap"
 
 dependencies {

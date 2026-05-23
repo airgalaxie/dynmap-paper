@@ -1437,13 +1437,13 @@ block:id=black_carpet,stdrot=true,allfaces=0:black_wool
 block:id=red_carpet,stdrot=true,allfaces=0:red_wool
 block:id=green_carpet,stdrot=true,allfaces=0:green_wool
 block:id=brown_carpet,stdrot=true,allfaces=0:brown_wool
-block:id=blue_carpet,,stdrot=true,allfaces=0:blue_wool
+block:id=blue_carpet,stdrot=true,allfaces=0:blue_wool
 block:id=purple_carpet,stdrot=true,allfaces=0:purple_wool
 block:id=cyan_carpet,stdrot=true,allfaces=0:cyan_wool
 block:id=light_gray_carpet,stdrot=true,allfaces=0:light_gray_wool
 block:id=gray_carpet,stdrot=true,allfaces=0:gray_wool
 block:id=pink_carpet,stdrot=true,allfaces=0:pink_wool
-block:id=lime_carpet,,stdrot=true,allfaces=0:lime_wool
+block:id=lime_carpet,stdrot=true,allfaces=0:lime_wool
 block:id=yellow_carpet,stdrot=true,allfaces=0:yellow_wool
 block:id=light_blue_carpet,stdrot=true,allfaces=0:light_blue_wool
 block:id=magenta_carpet,stdrot=true,allfaces=0:magenta_wool
@@ -4772,8 +4772,8 @@ block:id=%melon_stem,patch0=0:melon_stem,blockcolor=foliagebiome,transparency=TR
 #Pale hanging moss
 [1.21.4-]texture:id=pale_hanging_moss
 [1.21.4-]texture:id=pale_hanging_moss_tip
-[1.21.4-]block:id=pale_hanging_moss,tip:false,patch0-1=0:pale_hanging_moss,transparency=TRANSPARENT
-[1.21.4-]block:id=pale_hanging_moss,tip:true,patch0-1=0:pale_hanging_moss_tip,transparency=TRANSPARENT
+[1.21.4-]block:id=pale_hanging_moss,state=tip:false,patch0-1=0:pale_hanging_moss,transparency=TRANSPARENT
+[1.21.4-]block:id=pale_hanging_moss,state=tip:true,patch0-1=0:pale_hanging_moss_tip,transparency=TRANSPARENT
 #All the pale wooden stuff
 [1.21.4-]texture:id=pale_oak_planks,filename=assets/minecraft/textures/block/pale_oak_planks.png,xcount=1,ycount=1
 [1.21.4-]texture:id=pale_oak_sapling,filename=assets/minecraft/textures/block/pale_oak_sapling.png,xcount=1,ycount=1
@@ -5205,7 +5205,7 @@ block:id=%melon_stem,patch0=0:melon_stem,blockcolor=foliagebiome,transparency=TR
 [1.21.6-]texture:id=dried_ghast_hydration_2_east,filename=assets/minecraft/textures/block/dried_ghast_hydration_2_east.png,xcount=1,ycount=1
 [1.21.6-]texture:id=dried_ghast_hydration_2_north,filename=assets/minecraft/textures/block/dried_ghast_hydration_2_north.png,xcount=1,ycount=1
 [1.21.6-]texture:id=dried_ghast_hydration_2_south,filename=assets/minecraft/textures/block/dried_ghast_hydration_2_south.png,xcount=1,ycount=1
-[1.21.6-]texture:id=dried_ghast_hydration_2_tentacles,filename=assets/minecraft/textures/block/dried_ghast_hydration_2_tentacles.png,xcount=1,ycount
+[1.21.6-]texture:id=dried_ghast_hydration_2_tentacles,filename=assets/minecraft/textures/block/dried_ghast_hydration_2_tentacles.png,xcount=1,ycount=1
 [1.21.6-]texture:id=dried_ghast_hydration_2_top,filename=assets/minecraft/textures/block/dried_ghast_hydration_2_top.png,xcount=1,ycount=1
 [1.21.6-]texture:id=dried_ghast_hydration_2_west,filename=assets/minecraft/textures/block/dried_ghast_hydration_2_west.png,xcount=1,ycount=1
 [1.21.6-]texture:id=dried_ghast_hydration_3_bottom,filename=assets/minecraft/textures/block/dried_ghast_hydration_3_bottom.png,xcount=1,ycount=1
@@ -5217,8 +5217,8 @@ block:id=%melon_stem,patch0=0:melon_stem,blockcolor=foliagebiome,transparency=TR
 [1.21.6-]texture:id=dried_ghast_hydration_3_west,filename=assets/minecraft/textures/block/dried_ghast_hydration_3_west.png,xcount=1,ycount=1
 [1.21.6-]block:id=%dried_ghast,state=hydration:0/facing:north,patch0=0:dried_ghast_hydration_0_north,patch1=0:dried_ghast_hydration_0_bottom,patch2=0:dried_ghast_hydration_0_east,patch3=0:dried_ghast_hydration_0_south,patch4=0:dried_ghast_hydration_0_west,patch5=0:dried_ghast_hydration_0_top,patch6=0:dried_ghast_hydration_0_tentacles,transparency=SEMITRANSPARENT,stdrot=true
 [1.21.6-]block:id=%dried_ghast,state=hydration:0/facing:south,patch0=5000:dried_ghast_hydration_0_north,patch1=0:dried_ghast_hydration_0_bottom,patch2=0:dried_ghast_hydration_0_east,patch3=0:dried_ghast_hydration_0_south,patch4=0:dried_ghast_hydration_0_west,patch5=0:dried_ghast_hydration_0_top,patch6=0:dried_ghast_hydration_0_tentacles,transparency=SEMITRANSPARENT,stdrot=true
-[1.21.6-]block:id=%dried_ghast,state=hydration:0/facing:west,patch0=0:dried_ghast_hydration_0_north,patch1=0:dried_ghast_hydration_0_bottom,patch2=0:dried_ghast_hydration_0_east,patch3=0:dried_ghast_hydration_0_south,patch4=0:dried_ghast_hydration_0_west,patch5=0:dried_ghast_hydration_0_top,patch6=0:dried_ghast_hydration_0_tentacles,transparency=SEMITRANSPARENT,sstdrot=true
-[1.21.6-]block:id=%dried_ghast,state=hydration:0/facing:east,patch0=5000:dried_ghast_hydration_0_north,patch1=0:dried_ghast_hydration_0_bottom,patch2=0:dried_ghast_hydration_0_east,patch3=0:dried_ghast_hydration_0_south,patch4=0:dried_ghast_hydration_0_west,patch5=0:dried_ghast_hydration_0_top,patch6=0:dried_ghast_hydration_0_tentacles,transparency=SEMITRANSPARENT,sstdrot=true
+[1.21.6-]block:id=%dried_ghast,state=hydration:0/facing:west,patch0=0:dried_ghast_hydration_0_north,patch1=0:dried_ghast_hydration_0_bottom,patch2=0:dried_ghast_hydration_0_east,patch3=0:dried_ghast_hydration_0_south,patch4=0:dried_ghast_hydration_0_west,patch5=0:dried_ghast_hydration_0_top,patch6=0:dried_ghast_hydration_0_tentacles,transparency=SEMITRANSPARENT,stdrot=true
+[1.21.6-]block:id=%dried_ghast,state=hydration:0/facing:east,patch0=5000:dried_ghast_hydration_0_north,patch1=0:dried_ghast_hydration_0_bottom,patch2=0:dried_ghast_hydration_0_east,patch3=0:dried_ghast_hydration_0_south,patch4=0:dried_ghast_hydration_0_west,patch5=0:dried_ghast_hydration_0_top,patch6=0:dried_ghast_hydration_0_tentacles,transparency=SEMITRANSPARENT,stdrot=true
 [1.21.6-]block:id=%dried_ghast,state=hydration:1/facing:north,patch0=0:dried_ghast_hydration_1_top,patch1=0:dried_ghast_hydration_1_bottom,patch2=0:dried_ghast_hydration_1_east,patch3=0:dried_ghast_hydration_1_south,patch4=0:dried_ghast_hydration_1_west,patch5=0:dried_ghast_hydration_1_north,patch6=0:dried_ghast_hydration_1_tentacles,transparency=SEMITRANSPARENT,stdrot=true
 [1.21.6-]block:id=%dried_ghast,state=hydration:2/facing:north,patch0=0:dried_ghast_hydration_2_top,patch1=0:dried_ghast_hydration_2_bottom,patch2=0:dried_ghast_hydration_2_east,patch3=0:dried_ghast_hydration_2_south,patch4=0:dried_ghast_hydration_2_west,patch5=0:dried_ghast_hydration_2_north,patch6=0:dried_ghast_hydration_2_tentacles,transparency=SEMITRANSPARENT,stdrot=true
 [1.21.6-]block:id=%dried_ghast,state=hydration:3/facing:north,patch0=0:dried_ghast_hydration_3_top,patch1=0:dried_ghast_hydration_3_bottom,patch2=0:dried_ghast_hydration_3_east,patch3=0:dried_ghast_hydration_3_south,patch4=0:dried_ghast_hydration_3_west,patch5=0:dried_ghast_hydration_3_north,patch6=0:dried_ghast_hydration_3_tentacles,transparency=SEMITRANSPARENT,stdrot=true
