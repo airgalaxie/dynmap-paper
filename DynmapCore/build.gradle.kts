@@ -28,8 +28,9 @@ tasks {
             "lightings.txt",
             "perspectives.txt",
             "shaders.txt",
-            "extracted/web/version.js"
-                )) { // "extracted/web/index.html" wurde entfernt
+            "extracted/web/version.js",
+            "extracted/web/index.html" // <-- HIER WIEDER HINZUGEFÜGT
+                )) {
             // replace version and mcversion
             expand(
                     "buildnumber" to project.parent!!.ext.get("buildNumber").toString(),
