@@ -23,35 +23,34 @@
 	<meta name="msapplication-config" content="images/icons/browserconfig.xml">
 	<meta name="theme-color" content="#000000">
 
-	<script type="text/javascript" src="js/jquery-4.0.0.js?_=${version}-${buildnumber}"></script>
+	<script type="application/javascript" src="js/jquery-4.0.0.js?_=${version}-${buildnumber}" rel="preload" as="script" crossorigin="anonymous"></script>
 	<!-- not in use ? test it <script type="text/javascript" src="js/jquery-migrate-4.0.2.js?_=${version}-${buildnumber}"></script>-->
-
-	<link rel="stylesheet" type="text/css" href="css/leaflet.css?_=${version}-${buildnumber}" />
-	<script type="text/javascript" src="js/leaflet.js?_=${version}-${buildnumber}"></script>
+	<link rel="preload stylesheet" type="text/css" href="css/leaflet.css?_=${version}-${buildnumber}" as="style" crossorigin="anonymous"/>
+	<script defer type="application/javascript" src="js/leaflet.js?_=${version}-${buildnumber}" rel="preload" as="script" crossorigin="anonymous"></script>
     <!-- FOr source debug on leaflet 	<script type="text/javascript" src="js/leaflet-src.js?_=${version}-${buildnumber}"></script> -->
 	<!--<link rel="stylesheet" type="text/css" href="css/embedded.css" media="screen" />-->
 	<link rel="stylesheet" type="text/css" href="css/standalone.css?_=${version}-${buildnumber}" media="screen" />
 	<link rel="stylesheet" type="text/css" href="css/dynmap_style.css?_=${version}-${buildnumber}" media="screen" />
 	<!-- <link rel="stylesheet" type="text/css" href="css/override.css" media="screen" /> -->
 
-	<script type="text/javascript" src="js/custommarker.js?_=${version}-${buildnumber}"></script>
+	<script defer type="application/javascript" src="js/custommarker.js?_=${version}-${buildnumber}"></script>
 
-	<script type="text/javascript" src="js/dynmaputils.js?_=${version}-${buildnumber}"></script>
-	<script type="text/javascript" src="js/sidebarutils.js?_=${version}-${buildnumber}"></script>
+	<script defer type="application/javascript" src="js/dynmaputils.js?_=${version}-${buildnumber}"></script>
+	<script defer type="application/javascript" src="js/sidebarutils.js?_=${version}-${buildnumber}"></script>
 
-	<script type="text/javascript" src="version.js?_=${version}-${buildnumber}"></script>
-	<script type="text/javascript" src="js/jquery.json.js?_=${version}-${buildnumber}"></script>
-	<script type="text/javascript" src="js/jquery.mousewheel.js?_=${version}-${buildnumber}"></script>
-	<script type="text/javascript" src="js/minecraft.js?_=${version}-${buildnumber}"></script>
-	<script type="text/javascript" src="js/map.js?_=${version}-${buildnumber}"></script>
-	<script type="text/javascript" src="js/hdmap.js?_=${version}-${buildnumber}"></script>
-	<script type="text/javascript" src="standalone/config.js?_=${version}-${buildnumber}"></script>
+	<script defer type="application/javascript" src="version.js?_=${version}-${buildnumber}"></script>
+	<script defer type="application/javascript" src="js/jquery.json.js?_=${version}-${buildnumber}"></script>
+	<script defer type="application/javascript" src="js/jquery.mousewheel.js?_=${version}-${buildnumber}"></script>
+	<script defer type="application/javascript" src="js/minecraft.js?_=${version}-${buildnumber}"></script>
+	<script defer type="application/javascript" src="js/map.js?_=${version}-${buildnumber}"></script>
+	<script defer type="application/javascript" src="js/hdmap.js?_=${version}-${buildnumber}"></script>
+	<script defer type="application/javascript" src="standalone/config.js?_=${version}-${buildnumber}"></script>
 
 	<script type="text/javascript">
 		jQuery(document).ready(function() {
 			window.dynmap = new DynMap(jQuery.extend({
 				container: jQuery('#mcmap')
-		}, config));
+			}, config));
 		});
 	</script>
 

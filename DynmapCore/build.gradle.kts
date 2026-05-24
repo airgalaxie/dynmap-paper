@@ -29,7 +29,7 @@ tasks {
             "perspectives.txt",
             "shaders.txt",
             "extracted/web/version.js",
-            "extracted/web/index.html" // <-- HIER WIEDER HINZUGEFÜGT
+            "extracted/web/index.html"
                 )) {
             // replace version and mcversion
             expand(
