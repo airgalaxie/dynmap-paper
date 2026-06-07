@@ -27,7 +27,7 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
     private MessageDigest md;
     private MapStorage storage;
     private File baseStandaloneDir;
-
+/*
     private static class FileToWrite {
         String filename;
         byte[] content;
@@ -40,6 +40,26 @@ public class JsonFileClientUpdateComponent extends ClientUpdateComponent {
             return false;
         }
     }
+
+ */
+private static class FileToWrite {
+    String filename;
+    byte[] content;
+    boolean phpwrapper;
+
+    @Override
+    public boolean equals(Object o) {
+        if(o instanceof FileToWrite) {
+            return ((FileToWrite)o).filename.equals(this.filename);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hashCode(this.filename);
+    }
+}
     private class FileProcessor implements Runnable {
         public void run() {
             while(true) {

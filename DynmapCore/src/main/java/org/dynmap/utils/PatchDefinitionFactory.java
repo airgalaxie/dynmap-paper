@@ -22,33 +22,40 @@ public class PatchDefinitionFactory implements RenderPatchFactory {
     public void setPatchNameMape(Map<String, PatchDefinition> nmap) {
         namemap = nmap;
     }
-    
+
     @Override
+    @Deprecated
+    @SuppressWarnings("deprecation")
     public RenderPatch getPatch(double x0, double y0, double z0, double xu,
-            double yu, double zu, double xv, double yv, double zv, double umin,
-            double umax, double vmin, double vmax, SideVisible sidevis,
-            int textureids) {
-        return getPatch(x0, y0, z0, xu, yu, zu,xv, yv, zv, umin, umax, vmin, vmax, sidevis, textureids, vmin, vmax, true);
+                                double yu, double zu, double xv, double yv, double zv, double umin,
+                                double umax, double vmin, double vmax, SideVisible sidevis,
+                                int textureids) {
+        return getPatch(x0, y0, z0, xu, yu, zu, xv, yv, zv, umin, umax, vmin, vmax, sidevis, textureids, vmin, vmax, true);
     }
 
     @Override
+    @Deprecated
+    @SuppressWarnings("deprecation")
     public RenderPatch getPatch(double x0, double y0, double z0, double xu,
-            double yu, double zu, double xv, double yv, double zv,
-            double uplusvmax, SideVisible sidevis, int textureids) {
-        return getPatch(x0, y0, z0, xu, yu, zu,xv, yv, zv, 0.0, uplusvmax, 0.0, uplusvmax, sidevis, textureids, 0.0, 0.0, true);
+                                double yu, double zu, double xv, double yv, double zv,
+                                double uplusvmax, SideVisible sidevis, int textureids) {
+        return getPatch(x0, y0, z0, xu, yu, zu, xv, yv, zv, 0.0, uplusvmax, 0.0, uplusvmax, sidevis, textureids, 0.0, 0.0, true);
     }
+
     @Override
+    @Deprecated
+    @SuppressWarnings("deprecation")
     public PatchDefinition getPatch(double x0, double y0, double z0, double xu,
-            double yu, double zu, double xv, double yv, double zv, double umin,
-            double umax, double vmin, double vminatumax, double vmax, double vmaxatumax, SideVisible sidevis,
-            int textureids) {
-        return getPatch(x0, y0, z0, xu, yu, zu,xv, yv, zv, umin, umax, vmin, vmax, sidevis, textureids, vminatumax, vmaxatumax, true);
+                                    double yu, double zu, double xv, double yv, double zv, double umin,
+                                    double umax, double vmin, double vminatumax, double vmax, double vmaxatumax, SideVisible sidevis,
+                                    int textureids) {
+        return getPatch(x0, y0, z0, xu, yu, zu, xv, yv, zv, umin, umax, vmin, vmax, sidevis, textureids, vminatumax, vmaxatumax, true);
     }
-    
+
     public PatchDefinition getPatch(double x0, double y0, double z0, double xu,
-            double yu, double zu, double xv, double yv, double zv, double umin,
-            double umax, double vmin, double vmax, SideVisible sidevis,
-            int textureids, double vminatumax, double vmaxatumax, boolean shade) {
+                                    double yu, double zu, double xv, double yv, double zv, double umin,
+                                    double umax, double vmin, double vmax, SideVisible sidevis,
+                                    int textureids, double vminatumax, double vmaxatumax, boolean shade) {
         synchronized(lock) {
             lookup.update(x0, y0, z0, xu, yu, zu, xv, yv, zv, umin,
                     umax, vmin, vmax, sidevis, textureids, vminatumax, vmaxatumax, shade);
@@ -62,8 +69,8 @@ public class PatchDefinitionFactory implements RenderPatchFactory {
             }
             return pd2;
         }
-
     }
+
 
     public PatchDefinition getModelFace(double[] from, double[] to, BlockSide face, double[] uv, ModelBlockModel.SideRotation rot, boolean shade, int textureid) {
         synchronized(lock) {

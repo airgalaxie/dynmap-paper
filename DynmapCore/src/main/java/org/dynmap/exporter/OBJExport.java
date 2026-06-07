@@ -102,6 +102,7 @@ public class OBJExport {
      * @param core - core object
      * @param basename - base file name
      */
+    @SuppressWarnings("deprecation")
     public OBJExport(File dest, HDShader shader, DynmapWorld world, DynmapCore core, String basename) {
         destZipFile = dest;
         this.shader = shader;
@@ -115,6 +116,7 @@ public class OBJExport {
             int ord = s.ordinal();
             defaultPathces[ord] = fact.getPatch(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], 0, 1, 0, 0, 1, 1, SideVisible.TOP, ord);
         }
+
         vertices = new IndexedVector3DList(new IndexedVector3DList.ListCallback() {
             @Override
             public void elementAdded(IndexedVector3DList list, IndexedVector3D newElement) {
@@ -354,8 +356,8 @@ public class OBJExport {
     }
     /**
      * Handle block at current iterator coord
-     * @param id - block ID
-     * @param iter - iterator
+     * @param blk - block ID
+     * @param map - iterator
      * @param edgebits - bit N corresponds to side N being an endge (forge render)
      */
     private void handleBlock(DynmapBlockState blk, MapIterator map, boolean[] edgebits) throws IOException {

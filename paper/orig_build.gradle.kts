@@ -1,5 +1,3 @@
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 import net.minecrell.pluginyml.paper.PaperPluginDescription
 
@@ -8,18 +6,13 @@ plugins {
     alias(libs.plugins.pluginYmlPaper)
     id("dynmap.java-conventions")
 }
-
-description = "dynmap"
-
-// Generiert das Kurzdatum (z.B. 260601) vollautomatisch für lokale Builds
-val currentShortDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMdd"))
-
-// Ermittelt die Build-Nummer sicherer: Falls kein CI-Server da ist, wird das Datum genutzt
-val localBuildNumber = if (project.parent?.ext?.has("buildNumber") == true) {
-    project.parent!!.ext.get("buildNumber").toString()
-} else {
-    currentShortDate
+/*
+repositories {
+    mavenCentral()
+    maven { url = uri("https://jitpack.io") }
 }
+*/
+description = "dynmap"
 
 dependencies {
     implementation(project(":dynmap-api"))
@@ -35,10 +28,12 @@ dependencies {
 
 tasks {
     processResources {
+        // replace stuff in mcmod.info, nothing else
         filesMatching("paper-plugin.yml") {
+            // replace version and mcversion
             expand(
-                "buildnumber" to localBuildNumber,
-                "version" to project.version
+                    "buildnumber" to project.parent!!.ext.get("buildNumber").toString(),
+                    "version" to project.version
             )
         }
     }
@@ -56,12 +51,7 @@ tasks {
 
         destinationDirectory = file("../target")
         archiveBaseName = "Dynmap"
-
-        // Klasifiziert das Plugin als 'paper'
         archiveClassifier = "paper"
-
-        // HIER passiert die Magie: Der Dateiname der JAR bekommt das Datum angehängt
-        archiveVersion = "${project.version}-$currentShortDate"
     }
 
     artifacts {
@@ -72,10 +62,7 @@ tasks {
 paper {
     name = "dynmap"
     main = "org.dynmap.bukkit.DynmapPlugin"
-
-    // Das Plugin behält intern die originale, saubere Version ohne Datums-Suffix
-    version = "${project.version}"
-
+    version = "${project.version}-${project.parent!!.ext.get("buildNumber")}"
     apiVersion = libs.versions.paper.get().replace(".build.+", "")
     authors = listOf("Jim (AnEnragedPigeon)", "mikeprimm")
     description = "Real time web-based map system"
@@ -227,6 +214,122 @@ paper {
         }
         register("dynmap.marker.updateicon") {
             description = "Allows /dmarker updateicon"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.deleteicon") {
+            description = "Allows /dmarker deleteicon"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.addarea") {
+            description = "Allows /dmarker addarea, /dmarker addcorner, /dmarker clearcorners"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.updatearea") {
+            description = "Allows /dmarker updatearea"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.listareas") {
+            description = "Allows /dmarker listareas"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.deletearea") {
+            description = "Allows /dmarker deletearea"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.addline") {
+            description = "Allows /dmarker addline"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.updateline") {
+            description = "Allows /dmarker updateline"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.listlines") {
+            description = "Allows /dmarker listlines"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.deleteline") {
+            description = "Allows /dmarker deleteline"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.addcircle") {
+            description = "Allows /dmarker addcircle"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.updatecircle") {
+            description = "Allows /dmarker updatecircle"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.listcircles") {
+            description = "Allows /dmarker listcircles"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.deletecircle") {
+            description = "Allows /dmarker deletecircle"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.getdesc") {
+            description = "Allows /dmarker getdesc"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.resetdesc") {
+            description = "Allows /dmarker resetdesc"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.appenddesc") {
+            description = "Allows /dmarker appenddesc"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.importdesc") {
+            description = "Allows /dmarker importdesc"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.getlabel") {
+            description = "Allows /dmarker getlabel"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.marker.importlabel") {
+            description = "Allows /dmarker importlabel"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.dmap.worldlist") {
+            description = "Allows /dmap worldlist"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.dmap.worldset") {
+            description = "Allows /dmap worldset"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.dmap.worldreset") {
+            description = "Allows /dmap worldreset"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.dmap.mapdelete") {
+            description = "Allows /dmap mapdelete"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.dmap.mapset") {
+            description = "Allows /dmap mapset"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.dmap.mapadd") {
+            description = "Allows /dmap mapadd"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.dmap.perspectivelist") {
+            description = "Allows /dmap perspectivelist"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.dmap.shaderlist") {
+            description = "Allows /dmap shaderlist"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.dmap.lightinglist") {
+            description = "Allows /dmap lightinglist"
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("dynmap.playermarkers.seeall") {
+            description = "Allow all players to be seen by user on web UI"
             default = BukkitPluginDescription.Permission.Default.OP
         }
     }

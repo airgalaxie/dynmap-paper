@@ -130,13 +130,24 @@ public class PlayerFaces {
             try {
                 if(fetchskins && (refreshskins || missing_any)) {
                     URL url = null;
-
+/*
                     if (mSkinUrlProvider == null) {
                         if (!skinurl.equals("")) {
                             url = new URL(skinurl.replace("%player%", URLEncoder.encode(playername, "UTF-8"))
                                                   .replace("%uuid%", playeruuid.toString()));
                         } else if (playerskinurl != null) {
                             url = new URL(playerskinurl);
+                        }
+                    } else {
+                        url = mSkinUrlProvider.getSkinUrl(playername);
+                    }
+*/
+                    if (mSkinUrlProvider == null) {
+                        if (!skinurl.equals("")) {
+                            url = java.net.URI.create(skinurl.replace("%player%", URLEncoder.encode(playername, "UTF-8"))
+                                    .replace("%uuid%", playeruuid.toString())).toURL();
+                        } else if (playerskinurl != null) {
+                            url = java.net.URI.create(playerskinurl).toURL();
                         }
                     } else {
                         url = mSkinUrlProvider.getSkinUrl(playername);

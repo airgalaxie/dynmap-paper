@@ -1,40 +1,88 @@
-# Eclipse stuff
+# ====================================================================
+# IDEs & Editors (IntelliJ, Eclipse, VSCode)
+# ====================================================================
+.idea/
+**/.idea/
+*.iml
+**/*.iml
+*.ipr
+*.iws
 .classpath
 .project
-.settings
-
-# netbeans
+.settings/
+**/netBeans/
 /nbproject
-
-# idea
-.idea/
-
 *.launch
-
-# we use maven!
-/build.xml
-
-# maven
-/target
-
-# vim
 .*.sw[a-p]
+.vscode/
+**/.vscode/
 
-# various other potential build files
-/build
-/bin
-/dist
-/manifest.mf
-/run
+# ====================================================================
+# Build & Output Directories (Global & Submodules)
+# ====================================================================
+build/
+**/build/
+bin/
+**/bin/
+dist/
+**/dist/
+target/
+**/target/
+run/
+**/run/
+out/
+**/out/
 
-# Mac filesystem dust
-/.DS_Store
-/dependency-reduced-pom.xml
+# ====================================================================
+# Java & Kotlin Compiler Outputs (Verhindert Accessors-Explosion)
+# ====================================================================
+**/*.class
+**/*.kt.class
+**/classes/
+**/generated-sources/
+**/generated/
 
-*.log
-/.gradle
-/fabric-1.16.1_client.launch
-/fabric-1.16.1_server.launch
-/fabric-1.16.2_client.launch
-/fabric-1.16.2_server.launch
+# ====================================================================
+# Gradle Infrastructure & Performance Caches
+# ====================================================================
+.gradle/
+**/.gradle/
 buildSrc/.gradle/
+buildSrc/build/
+
+# Gradle & Kotlin Lock files / Performance Probes
+*.lock
+**/*.lock
+*.probe
+**/*.probe
+.kotlin/
+**/.kotlin/
+**/lookups.tab*
+
+# ====================================================================
+# Minecraft Server Dev Environment (Paperweight Caches)
+# ====================================================================
+.paperweight/
+**/.paperweight/
+**/paperweight/
+**/cache/paperweight/
+mappedServerJar.jar
+**/mappedServerJar.jar
+**/*.jar.cache
+
+# ====================================================================
+# System Garbage & Logs
+# ====================================================================
+.DS_Store
+**/.DS_Store
+Thumbs.db
+*.log
+**/logs/
+
+# ====================================================================
+# Legacy Project Leftovers
+# ====================================================================
+**/build.xml
+**/manifest.mf
+**/dependency-reduced-pom.xml
+**/fabric-*.launch

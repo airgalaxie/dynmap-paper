@@ -35,6 +35,7 @@ java {
 tasks {
     compileJava {
         options.compilerArgs.addAll(listOf("-Xlint:all", "-Xlint:-processing"))
+        options.compilerArgs.remove("-Werror")
         options.encoding = "UTF-8"
     }
 
