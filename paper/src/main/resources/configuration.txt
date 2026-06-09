@@ -279,7 +279,9 @@ block-alias:
 # Note: any webp format requires the presence of the 'webp command line tools' (cwebp, dwebp) (https://developers.google.com/speed/webp/download)
 #
 # Has no effect on maps with explicit format settings
-image-format: jpg-q90
+#image-format: jpg-q90
+
+image-format: webp-q80
 
 #### for WebP #########
 #image-format: webp-q85

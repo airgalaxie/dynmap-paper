@@ -57,6 +57,10 @@ import org.dynmap.utils.ImageIOManager;
 import org.yaml.snakeyaml.Yaml;
 
 public class DynmapCore implements DynmapCommonAPI {
+    private static final String MAIN_CONFIGURATION_FILE = "configuration.txt";
+    private static final String MAIN_WEB_INDEX_FILE = "index.html";
+    private static final String MAIN_WEB_INDEX_PATH = "web/" + MAIN_WEB_INDEX_FILE;
+
     /**
      * Callbacks for core initialization - subclassed by platform plugins
      */
@@ -351,7 +355,7 @@ public class DynmapCore implements DynmapCommonAPI {
         loadVersion();
         
         /* Initialize confguration.txt if needed */
-        File f = new File(dataDirectory, "configuration.txt");
+        File f = new File(dataDirectory, MAIN_CONFIGURATION_FILE);
         if(!createDefaultFileFromResource("/configuration.txt", f)) {
             return false;
         }
@@ -2370,6 +2374,9 @@ public class DynmapCore implements DynmapCommonAPI {
                 	continue;
                 }
                 n = n.substring("extracted/web/".length());
+                if (MAIN_WEB_INDEX_FILE.equals(n)) {
+                    continue;
+                }
                 // If file is going to web path, redirect it to the configured web
                 if (ze.isDirectory()) {
                     continue;
@@ -2464,6 +2471,12 @@ public class DynmapCore implements DynmapCommonAPI {
                 while ((line = br.readLine()) != null) {
                     if (line.length() == 0) continue;
                     if (line.startsWith("#")) continue;
+                    if (MAIN_CONFIGURATION_FILE.equals(line)) {
+                        continue;
+                    }
+                    if (MAIN_WEB_INDEX_PATH.equals(line)) {
+                        continue;
+                    }
                     File newfile = new File(df, line);
                     newfile.delete();
                 }
@@ -2490,6 +2503,12 @@ public class DynmapCore implements DynmapCommonAPI {
                 	continue;
                 }
                 n = n.substring("extracted/".length());
+                if (MAIN_CONFIGURATION_FILE.equals(n)) {
+                    continue;
+                }
+                if (MAIN_WEB_INDEX_PATH.equals(n)) {
+                    continue;
+                }
                 // If file is going to web path, redirect it to the configured web
                 if (n.startsWith("web/")) {
                 	// Don't update unless we are allowed to
@@ -2628,4 +2647,3 @@ public class DynmapCore implements DynmapCommonAPI {
         return defaultStorage;
     }
 }
-

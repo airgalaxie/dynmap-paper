@@ -15,9 +15,8 @@ explaining it to users, and fixing current and future problems - if we don't thi
    compromises or other malicious code), and they create problems with the MANY people who fork Dynmap for the sake of doing PRs or their own private
    custom builds - since all theose modified lines create merge conflicts - once again, with no actual function having been accomplished.  If we decide
    the code needs to be 'prettied up', it'll be done by the Dynmap team.
-- Do not make changes to core code (anything in DynmapCore or DynmapCoreAPI) unless you're ready to build and test it on all supported platforms.  Code that
-breaks building of ANY supported platform will be rejected.
-- Likewise, any Spigot related changes are expected to function correctly on all supported Spigot and PaperMC versions (currently 1.10.2 through 1.16.1).  
+- Do not make changes to core code (anything in DynmapCore or DynmapCoreAPI) unless you're ready to build and test it on the supported Paper target.  Code that
+breaks building of the supported Paper target will be rejected.
 - Do not include any code that involves platform specific native libraries or command line behaviors.  Dynmap supports 32-bit and 64-bit, Windows, lots of
 Linux versions (both x86 and ARM), MacOS, being used in Docker environments, and more - this is all about staying as 'pure Java' as the Minecraft server itself
 is.  If your PR includes platform specific dependencies that are not coded to handle working on all the above platforms properly, the PR will be rejected.
@@ -58,17 +57,16 @@ cease distribution of the unofficial version, unless otherwise authorized to con
     - Any bugs or issues opened in conjunction with the use of the modified version on this repository will be closed without comment.
 
 Additions of new functions, including new platform support, in this official Dynmap code base MUST be fully contained within the PRs submitted to this 
-repository.  Further, it is always expected than any updates will be built and tested across all relevant platforms - meaning any chances to shared code 
-components (DynmapCore, DynmapCoreAPI) MUST be successfully built and tested on ALL supported platforms (Forge, Spigot, etc).  Changes which break 
-supported platforms will be rejected.
+repository.  Further, it is always expected that any updates will be built and tested against the supported Paper target. Changes which break 
+the supported Paper target will be rejected.
 
-The only interfaces published and maintained as 'stable' are the interfaces of the DynmapCoreAPI (cross platform) and dynmap-api (Bukkit/spigot specific) 
+The only interfaces published and maintained as 'stable' are the interfaces of the DynmapCoreAPI and dynmap-api (Paper/Bukkit API based) 
 libraries.  All other components are NOT libraries - DynmapCore, in particular, is a shared code component across the various platforms, but is subject to 
 breaking changes without warning or consideration - any use of DynmapCore interfaces by code outside this repository is NOT supported, and will likely 
 result in breaking of such consuming code without warning and without apology.  DynmapCore is an internal shared code component, not a library - please
 treat it accordingly.
 
-Plugins or mods using the published APIs - DynmapCoreAPI (for all platforms) or dynmap-api (only for Spigot/Bukkit) - may access these components as 
+Plugins using the published APIs - DynmapCoreAPI or dynmap-api (Paper/Bukkit API based) - may access these components as 
 'compile' dependencies: DO NOT INTEGRATE THEM INTO YOUR PLUGIN - this will break Dynmap and/or other plugins when these interfaces are updated or 
 expanded.  These libraries are published at https://repo.mikeprimm.com and will be updated each official release.
 
