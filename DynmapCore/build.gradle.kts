@@ -16,6 +16,8 @@ dependencies {
     implementation(libs.jsonSimple)
     implementation(libs.snakeYaml)
     implementation(libs.owaspHtmlSanitizer)
+    implementation(libs.owaspJava8Shim)
+    implementation(libs.owaspJava10Shim)
     implementation(libs.gson)
 }
 
@@ -48,6 +50,8 @@ tasks {
             include(dependency(libs.jsonSimple))
             include(dependency(libs.snakeYaml))
             include(dependency(libs.owaspHtmlSanitizer))
+            include(dependency(libs.owaspJava8Shim))
+            include(dependency(libs.owaspJava10Shim))
             include(dependency(":DynmapCoreAPI"))
             exclude("META-INF/maven/**")
             exclude("META-INF/services/**")
@@ -55,6 +59,7 @@ tasks {
         relocate("org.json.simple", "org.dynmap.json.simple")
         relocate("org.yaml.snakeyaml", "org.dynmap.snakeyaml")
         relocate("org.owasp.html", "org.dynmap.org.owasp.html")
+        relocate("org.owasp.shim", "org.dynmap.org.owasp.shim")
 
         destinationDirectory = file("../target")
         archiveClassifier = ""
