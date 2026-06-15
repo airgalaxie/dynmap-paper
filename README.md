@@ -14,7 +14,7 @@ This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.co
 
 | Original dynmap Repository                          | airgalaxie New Modernized Fork (v26.1.2++)                                                  |
 |:----------------------------------------------------|:--------------------------------------------------------------------------------------------|
-| **Target Platform:** Paper 1.21.10 only             | **Target Platform:** Fully compatible with Paper 1.21.10 & 26.1.2+ architectures            |
+| **Target Platform:** Paper 1.21.10 only             | **Target Platform:** Fully compatible with Paper 1.21.10 & 26.2 architectures               |
 | **Compiler / Runtime:** Legacy Java target          | **Compiler / Runtime:** Built with **Java 26** on **Linux**                                 |
 | **Build System:** Outdated Gradle build             | **Build System:** Upgraded to **Gradle 9.5.1**                                              |
 | **Web Framework:** Deprecated/legacy jQuery version | **Web Framework:** Upgraded to **jQuery 4.0.x** (fixing legacy vulnerabilities)             |
