@@ -1,4 +1,4 @@
-# Dynmap v26.1.2++ (Modernized Fork)
+# Dynmap v26.2
 
 This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.com/airgalaxie/dynmap) repository, which builds upon the work of [JLyne's fork](https://github.com/JLyne/dynmap) and is based on the original [Dynmap project](https://github.com/webbukkit/dynmap).
 
