@@ -2506,16 +2506,16 @@ public class DynmapCore implements DynmapCommonAPI {
                 if (MAIN_CONFIGURATION_FILE.equals(n)) {
                     continue;
                 }
-                if (MAIN_WEB_INDEX_PATH.equals(n)) {
-                    continue;
-                }
                 // If file is going to web path, redirect it to the configured web
                 if (n.startsWith("web/")) {
                 	// Don't update unless we are allowed to
                 	if (!updatewebpathfiles) {
                 		continue;
                 	}
-            		f = new File(wpath, n.substring("web/".length()));            
+            		f = new File(wpath, n.substring("web/".length()));
+                    if (MAIN_WEB_INDEX_PATH.equals(n) && f.canRead()) {
+                        continue;
+                    }
                 }
                 else {
                 	f = new File(df, n);
