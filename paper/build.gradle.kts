@@ -21,6 +21,11 @@ val localBuildNumber = if (project.parent?.ext?.has("buildNumber") == true) {
     currentShortDate
 }
 
+val paperApiVersion = Regex("""^\d{1,2}\.[1-9][0-9]*(?:\.[1-9][0-9]*)?""")
+    .find(libs.versions.paper.get())
+    ?.value
+    ?: error("Cannot derive Paper API version from '${libs.versions.paper.get()}'")
+
 dependencies {
     implementation(project(":dynmap-api"))
     implementation(project(":DynmapCore", "shadow"))
@@ -76,7 +81,7 @@ paper {
     // Das Plugin behält intern die originale, saubere Version ohne Datums-Suffix
     version = "${project.version}"
 
-    apiVersion = libs.versions.paper.get().replace(".build.+", "")
+    apiVersion = paperApiVersion
     authors = listOf("Jim (AnEnragedPigeon)", "mikeprimm")
     description = "Real time web-based map system"
     website = "https://www.reddit.com/r/Dynmap/"
