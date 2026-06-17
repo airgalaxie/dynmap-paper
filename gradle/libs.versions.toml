@@ -1,6 +1,5 @@
 [versions]
-#paper = "26.2.build.+"
-paper = "26.2-rc-2.build.9-alpha"
+paper = "26.2.build.+"
 jsonSimple = "1.1.1" # Replace with gson
 snakeYaml = "2.6" # upgrade From 1.23
 owaspHtmlSanitizer = "20260313.1"
