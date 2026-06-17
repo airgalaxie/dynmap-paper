@@ -3,19 +3,22 @@
 This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.com/airgalaxie/dynmap) repository, which builds upon the work of [JLyne's fork](https://github.com/JLyne/dynmap) and is based on the original [Dynmap project](https://github.com/webbukkit/dynmap).
 
 > [!NOTE]
-> **Development Environment:** Active development and compilation on **Linux** using **Java 26** and **Gradle 9.5.1**.  
-> **Current Production Build:** v26.1.2++ (Stable & Modernized)  
-> **In Development:** Version v26.2 is currently active and in progress.
+> **Development Environment:** Active local development on **Linux** with **Java 26** and **Gradle 9.5.1**.  
+> **Production Compatibility:** The Gradle toolchain targets **Java 25**, so release builds must remain Java 25 compatible.  
+> **Current Branch:** `26.2`  
+> **Paper Target:** `26.2-rc-2.build.9-alpha`  
+> **Compatibility Goal:** Keep this fork compatible with the Paper **26.2.x** release line for as long as possible.  
+> **Status:** 26.2 release process; Paper upstream is still consumed from the current alpha/RC build line.
 
 ---
 
 ## 🔄 Side-by-Side Comparison of Project Scope
 
 
-| Original dynmap Repository                          | airgalaxie New Modernized Fork (v26.1.2++)                                                  |
+| Original dynmap Repository                          | airgalaxie New Modernized Fork (26.2 branch)                                                |
 |:----------------------------------------------------|:--------------------------------------------------------------------------------------------|
-| **Target Platform:** Paper 1.21.10 only             | **Target Platform:** Fully compatible with Paper 1.21.10 & 26.2 architectures               |
-| **Compiler / Runtime:** Legacy Java target          | **Compiler / Runtime:** Built with **Java 26** on **Linux**                                 |
+| **Target Platform:** Paper 1.21.10 baseline         | **Target Platform:** Paper 26.2.x, currently built against `26.2-rc-2.build.9-alpha`         |
+| **Compiler / Runtime:** Legacy Java target          | **Compiler / Runtime:** Developed with Java 26 locally, built for **Java 25** compatibility |
 | **Build System:** Outdated Gradle build             | **Build System:** Upgraded to **Gradle 9.5.1**                                              |
 | **Web Framework:** Deprecated/legacy jQuery version | **Web Framework:** Upgraded to **jQuery 4.0.x** (fixing legacy vulnerabilities)             |
 | **Map Engine:** Old Leaflet 1.7.x library           | **Map Engine:** Upgraded to **Leaflet 1.9.4** (smooth rendering, modern browser fixes)      |
@@ -25,7 +28,8 @@ This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.co
 
 ## 🛠️ Main Changes in this Fork (Summary)
 
-*   **Java 26 & Gradle 9.5.1**: Cutting-edge Linux-based compilation environment for maximum performance and future-proofing.
+*   **Paper 26.2.x Compatibility Goal**: Updated Paper dependency to `26.2-rc-2.build.9-alpha` for the 26.2 release process, while keeping the codebase aligned with the broader 26.2.x release line where practical.
+*   **Java 26 Development / Java 25 Production Compatibility**: Local development uses Java 26, while the Gradle toolchain keeps the produced plugin aligned with Java 25 compatibility.
 *   **jQuery 4.0.x & Leaflet 1.9.4**: Replaced outdated frontend web assets to resolve performance drops and security flaws.
 *   **Model Text Fixes**: Corrected specific structure and block rendering bugs in the `Modelsxx.txt` configuration data.
 
@@ -34,8 +38,8 @@ This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.co
 ## 📝 Configuration and Platform Notes
 
 *   **Configuration:** Dynmap's configuration is primarily managed through `configuration.txt` and other related files within the plugin's data folder. Please refer to the official Dynmap documentation for detailed configuration instructions. This fork does not introduce new configuration methods, but focuses on updating underlying technologies.
-*   **No Internal Webserver:** This fork, like the original Dynmap, does **not** include an internal webserver. You need to deploy the generated web files to an external web server (e.g., Nginx, Apache) for the map to be accessible via a web browser.
-*   **Platform Support:** This project is specifically built and tested for **Paper** servers (versions 1.21.10 & 26.1.2+ architectures). There are currently **no builds or explicit support for Fabric** or other Minecraft server platforms. Attempting to use this fork on unsupported platforms may lead to unexpected behavior or failures.
+*   **Webserver Default:** The Dynmap webserver configuration is present, but the bundled default configuration sets `disable-webserver: true`. Deploy the generated web files to an external web server (e.g., Nginx, Apache), or explicitly reconfigure Dynmap if you want to use its internal webserver.
+*   **Platform Support:** This project targets the **Paper 26.2.x** server line and is currently built against the `26.2-rc-2.build.9-alpha` API target. Compatibility with later 26.2.x builds is intended, but should be re-tested when Paper changes APIs or server internals during the alpha/RC phase. There are currently **no builds or explicit support for Fabric** or other Minecraft server platforms. Attempting to use this fork on unsupported platforms may lead to unexpected behavior or failures.
 
 ---
 
