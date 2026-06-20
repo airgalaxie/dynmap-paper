@@ -31,6 +31,16 @@ This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.co
 
 ---
 
+Changes include:
+- Removal of all platform support except Paper 1.21.10
+- Now a Mojang mapped Paper plugin
+- Removal of web chat
+- Removal of login support
+- Removal of internal webserver
+- Removal of obsolete permission providers and SkinsRestorer integration
+- Removal of various outdated workarounds (Log4Shell, Spout lighting, etc)
+- Removal of Postgres and S3 storage types
+
 ## 📝 Configuration and Platform Notes
 
 *   **Configuration:** Dynmap's configuration is primarily managed through `configuration.txt` and other related files within the plugin's data folder. Please refer to the official Dynmap documentation for detailed configuration instructions. This fork does not introduce new configuration methods, but focuses on updating underlying technologies.

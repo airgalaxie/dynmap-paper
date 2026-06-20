@@ -28,3 +28,4 @@ groupManager = { group = "org.anjocaido", name = "EssentialsGroupManager", versi
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 paperweightUserdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweightUserdev" }
 pluginYmlPaper = { id = "de.eldoria.plugin-yml.paper", version.ref = "pluginYmlPaper" }
+pluginYmlBukkit = { id = "de.eldoria.plugin-yml.bukkit", version.ref = "pluginYmlPaper" }
