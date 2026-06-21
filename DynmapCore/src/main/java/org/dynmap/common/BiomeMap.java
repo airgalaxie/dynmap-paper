@@ -92,8 +92,30 @@ public class BiomeMap {
     public static final BiomeMap BASALT_DELTAS = new BiomeMap(173, "BASALT_DELTAS", "minecraft:basalt_deltas");
     public static final BiomeMap DRIPSTONE_CAVES = new BiomeMap(174, "DRIPSTONE_CAVES", "minecraft:dripstone_caves");
     public static final BiomeMap LUSH_CAVES = new BiomeMap(175, "LUSH_CAVES", "minecraft:lush_caves");
+    public static final BiomeMap NETHER_WASTES = new BiomeMap(176, "NETHER_WASTES", 2.0, 0.0, "minecraft:nether_wastes");
+    public static final BiomeMap SNOWY_PLAINS = new BiomeMap(177, "SNOWY_PLAINS", 0.0, 0.5, "minecraft:snowy_plains");
+    public static final BiomeMap STONY_SHORE = new BiomeMap(178, "STONY_SHORE", 0.2, 0.3, "minecraft:stony_shore");
+    public static final BiomeMap OLD_GROWTH_BIRCH_FOREST = new BiomeMap(179, "OLD_GROWTH_BIRCH_FOREST", 0.6, 0.6, "minecraft:old_growth_birch_forest");
+    public static final BiomeMap OLD_GROWTH_PINE_TAIGA = new BiomeMap(180, "OLD_GROWTH_PINE_TAIGA", 0.3, 0.8, "minecraft:old_growth_pine_taiga");
+    public static final BiomeMap OLD_GROWTH_SPRUCE_TAIGA = new BiomeMap(181, "OLD_GROWTH_SPRUCE_TAIGA", 0.25, 0.8, "minecraft:old_growth_spruce_taiga");
+    public static final BiomeMap WINDSWEPT_HILLS = new BiomeMap(182, "WINDSWEPT_HILLS", 0.2, 0.3, "minecraft:windswept_hills");
+    public static final BiomeMap WINDSWEPT_GRAVELLY_HILLS = new BiomeMap(183, "WINDSWEPT_GRAVELLY_HILLS", 0.2, 0.3, "minecraft:windswept_gravelly_hills");
+    public static final BiomeMap WINDSWEPT_FOREST = new BiomeMap(184, "WINDSWEPT_FOREST", 0.2, 0.3, "minecraft:windswept_forest");
+    public static final BiomeMap WINDSWEPT_SAVANNA = new BiomeMap(185, "WINDSWEPT_SAVANNA", 1.1, 0.0, "minecraft:windswept_savanna");
+    public static final BiomeMap SPARSE_JUNGLE = new BiomeMap(186, "SPARSE_JUNGLE", 0.95, 0.8, "minecraft:sparse_jungle");
+    public static final BiomeMap MEADOW = new BiomeMap(187, "MEADOW", 0.5, 0.8, "minecraft:meadow");
+    public static final BiomeMap GROVE = new BiomeMap(188, "GROVE", -0.2, 0.8, "minecraft:grove");
+    public static final BiomeMap SNOWY_SLOPES = new BiomeMap(189, "SNOWY_SLOPES", -0.3, 0.9, "minecraft:snowy_slopes");
+    public static final BiomeMap FROZEN_PEAKS = new BiomeMap(190, "FROZEN_PEAKS", -0.7, 0.9, "minecraft:frozen_peaks");
+    public static final BiomeMap JAGGED_PEAKS = new BiomeMap(191, "JAGGED_PEAKS", -0.7, 0.9, "minecraft:jagged_peaks");
+    public static final BiomeMap STONY_PEAKS = new BiomeMap(192, "STONY_PEAKS", 1.0, 0.3, "minecraft:stony_peaks");
+    public static final BiomeMap MANGROVE_SWAMP = new BiomeMap(193, "MANGROVE_SWAMP", 0.8, 0.9, "minecraft:mangrove_swamp");
+    public static final BiomeMap DEEP_DARK = new BiomeMap(194, "DEEP_DARK", 0.8, 0.4, "minecraft:deep_dark");
+    public static final BiomeMap CHERRY_GROVE = new BiomeMap(195, "CHERRY_GROVE", 0.5, 0.8, "minecraft:cherry_grove");
+    public static final BiomeMap PALE_GARDEN = new BiomeMap(196, "PALE_GARDEN", 0.7, 0.8, "minecraft:pale_garden");
+    public static final BiomeMap SULFUR_CAVES = new BiomeMap(197, "SULFUR_CAVES", 2.0, 0.0, "minecraft:sulfur_caves");
 
-    public static final int LAST_WELL_KNOWN = 175;
+    public static final int LAST_WELL_KNOWN = 197;
     
     private double tmp;
     private double rain;
