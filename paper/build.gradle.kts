@@ -1,11 +1,10 @@
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
-import net.minecrell.pluginyml.paper.PaperPluginDescription
 
 plugins {
     alias(libs.plugins.shadow)
-    alias(libs.plugins.pluginYmlPaper)
+    alias(libs.plugins.pluginYmlBukkit)
     id("dynmap.java-conventions")
 }
 
@@ -40,7 +39,7 @@ dependencies {
 
 tasks {
     processResources {
-        filesMatching("paper-plugin.yml") {
+        filesMatching("plugin.yml") {
             expand(
                 "buildnumber" to localBuildNumber,
                 "version" to project.version
@@ -74,7 +73,7 @@ tasks {
     }
 }
 
-paper {
+bukkit {
     name = "dynmap"
     main = "org.dynmap.bukkit.DynmapPlugin"
 
@@ -85,21 +84,7 @@ paper {
     authors = listOf("Jim (AnEnragedPigeon)", "mikeprimm")
     description = "Real time web-based map system"
     website = "https://www.reddit.com/r/Dynmap/"
-
-    serverDependencies {
-        register("GroupManager") {
-            required = false
-            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
-        }
-        register("LuckPerms") {
-            required = false
-            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
-        }
-        register("Vault") {
-            required = false
-            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
-        }
-    }
+    softDepend = listOf("GroupManager", "LuckPerms", "Vault")
 
     permissions {
         register("dynmap.render") {
