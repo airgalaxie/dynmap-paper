@@ -269,7 +269,8 @@ var DynmapTileLayer = L.TileLayer.extend({
 function loadjs(url, completed) {
 	var script = document.createElement('script');
 	script.setAttribute('src', url);
-	script.setAttribute('type', 'text/javascript');
+	script.setAttribute('type', 'application/javascript');
+	script.async = true;
 	var isloaded = false;
 	script.onload = function() {
 		if (isloaded) { return; }
