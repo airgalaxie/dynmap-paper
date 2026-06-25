@@ -1,11 +1,11 @@
-# Dynmap v26.2
+# Dynmap Paper v26.2
 
-This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.com/airgalaxie/dynmap) repository, which builds upon the work of [JLyne's fork](https://github.com/JLyne/dynmap) and is based on the original [Dynmap project](https://github.com/webbukkit/dynmap).
+This is a heavily modified **fork** of the [airgalaxie/dynmap-paper](https://github.com/airgalaxie/dynmap-paper) repository, which builds upon the work of [JLyne's fork](https://github.com/JLyne/dynmap) and is based on the original [Dynmap project](https://github.com/webbukkit/dynmap).
 
 > [!NOTE]
 > **Development Environment:** Active local development on **Linux** with **Java 26** and **Gradle 9.6.0**.  
 > **Production Compatibility:** The Gradle toolchain targets **Java 25**, so release builds must remain Java 25 compatible.  
-> **Current Branch:** `26.2`  
+> **Current Branch:** `main` / `26.2`  
 > **Paper Target:** `26.2.build.+`  
 > **Compatibility Goal:** Keep this fork compatible with the Paper **26.2.x** release line for as long as possible.  
 > **Status:** 26.2 release process; Paper upstream is still consumed from the current alpha/RC build line.
@@ -15,7 +15,7 @@ This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.co
 ## 🔄 Side-by-Side Comparison of Project Scope
 
 
-| Original dynmap Repository                          | airgalaxie New Modernized Fork (26.2 branch)                                                |
+| Original dynmap Repository                          | airgalaxie New Modernized Fork (main / 26.2 branch)                                         |
 |:----------------------------------------------------|:--------------------------------------------------------------------------------------------|
 | **Target Platform:** Paper 1.21.10 baseline         | **Target Platform:** Paper 26.2.x, dynamically tracking `26.2.build.+`                      |
 | **Compiler / Runtime:** Legacy Java target          | **Compiler / Runtime:** Developed with Java 26 locally, built for **Java 25** compatibility |
@@ -36,7 +36,7 @@ This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.co
 ---
 
 Changes include:
-- Removal of all platform support except Paper 1.21.10
+- Removal of all platform support except Paper 26.2.x
 - Now a Mojang mapped Paper plugin
 - Removal of web chat
 - Removal of login support
@@ -51,7 +51,27 @@ Changes include:
 *   **Webserver Default:** The Dynmap webserver configuration is present, but the bundled default configuration sets `disable-webserver: true`. Deploy the generated web files to an external web server (e.g., Nginx, Apache), or explicitly reconfigure Dynmap if you want to use its internal webserver.
 *   **Platform Support:** This project targets the **Paper 26.2.x** server line and dynamically resolves the latest matching `26.2.build.+` API target at build time. Compatibility with later 26.2.x builds is intended, but should be re-tested when Paper changes APIs or server internals during the alpha/RC phase. There are currently **no builds or explicit support for Fabric** or other Minecraft server platforms. Attempting to use this fork on unsupported platforms may lead to unexpected behavior or failures.
 
+## 🌐 External Web Server and Live Data URLs
+
+This fork keeps the existing Dynmap-style external web server workflow intact. The generated web UI reads live data through the URLs written to `standalone/config.js`. By default, those URLs point to the generated standalone JSON files:
+
+```yaml
+url:
+    # configuration: "standalone/dynmap_config.json?_={timestamp}"
+    # update: "standalone/dynmap_{world}.json?_={timestamp}"
+```
+
+Existing installations can keep using their current file-based setup. Advanced deployments that already route live data through a reverse proxy or another endpoint can override only these URLs in `configuration.txt`:
+
+```yaml
+url:
+    configuration: "up/configuration"
+    update: "up/world/{world}/{timestamp}"
+```
+
+This is the supported compatibility path for custom routing. The project should not require users to rebuild a working Nginx, Apache, or CDN setup just to follow the fork. If a deployment serves the web UI from one machine while the backend writes live JSON over NFS or another shared filesystem, short-lived `404` responses for live JSON usually indicate infrastructure timing or cache visibility issues. In that case, prefer local filesystem/NFS/Nginx tuning or URL overrides over changing the global project defaults.
+
 ---
 
 ### ⚠️ Support Disclaimer
-Just like the original repositories: No official support will be provided. Please do not contact the original [Dynmap Team](https://github.com/webbukkit/dynmap), [JLyne](https://github.com/JLyne/dynmap), or the maintainers of this specific fork ([airgalaxie/dynmap](https://github.com/airgalaxie/dynmap)) for help regarding the changes implemented in this specific fork.
+Just like the original repositories: No official support will be provided. Please do not contact the original [Dynmap Team](https://github.com/webbukkit/dynmap), [JLyne](https://github.com/JLyne/dynmap), or the maintainers of this specific fork ([airgalaxie/dynmap-paper](https://github.com/airgalaxie/dynmap-paper)) for help regarding the changes implemented in this specific fork.

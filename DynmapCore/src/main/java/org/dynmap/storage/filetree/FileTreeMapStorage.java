@@ -575,18 +575,21 @@ public class FileTreeMapStorage extends MapStorage {
         String baseFilename = "_markers_/marker_" + world + ".json";
         File ff = new File(baseTileDir, baseFilename);
         File ffpar = ff.getParentFile();
-        if (content == null) { // Delete?
-            ff.delete();
+        if (content == null) {
             return true;
         }
         if (ffpar.exists() == false) {
             ffpar.mkdirs();
         }
-        getWriteLock(baseFilename);
-        byte[] buf = content.getBytes(UTF8);
-        boolean done = replaceFile(ff, buf, buf.length);
-        releaseWriteLock(baseFilename);
-        return done;
+        if (!getWriteLock(baseFilename)) {
+            return false;
+        }
+        try {
+            byte[] buf = content.getBytes(UTF8);
+            return replaceMarkerJSONFile(ff, buf, buf.length);
+        } finally {
+            releaseWriteLock(baseFilename);
+        }
     }
 
     @Override
@@ -665,6 +668,28 @@ public class FileTreeMapStorage extends MapStorage {
                 }
                 else {
                     Log.info("Image file " + f.getPath() + " - unable to write - failed");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean replaceMarkerJSONFile(File f, byte[] b, int len) {
+        boolean done = false;
+        int retrycnt = 0;
+        while (!done) {
+            try {
+                replaceLiveJSONFile(f, b, len);
+                done = true;
+            } catch (IOException iox) {
+                if(retrycnt < MAX_WRITE_RETRIES) {
+                    Debug.debug("JSON file " + f.getPath() + " - unable to write - retry #" + retrycnt);
+                    try { Thread.sleep(50 << retrycnt); } catch (InterruptedException ix) { return false; }
+                    retrycnt++;
+                }
+                else {
+                    Log.info("JSON file " + f.getPath() + " - unable to write - failed");
                     return false;
                 }
             }
