@@ -1,11 +1,11 @@
-# Dynmap v26.2
+# Dynmap Paper v26.2
 
-This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.com/airgalaxie/dynmap) repository, which builds upon the work of [JLyne's fork](https://github.com/JLyne/dynmap) and is based on the original [Dynmap project](https://github.com/webbukkit/dynmap).
+This is a heavily modified **fork** of the [airgalaxie/dynmap-paper](https://github.com/airgalaxie/dynmap-paper) repository, which builds upon the work of [JLyne's fork](https://github.com/JLyne/dynmap) and is based on the original [Dynmap project](https://github.com/webbukkit/dynmap).
 
 > [!NOTE]
-> **Development Environment:** Active local development on **Linux** with **Java 26** and **Gradle 9.5.1**.  
+> **Development Environment:** Active local development on **Linux** with **Java 26** and **Gradle 9.6.0**.  
 > **Production Compatibility:** The Gradle toolchain targets **Java 25**, so release builds must remain Java 25 compatible.  
-> **Current Branch:** `26.2`  
+> **Current Branch:** `main` / `26.2`  
 > **Paper Target:** `26.2.build.+`  
 > **Compatibility Goal:** Keep this fork compatible with the Paper **26.2.x** release line for as long as possible.  
 > **Status:** 26.2 release process; Paper upstream is still consumed from the current alpha/RC build line.
@@ -15,11 +15,11 @@ This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.co
 ## 🔄 Side-by-Side Comparison of Project Scope
 
 
-| Original dynmap Repository                          | airgalaxie New Modernized Fork (26.2 branch)                                                |
+| Original dynmap Repository                          | airgalaxie New Modernized Fork (main / 26.2 branch)                                         |
 |:----------------------------------------------------|:--------------------------------------------------------------------------------------------|
 | **Target Platform:** Paper 1.21.10 baseline         | **Target Platform:** Paper 26.2.x, dynamically tracking `26.2.build.+`                      |
 | **Compiler / Runtime:** Legacy Java target          | **Compiler / Runtime:** Developed with Java 26 locally, built for **Java 25** compatibility |
-| **Build System:** Outdated Gradle build             | **Build System:** Upgraded to **Gradle 9.5.1**                                              |
+| **Build System:** Outdated Gradle build             | **Build System:** Upgraded to **Gradle 9.6.0**                                              |
 | **Web Framework:** Deprecated/legacy jQuery version | **Web Framework:** Upgraded to **jQuery 4.0.x** (fixing legacy vulnerabilities)             |
 | **Map Engine:** Old Leaflet 1.7.x library           | **Map Engine:** Upgraded to **Leaflet 1.9.4** (smooth rendering, modern browser fixes)      |
 | **Render Configurations:** Outdated model txt-files | **Render Configurations:** Fixed critical bugs directly inside the **`Modelsxx.txt`** files |
@@ -36,7 +36,7 @@ This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.co
 ---
 
 Changes include:
-- Removal of all platform support except Paper 1.21.10
+- Removal of all platform support except Paper 26.2.x
 - Now a Mojang mapped Paper plugin
 - Removal of web chat
 - Removal of login support
@@ -54,4 +54,4 @@ Changes include:
 ---
 
 ### ⚠️ Support Disclaimer
-Just like the original repositories: No official support will be provided. Please do not contact the original [Dynmap Team](https://github.com/webbukkit/dynmap), [JLyne](https://github.com/JLyne/dynmap), or the maintainers of this specific fork ([airgalaxie/dynmap](https://github.com/airgalaxie/dynmap)) for help regarding the changes implemented in this specific fork.
+Just like the original repositories: No official support will be provided. Please do not contact the original [Dynmap Team](https://github.com/webbukkit/dynmap), [JLyne](https://github.com/JLyne/dynmap), or the maintainers of this specific fork ([airgalaxie/dynmap-paper](https://github.com/airgalaxie/dynmap-paper)) for help regarding the changes implemented in this specific fork.
