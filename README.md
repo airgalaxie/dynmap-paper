@@ -3,7 +3,7 @@
 This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.com/airgalaxie/dynmap) repository, which builds upon the work of [JLyne's fork](https://github.com/JLyne/dynmap) and is based on the original [Dynmap project](https://github.com/webbukkit/dynmap).
 
 > [!NOTE]
-> **Development Environment:** Active local development on **Linux** with **Java 26** and **Gradle 9.5.1**.  
+> **Development Environment:** Active local development on **Linux** with **Java 26** and **Gradle 9.6.0**.  
 > **Production Compatibility:** The Gradle toolchain targets **Java 25**, so release builds must remain Java 25 compatible.  
 > **Current Branch:** `26.2`  
 > **Paper Target:** `26.2.build.+`  
@@ -19,7 +19,7 @@ This is a heavily modified **fork** of the [airgalaxie/dynmap](https://github.co
 |:----------------------------------------------------|:--------------------------------------------------------------------------------------------|
 | **Target Platform:** Paper 1.21.10 baseline         | **Target Platform:** Paper 26.2.x, dynamically tracking `26.2.build.+`                      |
 | **Compiler / Runtime:** Legacy Java target          | **Compiler / Runtime:** Developed with Java 26 locally, built for **Java 25** compatibility |
-| **Build System:** Outdated Gradle build             | **Build System:** Upgraded to **Gradle 9.5.1**                                              |
+| **Build System:** Outdated Gradle build             | **Build System:** Upgraded to **Gradle 9.6.0**                                              |
 | **Web Framework:** Deprecated/legacy jQuery version | **Web Framework:** Upgraded to **jQuery 4.0.x** (fixing legacy vulnerabilities)             |
 | **Map Engine:** Old Leaflet 1.7.x library           | **Map Engine:** Upgraded to **Leaflet 1.9.4** (smooth rendering, modern browser fixes)      |
 | **Render Configurations:** Outdated model txt-files | **Render Configurations:** Fixed critical bugs directly inside the **`Modelsxx.txt`** files |
