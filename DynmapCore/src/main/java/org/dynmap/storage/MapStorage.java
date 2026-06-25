@@ -3,6 +3,10 @@ package org.dynmap.storage;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.zip.CRC32;
@@ -15,6 +19,8 @@ import org.dynmap.PlayerFaces;
 import org.dynmap.WebAuthManager;
 import org.dynmap.utils.BufferInputStream;
 import org.dynmap.utils.BufferOutputStream;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * Generic interface for map data storage (image tiles, and associated hash codes)
@@ -250,54 +256,102 @@ public abstract class MapStorage {
      * @return true if successful
      */
     public boolean setStandaloneFile(String fileid, BufferOutputStream content) {
-        RandomAccessFile fos = null;
         boolean good = false;
         boolean done = false;
         File f = new File(baseStandaloneDir, fileid);
-        File fnew = new File(baseStandaloneDir, fileid + ".new");
-        File fold = new File(baseStandaloneDir, fileid + ".old");
         int retrycnt = 0;
-        getWriteLock(fileid);
-        while (!done) {
-            try {
-                if (fnew.exists()) {
-                    fnew.delete();
-                }
-                if (content != null) {
-                    fos = new RandomAccessFile(fnew, "rw");
-                    fos.write(content.buf, 0, content.len);
-                }
-                good = true;
-                done = true;
-            } catch (IOException ioe) {
-                if(retrycnt < RETRY_LIMIT) {
-                    try { Thread.sleep(20 * (1 << retrycnt)); } catch (InterruptedException ix) {}
-                    retrycnt++;
-                }
-                else {
-                    Log.severe("Exception while writing JSON-file - " + fnew.getPath(), ioe);
+        if (!getWriteLock(fileid)) {
+            return false;
+        }
+        try {
+            while (!done) {
+                try {
+                    if (content == null) {
+                        if (isLiveStandaloneJSON(fileid)) {
+                            good = true;
+                        }
+                        else {
+                            Files.deleteIfExists(f.toPath());
+                            good = true;
+                        }
+                    }
+                    else {
+                        File parent = f.getParentFile();
+                        if ((parent != null) && !parent.exists()) {
+                            parent.mkdirs();
+                        }
+                        if (isLiveStandaloneJSON(fileid)) {
+                            replaceLiveJSONFile(f, content.buf, content.len);
+                        }
+                        else {
+                            replaceLiveFile(f, content.buf, content.len, false);
+                        }
+                        good = true;
+                    }
                     done = true;
-                }
-            } finally {
-                if(fos != null) {
-                    try {
-                        fos.close();
-                    } catch (IOException iox) {
+                } catch (IOException ioe) {
+                    if(retrycnt < RETRY_LIMIT) {
+                        try { Thread.sleep(20 * (1 << retrycnt)); } catch (InterruptedException ix) {}
+                        retrycnt++;
                     }
-                    fos = null;
-                }
-                if(good) {
-                    f.renameTo(fold);
-                    if (content != null) {
-                        fnew.renameTo(f);
+                    else {
+                        Log.severe("Exception while writing JSON-file - " + f.getPath(), ioe);
+                        done = true;
                     }
-                    fold.delete();
                 }
             }
+        } finally {
+            releaseWriteLock(fileid);
         }
-        releaseWriteLock(fileid);
 
         return good;
+    }
+
+    private static boolean isLiveStandaloneJSON(String fileid) {
+        return fileid.endsWith(".json");
+    }
+
+    protected static void replaceLiveJSONFile(File f, byte[] b, int len) throws IOException {
+        replaceLiveFile(f, b, len, true);
+    }
+
+    private static void replaceLiveFile(File f, byte[] b, int len, boolean verifyJson) throws IOException {
+        File ftmp = new File(f.getParentFile(), f.getName() + "." + Thread.currentThread().getId() + "." + System.nanoTime() + ".tmp");
+        try {
+            try (RandomAccessFile fos = new RandomAccessFile(ftmp, "rw")) {
+                fos.setLength(0);
+                fos.write(b, 0, len);
+                fos.getChannel().force(true);
+            }
+            verifyLiveFile(ftmp, len, verifyJson);
+            replaceFile(ftmp.toPath(), f.toPath());
+        } catch (IOException ioe) {
+            try { Files.deleteIfExists(ftmp.toPath()); } catch (IOException iox) {}
+            throw ioe;
+        }
+    }
+
+    private static void verifyLiveFile(File ftmp, int len, boolean verifyJson) throws IOException {
+        if (!ftmp.isFile() || (len <= 0) || (ftmp.length() != len)) {
+            throw new IOException("Temporary live file is missing, empty, or incomplete: " + ftmp.getPath());
+        }
+        if (verifyJson) {
+            try {
+                new JSONParser().parse(new String(Files.readAllBytes(ftmp.toPath()), "UTF-8"));
+            } catch (ParseException x) {
+                throw new IOException("Temporary live JSON is invalid: " + ftmp.getPath(), x);
+            }
+        }
+    }
+
+    private static void replaceFile(Path source, Path target) throws IOException {
+        try {
+            Files.move(source, target,
+                    StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING);
+        } catch (AtomicMoveNotSupportedException x) {
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
     
     /**
