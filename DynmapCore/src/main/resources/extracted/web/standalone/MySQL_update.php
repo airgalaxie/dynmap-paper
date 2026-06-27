@@ -1,34 +1,24 @@
 <?php
+declare(strict_types=1);
 
-ob_start();
-require_once 'MySQL_funcs.php';
-require 'MySQL_config.php';
-ob_end_clean();
+require_once __DIR__ . '/MySQL_funcs.php';
+require __DIR__ . '/MySQL_config.php';
 
-$world = $_REQUEST['world'];
+try {
+    $world = dynmap_request_string('world');
+    if (!dynmap_validate_name($world)) {
+        dynmap_json_error(400, 'invalid-world');
+    }
 
-header('Content-type: application/json; charset=utf-8');
+    $content = getStandaloneFile('dynmap_' . $world . '.json');
+    if ($content === null) {
+        dynmap_json_error(503, 'database-unavailable');
+    }
 
-if (strpos($world, '/') || strpos($world, '\\')) {
-    echo "{ \"error\": \"invalid-world\" }";
-    return;
-}
-
-$fname = 'updates_' . $world . '.json';
-
-$serverid = 0;
-if (isset($_REQUEST['serverid'])) {
-    $serverid = $_REQUEST['serverid'];
-}
-
-$content = getStandaloneFile('dynmap_' . $world . '.json');
-if (!isset($content)) {
-    header('HTTP/1.0 503 Database Unavailable');
-    echo "<h1>503 Database Unavailable</h1>";
-    echo 'Error reading database - ' . $fname . ' #' . $serverid;
+    header('Content-Type: application/json; charset=utf-8');
+    echo $content;
+} catch (Throwable $error) {
+    dynmap_json_error(503, 'database-unavailable');
+} finally {
     cleanupDb();
-    exit;
 }
-
-echo $content;
-cleanupDb();

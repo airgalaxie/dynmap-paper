@@ -1,16 +1,19 @@
 <?php
+declare(strict_types=1);
 
-ob_start();
-require_once 'MySQL_funcs.php';
-require 'MySQL_config.php';
-ob_end_clean();
+require_once __DIR__ . '/MySQL_funcs.php';
+require __DIR__ . '/MySQL_config.php';
 
-$content = getStandaloneFile('dynmap_config.json');
+try {
+    $content = getStandaloneFile('dynmap_config.json');
+    if ($content === null) {
+        dynmap_json_error(503, 'database-unavailable');
+    }
 
-header('Content-type: application/json; charset=utf-8');
-
-$json = json_decode($content);
-
-echo $content;
-
-cleanupDb();
+    header('Content-Type: application/json; charset=utf-8');
+    echo $content;
+} catch (Throwable $error) {
+    dynmap_json_error(503, 'database-unavailable');
+} finally {
+    cleanupDb();
+}

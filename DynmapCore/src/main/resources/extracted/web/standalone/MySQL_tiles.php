@@ -1,78 +1,82 @@
 <?php
+declare(strict_types=1);
 
-ob_start();
-require_once 'MySQL_funcs.php';
-require 'MySQL_config.php';
-ob_end_clean();
+require_once __DIR__ . '/MySQL_funcs.php';
+require __DIR__ . '/MySQL_config.php';
 
+try {
+    $path = dynmap_request_string('tile');
+    if (!dynmap_validate_path($path)) {
+        dynmap_http_error(400, 'Bad tile path');
+    }
 
-$path = htmlspecialchars($_REQUEST['tile']);
-if ((!isset($path)) || strstr($path, "..")) {
-    header('HTTP/1.0 500 Error');
-    echo "<h1>500 Error</h1>";
-    echo "Bad marker: " . $path;
-    exit();
-}
+    $parts = explode('/', $path);
+    if (count($parts) !== 4 || !dynmap_validate_name($parts[0]) || !dynmap_validate_name($parts[1])) {
+        dynmap_redirect_blank();
+    }
 
-$parts = explode("/", $path);
+    $world = $parts[0];
+    $prefix = $parts[1];
+    $variant = 'STANDARD';
+    if (str_ends_with($prefix, '_day')) {
+        $prefix = substr($prefix, 0, -4);
+        $variant = 'DAY';
+    }
 
-if (count($parts) != 4) {
-    header('Location: ../images/blank.png');
-    cleanupDb();
-    exit;
-}
+    $file = $parts[3];
+    $name = preg_replace('/\.(png|jpg|jpeg|webp)$/i', '', $file);
+    $coords = explode('_', (string) $name);
+    if (count($coords) === 3 && $coords[0] !== '') {
+        $zoom = strlen($coords[0]);
+        $x = filter_var($coords[1], FILTER_VALIDATE_INT);
+        $y = filter_var($coords[2], FILTER_VALIDATE_INT);
+    } elseif (count($coords) === 2) {
+        $zoom = 0;
+        $x = filter_var($coords[0], FILTER_VALIDATE_INT);
+        $y = filter_var($coords[1], FILTER_VALIDATE_INT);
+    } else {
+        dynmap_redirect_blank();
+    }
+    if ($x === false || $y === false) {
+        dynmap_redirect_blank();
+    }
 
-$world = $parts[0];
-$variant = 'STANDARD';
+    $db = initDbIfNeeded();
+    $stmt = $db->prepare(
+        'SELECT t.NewImage,t.Image,t.Format,t.HashCode,t.LastUpdate FROM ' . dynmap_table('Maps') .
+        ' m JOIN ' . dynmap_table('Tiles') .
+        ' t ON m.ID=t.MapID WHERE m.WorldID=? AND m.MapID=? AND m.Variant=? AND t.x=? AND t.y=? AND t.zoom=?'
+    );
+    if (!$stmt) {
+        throw new RuntimeException('Could not prepare tile query');
+    }
+    $stmt->bind_param('sssiii', $world, $prefix, $variant, $x, $y, $zoom);
+    $stmt->execute();
+    $stmt->bind_result($newImage, $image, $format, $hash, $lastUpdate);
 
-$prefix = $parts[1];
-$plen = strlen($prefix);
-if (($plen > 4) && (substr($prefix, $plen - 4) === "_day")) {
-    $prefix = substr($prefix, 0, $plen - 4);
-    $variant = 'DAY';
-}
-$mapid = $world . "." . $prefix;
+    if (!$stmt->fetch()) {
+        $stmt->close();
+        dynmap_redirect_blank();
+    }
+    $stmt->close();
 
-$fparts = explode("_", $parts[3]);
-if (count($fparts) == 3) { // zoom_x_y
-    $zoom = strlen($fparts[0]);
-    $x = intval($fparts[1]);
-    $y = intval($fparts[2]);
-} elseif (count($fparts) == 2) { // x_y
-    $zoom = 0;
-    $x = intval($fparts[0]);
-    $y = intval($fparts[1]);
-} else {
-    header('Location: ../images/blank.png');
-    cleanupDb();
-    exit;
-}
-initDbIfNeeded();
+    $content = $newImage ?? $image;
+    if ($content === null) {
+        dynmap_redirect_blank();
+    }
 
-$stmt = $db->prepare('SELECT t.NewImage,t.Image,t.Format,t.HashCode,t.LastUpdate FROM ' . $dbprefix . 'Maps m JOIN ' . $dbprefix . 'Tiles t ON m.ID=t.MapID WHERE m.WorldID=? AND m.MapID=? AND m.Variant=? AND t.x=? AND t.y=? and t.zoom=?');
-$stmt->bind_param('sssiii', $world, $prefix, $variant, $x, $y, $zoom);
-$res = $stmt->execute();
-$stmt->bind_result($tnewimage, $timage, $format, $thash, $tlast);
-if ($stmt->fetch()) {
-    if ($format == 0) {
+    if ((int) $format === 0) {
         header('Content-Type: image/png');
-    } else if ($format == 2) {
-    	header('Content-Type: image/webp');
+    } elseif ((int) $format === 2) {
+        header('Content-Type: image/webp');
     } else {
         header('Content-Type: image/jpeg');
     }
-    header('ETag: \'' . $thash . '\'');
-    header('Last-Modified: ' . gmdate('D, d M Y H:i:s', (int) ($tlast / 1000)) . ' GMT');
-    if (is_null($tnewimage)) {
-        echo $timage;
-    } else {
-        echo $tnewimage;
-    }
-} else {
-    header('Location: ../images/blank.png');
+    header('ETag: "' . dechex((int) $hash) . '"');
+    header('Last-Modified: ' . gmdate('D, d M Y H:i:s', (int) ((int) $lastUpdate / 1000)) . ' GMT');
+    echo $content;
+} catch (Throwable $error) {
+    dynmap_http_error(503, 'Database Unavailable');
+} finally {
+    cleanupDb();
 }
-
-$stmt->close();
-cleanupDb();
-
-exit;

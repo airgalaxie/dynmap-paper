@@ -1,90 +1,110 @@
 <?php
+declare(strict_types=1);
 
-ob_start();
-require_once 'MySQL_funcs.php';
-require 'MySQL_config.php';
-ob_end_clean();
+require_once __DIR__ . '/MySQL_funcs.php';
+require __DIR__ . '/MySQL_config.php';
 
-$path = htmlspecialchars($_REQUEST['marker']);
-if ((!isset($path)) || strstr($path, "..")) {
-    header('HTTP/1.0 500 Error');
-    echo "<h1>500 Error</h1>";
-    echo "Bad marker: " . $path;
-    exit();
+function dynmap_face_type_id(string $faceType): ?int
+{
+    return match ($faceType) {
+        '8x8' => 0,
+        '16x16' => 1,
+        '32x32' => 2,
+        'body' => 3,
+        default => null,
+    };
 }
 
-$parts = explode("/", $path);
-
-if (($parts[0] != "faces") && ($parts[0] != "_markers_")) {
-    header('HTTP/1.0 500 Error');
-    echo "<h1>500 Error</h1>";
-    echo "Bad marker: " . $path;
-    exit();
-}
-
-initDbIfNeeded();
-
-if ($parts[0] == "faces") {
-    if (count($parts) != 3) {
-        header('HTTP/1.0 500 Error');
-        echo "<h1>500 Error</h1>";
-        echo "Bad face: " . $path;
-        cleanupDb();
-        exit();
+try {
+    $path = dynmap_request_string('marker');
+    if (!dynmap_validate_path($path)) {
+        dynmap_http_error(400, 'Bad marker path');
     }
-    $ft = 0;
-    if ($parts[1] == "8x8") {
-        $ft = 0;
-    } elseif ($parts[1] == '16x16') {
-        $ft = 1;
-    } elseif ($parts[1] == '32x32') {
-        $ft = 2;
-    } elseif ($parts[1] == 'body') {
-        $ft = 3;
-    }
-    $pn = explode(".", $parts[2]);
-    $stmt = $db->prepare('SELECT Image from ' . $dbprefix . 'Faces WHERE PlayerName=? AND TypeID=?');
-    $stmt->bind_param('si', $pn[0], $ft);
-    $res = $stmt->execute();
-    $stmt->bind_result($timage);
-    if ($stmt->fetch()) {
-        header('Content-Type: image/png');
-        echo $timage;
-    } else {
-        header('Location: ../images/blank.png');
-    }
-} else { // _markers_
-    $in = explode(".", $parts[1]);
-    $name = implode(".", array_slice($in, 0, count($in) - 1));
-    $ext = $in[count($in) - 1];
-    if (($ext == "json") && (strpos($name, "marker_") == 0)) {
-        $world = substr($name, 7);
-        $stmt = $db->prepare('SELECT Content from ' . $dbprefix . 'MarkerFiles WHERE FileName=?');
-        $stmt->bind_param('s', $world);
-        $res = $stmt->execute();
-        $stmt->bind_result($timage);
-        header('Content-Type: application/json');
-        if ($stmt->fetch()) {
-            echo $timage;
-        } else {
-            echo "{ }";
+
+    $parts = explode('/', $path);
+    if ($parts[0] === 'faces') {
+        if (count($parts) !== 3 || !str_ends_with($parts[2], '.png')) {
+            dynmap_redirect_blank();
         }
-    } else {
-        $stmt = $db->prepare('SELECT Image from ' . $dbprefix . 'MarkerIcons WHERE IconName=?');
-        $stmt->bind_param('s', $name);
-        $res = $stmt->execute();
-        $stmt->bind_result($timage);
+
+        $typeId = dynmap_face_type_id($parts[1]);
+        $player = substr($parts[2], 0, -4);
+        if ($typeId === null || !dynmap_validate_name($player)) {
+            dynmap_redirect_blank();
+        }
+
+        $db = initDbIfNeeded();
+        $stmt = $db->prepare('SELECT Image FROM ' . dynmap_table('Faces') . ' WHERE PlayerName=? AND TypeID=?');
+        if (!$stmt) {
+            throw new RuntimeException('Could not prepare face query');
+        }
+        $stmt->bind_param('si', $player, $typeId);
+        $stmt->execute();
+        $stmt->bind_result($image);
         if ($stmt->fetch()) {
             header('Content-Type: image/png');
-            echo $timage;
+            echo $image;
         } else {
-            header('Location: ../images/blank.png');
+            $stmt->close();
+            dynmap_redirect_blank();
         }
+        $stmt->close();
+        cleanupDb();
+        exit;
     }
+
+    if ($parts[0] !== '_markers_' || count($parts) !== 2) {
+        dynmap_http_error(400, 'Bad marker path');
+    }
+
+    $file = $parts[1];
+    if (str_ends_with($file, '.json') && str_starts_with($file, 'marker_')) {
+        $world = substr($file, strlen('marker_'), -5);
+        if (!dynmap_validate_name($world)) {
+            dynmap_json_error(400, 'invalid-world');
+        }
+
+        $db = initDbIfNeeded();
+        $stmt = $db->prepare('SELECT Content FROM ' . dynmap_table('MarkerFiles') . ' WHERE FileName=?');
+        if (!$stmt) {
+            throw new RuntimeException('Could not prepare marker file query');
+        }
+        $stmt->bind_param('s', $world);
+        $stmt->execute();
+        $stmt->bind_result($content);
+        header('Content-Type: application/json; charset=utf-8');
+        echo $stmt->fetch() ? (string) $content : '{ }';
+        $stmt->close();
+        cleanupDb();
+        exit;
+    }
+
+    if (!str_ends_with($file, '.png')) {
+        dynmap_redirect_blank();
+    }
+    $icon = substr($file, 0, -4);
+    if (!dynmap_validate_name($icon)) {
+        dynmap_redirect_blank();
+    }
+
+    $db = initDbIfNeeded();
+    $stmt = $db->prepare('SELECT Image FROM ' . dynmap_table('MarkerIcons') . ' WHERE IconName=?');
+    if (!$stmt) {
+        throw new RuntimeException('Could not prepare marker icon query');
+    }
+    $stmt->bind_param('s', $icon);
+    $stmt->execute();
+    $stmt->bind_result($image);
+    if ($stmt->fetch()) {
+        header('Content-Type: image/png');
+        echo $image;
+    } else {
+        $stmt->close();
+        dynmap_redirect_blank();
+    }
+    $stmt->close();
+} catch (Throwable $error) {
+    dynmap_http_error(503, 'Database Unavailable');
+} finally {
+    cleanupDb();
 }
-
-$stmt->close();
-
-cleanupDb();
-
-exit;

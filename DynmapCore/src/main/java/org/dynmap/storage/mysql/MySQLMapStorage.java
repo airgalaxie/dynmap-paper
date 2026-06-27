@@ -3,18 +3,26 @@ package org.dynmap.storage.mysql;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.dynmap.DynmapCore;
 import org.dynmap.DynmapWorld;
@@ -53,6 +61,11 @@ public class MySQLMapStorage extends MapStorage {
     private static final long IDLE_TIMEOUT = 60000;	// Use 60 second timeout
     private int cpoolCount = 0;
     private static final Charset UTF8 = Charset.forName("UTF-8");
+    private DynmapCore core;
+    private String driverJar;
+    private String driverClass;
+    private URLClassLoader driverClassLoader;
+    private DriverShim registeredDriver;
         
     public class StorageTile extends MapStorageTile {
         private Integer mapkey;
@@ -290,8 +303,7 @@ public class MySQLMapStorage extends MapStorage {
         connectionString = "jdbc:mysql://" + hostname + ":" + port + "/" + database + flags;
         Log.info("Opening MySQL database " + hostname + ":" + port + "/" + database + " as map store");
 
-        if(!hasClass("com.mysql.cj.jdbc.Driver") && !hasClass("com.mysql.jdbc.Driver")){
-            Log.severe("MySQL-JDBC classes not found - MySQL data source not usable");
+        if(!loadJdbcDriver("MySQL-JDBC", "com.mysql.cj.jdbc.Driver", "com.mysql.jdbc.Driver")){
             return false;
         }
         return true;
@@ -302,6 +314,7 @@ public class MySQLMapStorage extends MapStorage {
         if (!super.init(core)) {
             return false;
         }
+        this.core = core;
         database = core.configuration.getString("storage/database", "dynmap");
         hostname = core.configuration.getString("storage/hostname", "localhost");
         port = core.configuration.getInteger("storage/port", 3306);
@@ -309,6 +322,8 @@ public class MySQLMapStorage extends MapStorage {
         password = core.configuration.getString("storage/password", "dynmap");
         prefix = core.configuration.getString("storage/prefix", "");
         flags = core.configuration.getString("storage/flags", "?allowReconnect=true&autoReconnect=true");
+        driverJar = core.configuration.getString("storage/driver-jar", "");
+        driverClass = core.configuration.getString("storage/driver-class", "");
         tableTiles = prefix + "Tiles";
         tableMaps = prefix + "Maps";
         tableFaces = prefix + "Faces";
@@ -326,12 +341,127 @@ public class MySQLMapStorage extends MapStorage {
         return writeConfigPHP(core);
     }
 
-    private boolean hasClass(String classname){
+    protected boolean hasClass(String classname){
         try{
             Class.forName(classname);
             return true;
         } catch (ClassNotFoundException cnfx){
             return false;
+        }
+    }
+
+    protected boolean loadJdbcDriver(String label, String... defaultClasses) {
+        String configuredClass = (driverClass == null || driverClass.isBlank()) ? null : driverClass.trim();
+        if (configuredClass != null) {
+            if (hasClass(configuredClass)) {
+                Log.info(label + " driver found on classpath: " + configuredClass);
+                return true;
+            }
+            return loadJdbcDriverFromJar(label, configuredClass);
+        }
+
+        for (String classname : defaultClasses) {
+            if (hasClass(classname)) {
+                Log.info(label + " driver found on classpath: " + classname);
+                return true;
+            }
+        }
+
+        if (defaultClasses.length > 0 && loadJdbcDriverFromJar(label, defaultClasses[0])) {
+            return true;
+        }
+
+        Log.severe(label + " classes not found - data source not usable");
+        return false;
+    }
+
+    private boolean loadJdbcDriverFromJar(String label, String classname) {
+        if (driverJar == null || driverJar.isBlank()) {
+            Log.severe(label + " classes not found - set storage/driver-jar or add the driver to the server classpath");
+            return false;
+        }
+        File jar = core.getFile(driverJar);
+        if (!jar.isFile()) {
+            Log.severe(label + " driver JAR not found: " + jar.getPath());
+            return false;
+        }
+        try {
+            driverClassLoader = new URLClassLoader(new URL[] { jar.toURI().toURL() }, MySQLMapStorage.class.getClassLoader());
+            Class<?> driverType = Class.forName(classname, true, driverClassLoader);
+            Driver driver = (Driver) driverType.getDeclaredConstructor().newInstance();
+            registeredDriver = new DriverShim(driver);
+            DriverManager.registerDriver(registeredDriver);
+            Log.info(label + " driver loaded from " + jar.getPath() + " using " + classname);
+            return true;
+        } catch (MalformedURLException mx) {
+            Log.severe(label + " driver JAR path is invalid: " + jar.getPath(), mx);
+        } catch (Exception x) {
+            Log.severe(label + " driver could not be loaded from " + jar.getPath() + " using " + classname, x);
+        }
+        return false;
+    }
+
+    @Override
+    public void shutdownStorage() {
+        super.shutdownStorage();
+        if (registeredDriver != null) {
+            try {
+                DriverManager.deregisterDriver(registeredDriver);
+            } catch (SQLException sx) {
+                Log.warning("Error deregistering JDBC driver - " + sx.getMessage());
+            }
+            registeredDriver = null;
+        }
+        if (driverClassLoader != null) {
+            try {
+                driverClassLoader.close();
+            } catch (IOException iox) {
+                Log.warning("Error closing JDBC driver classloader - " + iox.getMessage());
+            }
+            driverClassLoader = null;
+        }
+    }
+
+    private static class DriverShim implements Driver {
+        private final Driver driver;
+
+        DriverShim(Driver driver) {
+            this.driver = driver;
+        }
+
+        @Override
+        public Connection connect(String url, Properties info) throws SQLException {
+            return driver.connect(url, info);
+        }
+
+        @Override
+        public boolean acceptsURL(String url) throws SQLException {
+            return driver.acceptsURL(url);
+        }
+
+        @Override
+        public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
+            return driver.getPropertyInfo(url, info);
+        }
+
+        @Override
+        public int getMajorVersion() {
+            return driver.getMajorVersion();
+        }
+
+        @Override
+        public int getMinorVersion() {
+            return driver.getMinorVersion();
+        }
+
+        @Override
+        public boolean jdbcCompliant() {
+            return driver.jdbcCompliant();
+        }
+
+        @Override
+        public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+            return driver.getParentLogger();
         }
     }
 
