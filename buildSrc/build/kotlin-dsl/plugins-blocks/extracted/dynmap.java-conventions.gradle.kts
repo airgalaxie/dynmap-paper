@@ -1,6 +1,0 @@
-                                               
-
-plugins {
-    java
-    `maven-publish`
-}
