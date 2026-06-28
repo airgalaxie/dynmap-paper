@@ -54,6 +54,7 @@ import org.dynmap.storage.sqllte.SQLiteMapStorage;
 import org.dynmap.utils.BlockStep;
 import org.dynmap.utils.BufferOutputStream;
 import org.dynmap.utils.ImageIOManager;
+import org.dynmap.web.StaticFileWebServer;
 import org.yaml.snakeyaml.Yaml;
 
 public class DynmapCore implements DynmapCommonAPI {
@@ -136,6 +137,7 @@ public class DynmapCore implements DynmapCommonAPI {
     private String webpath;
     // And whether to disable web file update
     private boolean updatewebpathfiles = true;
+    private StaticFileWebServer webServer;
 
     private String[] deftriggers = { };
 
@@ -448,6 +450,8 @@ public class DynmapCore implements DynmapCommonAPI {
         if (defaultStorage.needsStaticWebFiles()) {
         	updateStaticWebToStorage();
         }
+
+        startWebServer();
         
         // Inject core instance
         ImageIOManager.core = this;
@@ -832,6 +836,8 @@ public class DynmapCore implements DynmapCommonAPI {
     }
 
     public void disableCore() {
+        stopWebServer();
+
         if (componentManager != null) {
             int componentCount = componentManager.components.size();
             for(Component component : componentManager.components) {
@@ -855,6 +861,24 @@ public class DynmapCore implements DynmapCommonAPI {
         /* Don't clean up markerAPI - other plugins may still be accessing it */
         
         Debug.clearDebuggers();
+    }
+
+    private void startWebServer() {
+        stopWebServer();
+        try {
+            webServer = new StaticFileWebServer(this, configuration, dataDirectory, webpath);
+            webServer.start();
+        } catch (IOException iox) {
+            webServer = null;
+            Log.severe("Failed to start internal webserver", iox);
+        }
+    }
+
+    private void stopWebServer() {
+        if (webServer != null) {
+            webServer.stop();
+            webServer = null;
+        }
     }
 
     private static File combinePaths(File parent, String path) {

@@ -208,11 +208,11 @@ private static class FileToWrite {
         sb.append(" url : {\n");
         /* Get configuration URL */
         sb.append("  configuration: '");
-        sb.append(core.configuration.getString("url/configuration", store.getConfigurationJSONURI()));
+        sb.append(getWebURL(core, "configuration", store.getConfigurationJSONURI(), "up/configuration"));
         sb.append("',\n");
         /* Get update URL */
         sb.append("  update: '");
-        sb.append(core.configuration.getString("url/update", store.getUpdateJSONURI()));
+        sb.append(getWebURL(core, "update", store.getUpdateJSONURI(), "up/world/{world}/{timestamp}"));
         sb.append("',\n");
         /* Get sendmessage URL */
         sb.append("  sendmessage: '");
@@ -228,11 +228,11 @@ private static class FileToWrite {
         sb.append("',\n");
         /* Get tiles URL */
         sb.append("  tiles: '");
-        sb.append(core.configuration.getString("url/tiles", store.getTilesURI()));
+        sb.append(getWebURL(core, "tiles", store.getTilesURI(), "storage/tiles/"));
         sb.append("',\n");
         /* Get markers URL */
         sb.append("  markers: '");
-        sb.append(core.configuration.getString("url/markers", store.getMarkersURI()));
+        sb.append(getWebURL(core, "markers", store.getMarkersURI(), "storage/markers/"));
         sb.append("'\n }\n};\n");
         
         byte[] outputBytes = sb.toString().getBytes(cs_utf8);
@@ -262,6 +262,24 @@ private static class FileToWrite {
         		}
         	}
         }, 0);
+    }
+
+    private String getWebURL(DynmapCore core, String key, String externalDefault, String internalDefault) {
+        String configured = core.configuration.getString("url/" + key, null);
+        if (configured != null) {
+            return configured;
+        }
+        if (useInternalStorageEndpoints(core, externalDefault)) {
+            return internalDefault;
+        }
+        return externalDefault;
+    }
+
+    private boolean useInternalStorageEndpoints(DynmapCore core, String externalDefault) {
+        return !core.configuration.getBoolean("disable-webserver", true)
+                && core.configuration.getBoolean("webserver-storage-endpoints", true)
+                && externalDefault != null
+                && externalDefault.contains(".php");
     }
     
     protected void writeConfiguration() {

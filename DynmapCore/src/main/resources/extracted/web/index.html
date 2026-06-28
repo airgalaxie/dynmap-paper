@@ -23,7 +23,7 @@
 	<meta name="msapplication-config" content="images/icons/browserconfig.xml">
 	<meta name="theme-color" content="#000000">
 
-	<script type="application/javascript" src="js/jquery-4.0.0.js?_=${version}-${buildnumber}" rel="preload" as="script" crossorigin="anonymous"></script>
+	<script defer type="application/javascript" src="js/jquery-4.0.0.js?_=${version}-${buildnumber}"></script>
 	<!-- not in use ? test it <script type="text/javascript" src="js/jquery-migrate-4.0.2.js?_=${version}-${buildnumber}"></script>-->
 	<link rel="preload stylesheet" type="text/css" href="css/leaflet.css?_=${version}-${buildnumber}" as="style" crossorigin="anonymous"/>
 	<script defer type="application/javascript" src="js/leaflet.js?_=${version}-${buildnumber}" rel="preload" as="script" crossorigin="anonymous"></script>
@@ -46,8 +46,8 @@
 	<script defer type="application/javascript" src="js/hdmap.js?_=${version}-${buildnumber}"></script>
 	<script defer type="application/javascript" src="standalone/config.js?_=${version}-${buildnumber}"></script>
 
-	<script type="text/javascript">
-		jQuery(document).ready(function() {
+	<script type="application/javascript">
+		window.addEventListener('DOMContentLoaded', function() {
 			window.dynmap = new DynMap(jQuery.extend({
 				container: jQuery('#mcmap')
 			}, config));
