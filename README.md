@@ -7,7 +7,8 @@ This is a heavily modified **fork** of the [airgalaxie/dynmap-paper](https://git
 > **Production Compatibility:** The Gradle toolchain targets **Java 25**, so release builds must remain Java 25 compatible.  
 > **Current Branch:** `main` / `26.2`  
 > **Paper Target:** `26.2.build.+`  
-> **Compatibility Goal:** Keep this fork compatible with the Paper **26.2.x** release line for as long as possible.  
+> **Runtime Goal:** Keep this fork compatible with the Paper **26.2.x** release line for as long as possible.  
+> **Plugin API Goal:** Preserve Bukkit/Dynmap API compatibility for external plugin integrations where practical.  
 > **Status:** 26.2 release process; Paper upstream is resolved dynamically through `26.2.build.+`.
 
 ---
@@ -28,7 +29,8 @@ This is a heavily modified **fork** of the [airgalaxie/dynmap-paper](https://git
 
 ## Main Changes in this Fork (Summary)
 
-*   **Paper 26.2.x Compatibility Goal**: Uses the dynamic Paper dependency selector `26.2.build.+` for the 26.2 release process, while keeping the codebase aligned with the broader 26.2.x release line where practical.
+*   **Paper 26.2.x Runtime Goal**: Uses the dynamic Paper dependency selector `26.2.build.+` for the 26.2 release process, while keeping the codebase aligned with the broader 26.2.x release line where practical.
+*   **Bukkit/Dynmap API Compatibility Goal**: Keeps the public Dynmap Bukkit API and common integration points stable for external plugins where practical, even though the current server runtime target is Paper.
 *   **Java 26 Development / Java 25 Production Compatibility**: Local development uses Java 26, while the Gradle toolchain keeps the produced plugin aligned with Java 25 compatibility.
 *   **jQuery 4.0.x & Leaflet 1.9.4**: Replaced outdated frontend web assets to resolve performance drops and security flaws.
 *   **Model Text Fixes**: Corrected specific structure and block rendering bugs in the `Modelsxx.txt` configuration data.
@@ -36,7 +38,7 @@ This is a heavily modified **fork** of the [airgalaxie/dynmap-paper](https://git
 ---
 
 Changes include:
-- Removal of all platform support except Paper 26.2.x
+- Removal of server runtime support except Paper 26.2.x
 - Now a Mojang mapped Paper plugin
 - Removal of web chat
 - Removal of login support
@@ -49,7 +51,7 @@ Changes include:
 
 *   **Configuration:** Dynmap's configuration is primarily managed through `configuration.txt` and other related files within the plugin's data folder. Please refer to the official Dynmap documentation for detailed configuration instructions. This fork does not introduce new configuration methods, but focuses on updating underlying technologies.
 *   **Webserver Default:** The Dynmap webserver configuration is present, and the bundled default configuration follows the original Dynmap default with `disable-webserver: false`. Deploy the generated web files to an external web server (e.g., Nginx, Apache), or use the internal static webserver if you want Dynmap to serve the generated web UI itself.
-*   **Platform Support:** This project targets the **Paper 26.2.x** server line and dynamically resolves the latest matching `26.2.build.+` API target at build time. Compatibility with later 26.2.x builds is intended, but should be re-tested when Paper changes APIs or server internals during the alpha/RC phase. There are currently **no builds or explicit support for Fabric** or other Minecraft server platforms. Attempting to use this fork on unsupported platforms may lead to unexpected behavior or failures.
+*   **Platform Support:** This project targets the **Paper 26.2.x** server line and dynamically resolves the latest matching `26.2.build.+` API target at build time. Compatibility with later 26.2.x builds is intended, but should be re-tested when Paper changes APIs or server internals during the release process. The current plugin artifact is not a Spigot server build, but Bukkit/Spigot-facing Dynmap API compatibility for other plugins should be preserved where practical. There are currently **no builds or explicit support for Fabric** or other Minecraft server platforms. Attempting to run this fork on unsupported server platforms may lead to unexpected behavior or failures.
 
 ## Web Chat Boundary
 

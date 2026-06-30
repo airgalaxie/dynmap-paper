@@ -1,17 +1,20 @@
 # Contributing to Dynmap Paper v26.2
 
 ## Project Origins and History
-This repository is a modern, heavily modified fork of the `airgalaxie/dynmap-paper` project, continuing the work of JLyne and the original Dynmap project created by Mike Primm/webbukkit. While we respect and preserve the core structure of the original project, this branch is optimized for the Paper 26.2.x server line.
+This repository is a modern, heavily modified fork of the `airgalaxie/dynmap-paper` project, continuing the work of JLyne and the original Dynmap project created by Mike Primm/webbukkit. While we respect and preserve the core structure of the original project, this branch is optimized for the Paper 26.2.x server runtime while keeping Bukkit/Dynmap API integrations usable where practical.
 
 ## Target Environments and Java Runtime
 The runtime and build strategy is intentionally narrow:
 - **Production Baseline:** Release builds target Java 25 through the Gradle toolchain. Production-targeted code must remain Java 25 compatible.
 - **Development Environment:** Active local development uses Linux, Java 26, and Gradle 9.6.0.
-- **Paper Target:** Dependencies track the Paper 26.2.x line through `26.2.build.+`.
+- **Paper Runtime Target:** Dependencies track the Paper 26.2.x line through `26.2.build.+`.
+- **Plugin API Target:** External plugin integrations should continue to use the published Bukkit/Dynmap API where possible.
 - **Build Infrastructure:** Keep Gradle and dependency changes focused and documented.
 
 ## Contribution and Scope Rules
-- **Paper 26.2.x Only:** Support for other platforms such as Spigot, Fabric, and legacy Bukkit variants is out of scope.
+- **Paper 26.2.x Runtime:** The current plugin artifact targets Paper 26.2.x and is not a Spigot server build.
+- **Bukkit/Spigot API Compatibility:** Preserve the public Dynmap Bukkit API and common integration behavior for other plugins where practical.
+- **Other Platforms:** Fabric and legacy non-Bukkit platforms are out of scope.
 - **Modernized Frontend:** Web assets use modern jQuery and Leaflet versions. Keep frontend changes compatible with the existing Dynmap web UI flow.
 - **Internal Webserver:** The fork includes a small internal static webserver and optional storage-backed endpoints. Preserve external web server compatibility and existing URL override behavior.
 - **Removed Legacy Storage:** PostgreSQL and S3 storage are not implemented in this fork.
