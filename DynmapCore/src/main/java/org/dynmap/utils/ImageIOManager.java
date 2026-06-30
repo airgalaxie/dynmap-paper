@@ -53,60 +53,93 @@ public class ImageIOManager {
     private static void doWEBPEncode(BufferedImage img, ImageFormat fmt, OutputStream out) throws IOException {
         BufferOutputStream bos = new BufferOutputStream();
         
-        ImageIO.write(img, "png", bos); // Encode as PNG in buffere output stream
+        if (!ImageIO.write(img, "png", bos)) { // Encode as PNG in buffer output stream
+            throw new IOException("No PNG encoder available");
+        }
         // Write to a tmp file
-        File tmpfile = File.createTempFile("pngToWebp", "png");
-        FileOutputStream fos = new FileOutputStream(tmpfile);
-        fos.write(bos.buf, 0, bos.len);
-        fos.close();
-        // Run encoder to new new temp file
-        File tmpfile2 = File.createTempFile("pngToWebp", "webp");
-        ArrayList<String> args = new ArrayList<String>();
-        args.add(core.getCWEBPPath());
-        if (fmt.getID().endsWith("-l")) {
-        	args.add("-lossless");
-        }
-        args.add("-q");
-        args.add(Integer.toString((int)fmt.getQuality()));
-        args.add(tmpfile.getAbsolutePath());
-        args.add("-o");
-        args.add(tmpfile2.getAbsolutePath());
-        Process pr = Runtime.getRuntime().exec(args.toArray(new String[0]));
+        File tmpfile = null;
+        File tmpfile2 = null;
         try {
-        	pr.waitFor();
-        } catch (InterruptedException ix) {
-        	throw new IOException("Error waiting for encoder");
+            tmpfile = File.createTempFile("pngToWebp", "png");
+            try (FileOutputStream fos = new FileOutputStream(tmpfile)) {
+                fos.write(bos.buf, 0, bos.len);
+            }
+            // Run encoder to new temp file
+            tmpfile2 = File.createTempFile("pngToWebp", "webp");
+            ArrayList<String> args = new ArrayList<String>();
+            args.add(core.getCWEBPPath());
+            if (fmt.getID().endsWith("-l")) {
+            	args.add("-lossless");
+            }
+            args.add("-q");
+            args.add(Integer.toString((int)fmt.getQuality()));
+            args.add(tmpfile.getAbsolutePath());
+            args.add("-o");
+            args.add(tmpfile2.getAbsolutePath());
+            Process pr = Runtime.getRuntime().exec(args.toArray(new String[0]));
+            try {
+            	if (pr.waitFor() != 0) {
+                    throw new IOException("WEBP encoder failed");
+                }
+            } catch (InterruptedException ix) {
+                Thread.currentThread().interrupt();
+            	throw new IOException("Error waiting for encoder");
+            }
+            if (!tmpfile2.isFile() || tmpfile2.length() == 0) {
+                throw new IOException("WEBP encoder produced no output");
+            }
+            // Read output file into output stream
+            //Files.copy(tmpfile2, out);
+            Files.copy(tmpfile2.toPath(), out);
+            out.flush();
+        } finally {
+            if (tmpfile != null) {
+                tmpfile.delete();
+            }
+            if (tmpfile2 != null) {
+                tmpfile2.delete();
+            }
         }
-        // Read output file into output stream
-        //Files.copy(tmpfile2, out);
-        Files.copy(tmpfile2.toPath(), out);
-        out.flush();
-        // Clean up temp files
-        tmpfile.delete();
-        tmpfile2.delete();
     }
 
     private static BufferedImage doWEBPDecode(BufferInputStream buf) throws IOException {
         // Write to a tmp file
-        File tmpfile = File.createTempFile("webpToPng", "webp");
-        //Files.write(buf.buffer(), tmpfile);
-        Files.write(tmpfile.toPath(), buf.buffer());
-        // Run encoder to new new temp file
-        File tmpfile2 = File.createTempFile("webpToPng", "png");
-        String args[] = { core.getDWEBPPath(), tmpfile.getAbsolutePath(), "-o", tmpfile2.getAbsolutePath() };
-        Process pr = Runtime.getRuntime().exec(args);
+        File tmpfile = null;
+        File tmpfile2 = null;
         try {
-        	pr.waitFor();
-        } catch (InterruptedException ix) {
-        	throw new IOException("Error waiting for encoder");
+            tmpfile = File.createTempFile("webpToPng", "webp");
+            //Files.write(buf.buffer(), tmpfile);
+            Files.write(tmpfile.toPath(), buf.buffer());
+            // Run decoder to new temp file
+            tmpfile2 = File.createTempFile("webpToPng", "png");
+            String args[] = { core.getDWEBPPath(), tmpfile.getAbsolutePath(), "-o", tmpfile2.getAbsolutePath() };
+            Process pr = Runtime.getRuntime().exec(args);
+            try {
+            	if (pr.waitFor() != 0) {
+                    throw new IOException("WEBP decoder failed");
+                }
+            } catch (InterruptedException ix) {
+                Thread.currentThread().interrupt();
+            	throw new IOException("Error waiting for decoder");
+            }
+            if (!tmpfile2.isFile() || tmpfile2.length() == 0) {
+                throw new IOException("WEBP decoder produced no output");
+            }
+            // Read file
+            BufferedImage obuf = ImageIO.read(tmpfile2);
+            if (obuf == null) {
+                throw new IOException("WEBP decoder produced unreadable PNG");
+            }
+            
+            return obuf;
+        } finally {
+            if (tmpfile != null) {
+                tmpfile.delete();
+            }
+            if (tmpfile2 != null) {
+                tmpfile2.delete();
+            }
         }
-        // Read file
-        BufferedImage obuf = ImageIO.read(tmpfile2);
-        // Clean up temp files
-        tmpfile.delete();
-        tmpfile2.delete();
-        
-        return obuf;
     }
 
     public static BufferOutputStream imageIOEncode(BufferedImage img, ImageFormat fmt) {
@@ -161,7 +194,9 @@ public class ImageIOManager {
             	doWEBPEncode(img, fmt, bos);
             }
             else {
-                ImageIO.write(img, fmt.getFileExt(), bos); /* Write to byte array stream - prevent bogus I/O errors */
+                if (!ImageIO.write(img, fmt.getFileExt(), bos)) { /* Write to byte array stream - prevent bogus I/O errors */
+                    throw new IOException("No " + fmt.getFileExt().toUpperCase() + " encoder available");
+                }
             }
         } catch (IOException iox) {
             Log.info("Error encoding image - " + iox.getMessage());

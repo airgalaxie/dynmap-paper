@@ -37,6 +37,9 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Internal static web server for Dynmap web files and storage-backed endpoints.
+ */
 public class StaticFileWebServer {
     private static final int DEFAULT_PORT = 8123;
     private static final int DEFAULT_MAX_SESSIONS = 30;
@@ -72,6 +75,14 @@ public class StaticFileWebServer {
     private HttpServer httpsServer;
     private ExecutorService executor;
 
+    /**
+     * Create internal web server instance.
+     * @param core - dynmap core
+     * @param configuration - dynmap configuration
+     * @param dataDirectory - dynmap data directory
+     * @param webpath - web root path
+     * @throws IOException if web root path cannot be resolved
+     */
     public StaticFileWebServer(DynmapCore core, ConfigurationNode configuration, File dataDirectory, String webpath) throws IOException {
         this.core = core;
         this.configuration = configuration;
@@ -82,6 +93,10 @@ public class StaticFileWebServer {
         this.allowSymlinks = configuration.getBoolean("allow-symlinks", true);
     }
 
+    /**
+     * Start HTTP and optional HTTPS listeners.
+     * @throws IOException if HTTP listener cannot be started
+     */
     public void start() throws IOException {
         if (configuration.getBoolean("disable-webserver", true)) {
             Log.info("Internal webserver is disabled");
@@ -119,6 +134,9 @@ public class StaticFileWebServer {
         }
     }
 
+    /**
+     * Stop all active listeners and worker threads.
+     */
     public void stop() {
         if (httpsServer != null) {
             httpsServer.stop(0);
@@ -134,11 +152,20 @@ public class StaticFileWebServer {
         }
     }
 
+    /**
+     * Register request handlers and executor.
+     * @param server - HTTP server
+     */
     private void configureServer(HttpServer server) {
         server.createContext("/", new StaticFileHandler());
         server.setExecutor(executor);
     }
 
+    /**
+     * Build SSL context from configured keystore.
+     * @return initialized SSL context
+     * @throws IOException if SSL context cannot be initialized
+     */
     private SSLContext createSslContext() throws IOException {
         String keyStorePath = configuration.getString("webserver-ssl-keystore", null);
         String keyStorePassword = configuration.getString("webserver-ssl-keystore-password", "");
@@ -166,6 +193,14 @@ public class StaticFileWebServer {
         }
     }
 
+    /**
+     * Build bind address from configuration.
+     * @param bindKey - configuration key for bind address
+     * @param portKey - configuration key for port
+     * @param defaultPort - fallback port
+     * @return socket address
+     * @throws IOException if bind address cannot be resolved
+     */
     private InetSocketAddress buildAddress(String bindKey, String portKey, int defaultPort) throws IOException {
         String bindAddress = configuration.getString(bindKey, configuration.getString("webserver-bindaddress", null));
         int port = configuration.getInteger(portKey, defaultPort);
@@ -175,6 +210,11 @@ public class StaticFileWebServer {
         return new InetSocketAddress(InetAddress.getByName(bindAddress), port);
     }
 
+    /**
+     * Get host string for startup log.
+     * @param address - socket address
+     * @return printable host
+     */
     private String printableHost(InetSocketAddress address) {
         InetAddress inetAddress = address.getAddress();
         if (inetAddress == null || inetAddress.isAnyLocalAddress()) {
@@ -183,6 +223,9 @@ public class StaticFileWebServer {
         return inetAddress.getHostAddress();
     }
 
+    /**
+     * Stop HTTPS listener without affecting HTTP.
+     */
     private void stopHttpsOnly() {
         if (httpsServer != null) {
             httpsServer.stop(0);
@@ -190,6 +233,12 @@ public class StaticFileWebServer {
         }
     }
 
+    /**
+     * Resolve relative paths against parent directory.
+     * @param parent - parent directory
+     * @param path - absolute or relative path
+     * @return resolved file
+     */
     private static File resolvePath(File parent, String path) {
         File file = new File(path);
         if (file.isAbsolute()) {
@@ -199,6 +248,11 @@ public class StaticFileWebServer {
     }
 
     private class StaticFileHandler implements HttpHandler {
+        /**
+         * Handle static file and storage endpoint requests.
+         * @param exchange - HTTP exchange
+         * @throws IOException if response cannot be sent
+         */
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             try {
@@ -239,6 +293,12 @@ public class StaticFileWebServer {
             }
         }
 
+        /**
+         * Handle storage-backed API routes.
+         * @param exchange - HTTP exchange
+         * @return true if request was handled
+         * @throws IOException if response cannot be sent
+         */
         private boolean handleStorageRequest(HttpExchange exchange) throws IOException {
             if (!configuration.getBoolean("webserver-storage-endpoints", true)) {
                 return false;
@@ -274,6 +334,12 @@ public class StaticFileWebServer {
             return false;
         }
 
+        /**
+         * Send standalone JSON file from storage.
+         * @param exchange - HTTP exchange
+         * @param fileid - standalone file id
+         * @throws IOException if response cannot be sent
+         */
         private void sendStandaloneFile(HttpExchange exchange, String fileid) throws IOException {
             MapStorage storage = core.getDefaultMapStorage();
             if (storage == null) {
@@ -288,6 +354,12 @@ public class StaticFileWebServer {
             sendBuffer(exchange, 200, "application/json; charset=utf-8", content, -1, null);
         }
 
+        /**
+         * Send map tile image from storage.
+         * @param exchange - HTTP exchange
+         * @param tilePath - storage tile path
+         * @throws IOException if response cannot be sent
+         */
         private void sendStorageTile(HttpExchange exchange, String tilePath) throws IOException {
             String normalized = normalizeStoragePath(tilePath);
             if (normalized == null) {
@@ -323,10 +395,16 @@ public class StaticFileWebServer {
                 sendBlankTile(exchange);
                 return;
             }
-            String contentType = read.format != null ? read.format.getContentType() : "application/octet-stream";
+            String contentType = tileContentType(read, normalized);
             sendBuffer(exchange, 200, contentType, read.image, read.lastModified, read.hashCode >= 0 ? Long.toHexString(read.hashCode) : null);
         }
 
+        /**
+         * Send marker JSON, marker image, or player face from storage.
+         * @param exchange - HTTP exchange
+         * @param markerPath - storage marker path
+         * @throws IOException if response cannot be sent
+         */
         private void sendStorageMarker(HttpExchange exchange, String markerPath) throws IOException {
             String normalized = normalizeStoragePath(markerPath);
             if (normalized == null) {
@@ -393,6 +471,11 @@ public class StaticFileWebServer {
             send(exchange, 404, "Not Found");
         }
 
+        /**
+         * Find loaded world by name.
+         * @param worldName - world name
+         * @return world, or null if not found
+         */
         private DynmapWorld getWorld(String worldName) {
             if (core.mapManager == null) {
                 return null;
@@ -400,6 +483,11 @@ public class StaticFileWebServer {
             return core.mapManager.getWorld(worldName);
         }
 
+        /**
+         * Normalize storage path and reject traversal.
+         * @param path - request path
+         * @return normalized path, or null if invalid
+         */
         private String normalizeStoragePath(String path) {
             if (path == null || path.isBlank()) {
                 return null;
@@ -413,14 +501,29 @@ public class StaticFileWebServer {
             return path;
         }
 
+        /**
+         * Test if path segment is safe.
+         * @param value - path segment
+         * @return true if safe
+         */
         private boolean isSafePathPart(String value) {
             return value != null && !value.isEmpty() && value.indexOf('/') < 0 && value.indexOf('\\') < 0 && !value.contains("..");
         }
 
+        /**
+         * Test if marker id is safe.
+         * @param value - marker id
+         * @return true if safe
+         */
         private boolean isSafeMarkerId(String value) {
             return value != null && !value.isEmpty() && value.indexOf('/') < 0 && value.indexOf('\\') < 0 && !value.contains("..");
         }
 
+        /**
+         * Send fallback blank tile.
+         * @param exchange - HTTP exchange
+         * @throws IOException if response cannot be sent
+         */
         private void sendBlankTile(HttpExchange exchange) throws IOException {
             Path blank = normalizedWebRoot.resolve("images/blank.png").normalize();
             if (blank.startsWith(normalizedWebRoot) && Files.isRegularFile(blank) && Files.isReadable(blank)) {
@@ -430,6 +533,12 @@ public class StaticFileWebServer {
             }
         }
 
+        /**
+         * Resolve URI to safe file path under web root.
+         * @param uri - request URI
+         * @return file path, or null if invalid
+         * @throws IOException if real path cannot be resolved
+         */
         private Path resolveRequestPath(URI uri) throws IOException {
             String requestPath = decodePath(uri.getRawPath());
             if (requestPath == null || requestPath.indexOf('\0') >= 0) {
@@ -459,6 +568,11 @@ public class StaticFileWebServer {
             return normalized;
         }
 
+        /**
+         * Decode percent-encoded UTF-8 path.
+         * @param rawPath - raw request path
+         * @return decoded path
+         */
         private String decodePath(String rawPath) {
             if (rawPath == null) {
                 return null;
@@ -503,6 +617,11 @@ public class StaticFileWebServer {
             }
         }
 
+        /**
+         * Resolve content type for static file.
+         * @param file - file path
+         * @return content type
+         */
         private String contentType(Path file) {
             String name = file.getFileName().toString();
             int dot = name.lastIndexOf('.');
@@ -522,19 +641,150 @@ public class StaticFileWebServer {
             return "application/octet-stream";
         }
 
+        /**
+         * Resolve content type for storage tile.
+         * @param read - tile read result
+         * @param tilePath - requested tile path
+         * @return content type
+         */
+        private String tileContentType(MapStorageTile.TileRead read, String tilePath) {
+            if (read.format != null) {
+                return read.format.getContentType();
+            }
+
+            String fromPath = imageContentTypeFromPath(tilePath);
+            if (fromPath != null) {
+                return fromPath;
+            }
+
+            String fromBytes = imageContentTypeFromBytes(read.image);
+            return fromBytes != null ? fromBytes : "application/octet-stream";
+        }
+
+        /**
+         * Resolve image content type from file extension.
+         * @param path - image path
+         * @return content type, or null if unknown
+         */
+        private String imageContentTypeFromPath(String path) {
+            int dot = path.lastIndexOf('.');
+            if (dot < 0 || dot + 1 >= path.length()) {
+                return null;
+            }
+            String ext = path.substring(dot + 1).toLowerCase(Locale.ROOT);
+            if ("png".equals(ext)) {
+                return "image/png";
+            }
+            if ("jpg".equals(ext) || "jpeg".equals(ext)) {
+                return "image/jpeg";
+            }
+            if ("webp".equals(ext)) {
+                return "image/webp";
+            }
+            if ("gif".equals(ext)) {
+                return "image/gif";
+            }
+            return null;
+        }
+
+        /**
+         * Resolve image content type from magic bytes.
+         * @param image - image bytes
+         * @return content type, or null if unknown
+         */
+        private String imageContentTypeFromBytes(BufferInputStream image) {
+            if (image == null || image.length() < 4) {
+                return null;
+            }
+            byte[] data = image.buffer();
+            if (image.length() >= 8
+                    && (data[0] & 0xFF) == 0x89
+                    && data[1] == 0x50
+                    && data[2] == 0x4E
+                    && data[3] == 0x47
+                    && data[4] == 0x0D
+                    && data[5] == 0x0A
+                    && data[6] == 0x1A
+                    && data[7] == 0x0A) {
+                return "image/png";
+            }
+            if ((data[0] & 0xFF) == 0xFF && (data[1] & 0xFF) == 0xD8 && (data[2] & 0xFF) == 0xFF) {
+                return "image/jpeg";
+            }
+            if (image.length() >= 12
+                    && data[0] == 'R'
+                    && data[1] == 'I'
+                    && data[2] == 'F'
+                    && data[3] == 'F'
+                    && data[8] == 'W'
+                    && data[9] == 'E'
+                    && data[10] == 'B'
+                    && data[11] == 'P') {
+                return "image/webp";
+            }
+            if (image.length() >= 6
+                    && data[0] == 'G'
+                    && data[1] == 'I'
+                    && data[2] == 'F'
+                    && data[3] == '8'
+                    && (data[4] == '7' || data[4] == '9')
+                    && data[5] == 'a') {
+                return "image/gif";
+            }
+            return null;
+        }
+
+        /**
+         * Send plain text response.
+         * @param exchange - HTTP exchange
+         * @param status - HTTP status
+         * @param message - response message
+         * @throws IOException if response cannot be sent
+         */
         private void send(HttpExchange exchange, int status, String message) throws IOException {
             byte[] data = message.getBytes(StandardCharsets.UTF_8);
             sendBytes(exchange, status, "text/plain; charset=utf-8", data, -1, null);
         }
 
+        /**
+         * Send buffer response.
+         * @param exchange - HTTP exchange
+         * @param status - HTTP status
+         * @param contentType - response content type
+         * @param content - response body
+         * @param lastModified - last modified timestamp
+         * @param etag - entity tag
+         * @throws IOException if response cannot be sent
+         */
         private void sendBuffer(HttpExchange exchange, int status, String contentType, BufferInputStream content, long lastModified, String etag) throws IOException {
             sendBytes(exchange, status, contentType, content.buffer(), content.length(), lastModified, etag);
         }
 
+        /**
+         * Send byte array response.
+         * @param exchange - HTTP exchange
+         * @param status - HTTP status
+         * @param contentType - response content type
+         * @param data - response body
+         * @param lastModified - last modified timestamp
+         * @param etag - entity tag
+         * @throws IOException if response cannot be sent
+         */
         private void sendBytes(HttpExchange exchange, int status, String contentType, byte[] data, long lastModified, String etag) throws IOException {
             sendBytes(exchange, status, contentType, data, data.length, lastModified, etag);
         }
 
+        /**
+         * Send byte array response with explicit length.
+         * @param exchange - HTTP exchange
+         * @param status - HTTP status
+         * @param contentType - response content type
+         * @param data - response body
+         * @param length - response body length
+         * @param lastModified - last modified timestamp
+         * @param etag - entity tag
+         * @throws IOException if response cannot be sent
+         */
         private void sendBytes(HttpExchange exchange, int status, String contentType, byte[] data, int length, long lastModified, String etag) throws IOException {
             Headers headers = exchange.getResponseHeaders();
             headers.set("Content-Type", contentType);
